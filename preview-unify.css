@@ -542,6 +542,312 @@ body.knowledge-help-preview {
   }
 }
 
+@media (max-width: 640px) {
+  html,
+  body.knowledge-help-preview {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .knowledge-help-preview .site-header {
+    position: sticky;
+  }
+
+  .knowledge-help-preview .header-inner {
+    min-height: 68px;
+    padding: 10px 14px;
+    justify-content: flex-start;
+    box-sizing: border-box;
+  }
+
+  .knowledge-help-preview .brand {
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .knowledge-help-preview .brand-mark {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border-radius: 12px;
+  }
+
+  .knowledge-help-preview .brand strong {
+    display: block;
+    font-size: 18px;
+    line-height: 1.25;
+  }
+
+  .knowledge-help-preview .brand small {
+    display: block;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .knowledge-help-preview main {
+    width: 100%;
+    max-width: none;
+    padding: 14px 12px 42px;
+    box-sizing: border-box;
+  }
+
+  .knowledge-help-preview .workspace-head {
+    margin-bottom: 14px;
+    padding: 22px 18px;
+    border-radius: 22px;
+  }
+
+  .knowledge-help-preview .workspace-head h2 {
+    font-size: 30px;
+    letter-spacing: -0.03em;
+  }
+
+  .knowledge-help-preview .workspace-head h2::after {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .knowledge-help-preview .module-grid.learning-grid {
+    width: 100%;
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+
+  .knowledge-help-preview .learning-mode-switch {
+    position: static !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 0 14px;
+    padding: 6px;
+    gap: 8px;
+    border-radius: 18px;
+    box-sizing: border-box;
+  }
+
+  .knowledge-help-preview .learning-mode-button {
+    min-height: 52px;
+    padding: 10px 8px;
+    border-radius: 14px;
+  }
+
+  .knowledge-help-preview .learning-mode-button span {
+    font-size: 16px;
+    line-height: 1.25;
+  }
+
+  .knowledge-help-preview .learning-mode-button small {
+    display: none;
+  }
+
+  .knowledge-help-preview .quiz-card.learning-section.active,
+  .knowledge-help-preview .story-game-card.learning-section.active,
+  .knowledge-help-preview.knowledge-help-preview .knowledge-workspace .quiz-card.learning-section.active,
+  .knowledge-help-preview.knowledge-help-preview .knowledge-workspace .story-game-card.learning-section.active {
+    grid-column: 1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 18px 14px !important;
+    border-radius: 20px !important;
+    box-sizing: border-box;
+  }
+
+  .knowledge-help-preview .quiz-card h3 {
+    font-size: 21px;
+    line-height: 1.35;
+  }
+
+  .knowledge-help-preview .quiz-options button,
+  .knowledge-help-preview .quiz-options label,
+  .knowledge-help-preview .quiz-options .quiz-option {
+    min-height: 50px;
+    padding: 12px;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .knowledge-help-preview .story-game-head {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+    align-items: start;
+    padding-bottom: 14px;
+  }
+
+  .knowledge-help-preview .story-game-head > strong {
+    justify-self: start;
+    min-height: 32px;
+    padding: 0 12px;
+    font-size: 14px;
+    order: -1;
+  }
+
+  .knowledge-help-preview .story-game-head h3 {
+    margin-top: 4px;
+    font-size: 22px;
+    line-height: 1.3;
+  }
+
+  .knowledge-help-preview .story-game-head p {
+    max-width: none;
+    margin: 8px 0 0;
+    font-size: 15px;
+    line-height: 1.65;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
+  .knowledge-help-preview .scene-gallery {
+    grid-template-columns: 40px minmax(0, 1fr) 40px !important;
+    gap: 8px;
+    width: 100%;
+    align-items: center;
+  }
+
+  .knowledge-help-preview .scene-viewport {
+    min-width: 0;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .knowledge-help-preview .scene-track {
+    width: 100%;
+  }
+
+  .knowledge-help-preview .scene-track .scene-card {
+    min-width: 100%;
+    min-height: 260px;
+    aspect-ratio: 16 / 10;
+    border-radius: 18px;
+  }
+
+  .knowledge-help-preview .scene-content {
+    padding: 18px;
+    gap: 8px;
+  }
+
+  .knowledge-help-preview .scene-badge,
+  .knowledge-help-preview .scene-label {
+    font-size: 13px;
+  }
+
+  .knowledge-help-preview .scene-card strong {
+    max-width: 100%;
+    font-size: 24px;
+    line-height: 1.18;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
+  .knowledge-help-preview .scene-card small {
+    max-width: 100%;
+    font-size: 14px;
+    line-height: 1.55;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
+  .knowledge-help-preview .scene-card em {
+    margin-top: 6px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+
+  .knowledge-help-preview .scene-nav {
+    width: 40px;
+    height: 54px;
+    border-radius: 14px;
+    font-size: 26px;
+  }
+
+  .knowledge-help-preview .role-stage,
+  .knowledge-help-preview .story-stage {
+    grid-template-columns: 1fr !important;
+  }
+
+  .knowledge-help-preview .role-stage {
+    gap: 14px;
+  }
+
+  .knowledge-help-preview .selected-scene {
+    min-height: 190px;
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .knowledge-help-preview .selected-scene strong {
+    max-width: 100%;
+    font-size: 26px;
+    line-height: 1.15;
+  }
+
+  .knowledge-help-preview .selected-scene span {
+    font-size: 14px;
+  }
+
+  .knowledge-help-preview .role-picker {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+
+  .knowledge-help-preview .role-button {
+    min-height: 0;
+    padding: 13px;
+  }
+
+  .knowledge-help-preview .story-stage {
+    grid-template-areas:
+      "top"
+      "visual"
+      "board"
+      "thought" !important;
+    gap: 12px;
+  }
+
+  .knowledge-help-preview .story-topbar {
+    min-height: 48px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .knowledge-help-preview .story-visual {
+    min-height: 190px;
+    border-radius: 18px;
+  }
+
+  .knowledge-help-preview .story-board,
+  .knowledge-help-preview .thought-panel {
+    padding: 15px;
+    border-radius: 18px;
+  }
+
+  .knowledge-help-preview .story-line {
+    padding: 12px;
+  }
+
+  .knowledge-help-preview .story-line p,
+  .knowledge-help-preview .thought-panel p {
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  .knowledge-help-preview .thought-choices {
+    grid-template-columns: 1fr !important;
+  }
+
+  .knowledge-help-preview .thought-choice {
+    min-height: 0;
+    padding: 13px 13px 13px 42px;
+    font-size: 15px;
+  }
+
+  .knowledge-help-preview .thought-choice::before {
+    left: 16px;
+    top: 19px;
+  }
+}
+
 /* editor_preview / reviewer_preview：对齐 admin.html 的深色侧边栏后台风格 */
 
 body.role-admin-preview {
