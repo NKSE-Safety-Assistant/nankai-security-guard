@@ -43,6 +43,7 @@
       const roleText = { admin: "管理员入口", reviewer: "审核员入口", editor: "编辑员入口" };
       const accountText = { admin: "管理员账号", reviewer: "审核员账号", editor: "编辑员账号" };
       const message = document.querySelector("#loginMessage");
+      const isGithubPages = location.hostname.endsWith(".github.io");
       document.querySelector("#loginRoleKicker").textContent = roleText[role] || "后台入口";
       document.querySelector("#usernameLabel").textContent = accountText[role] || "后台账号";
       document.querySelector("#passwordLabel").textContent = (accountText[role] || "后台账号") + "密码";
@@ -60,8 +61,19 @@
         input.addEventListener("focus", () => input.removeAttribute("readonly"));
         input.addEventListener("click", () => input.removeAttribute("readonly"));
       });
+      if (isGithubPages) {
+        message.classList.add("is-error");
+        message.textContent = "当前是 GitHub Pages 静态展示地址，后台登录需要使用本地或服务器后端地址。";
+        document.querySelector(".admin-login-submit").disabled = true;
+        document.querySelector("#feishuLoginLink").href = "#";
+        document.querySelector("#feishuLoginLink").addEventListener("click", (event) => {
+          event.preventDefault();
+          message.textContent = "飞书登录也需要后端服务，GitHub Pages 静态页面无法完成身份验证。";
+        });
+      }
       document.querySelector("#adminLoginForm").addEventListener("submit", async (event) => {
         event.preventDefault();
+        if (isGithubPages) return;
         const form = new FormData(event.currentTarget);
         message.classList.remove("is-error");
         message.classList.add("is-success");
