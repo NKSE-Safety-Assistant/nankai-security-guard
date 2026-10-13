@@ -6,7 +6,7 @@
     <title>南开安全卫士 - 编辑员工作台</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body data-default-tab="admin">
+  <body class="staff-console-page" data-default-tab="admin">
     <header class="site-header">
       <div class="header-inner">
         <a class="brand" href="index.html" aria-label="南开安全卫士首页">
@@ -16,13 +16,28 @@
       </div>
     </header>
 
-        <main class="admin-console">
+    <div class="staff-console-shell">
+      <aside class="staff-sidebar">
+        <div class="staff-sidebar-brand"><span>编</span><div><strong>编辑员工作台</strong><small>案例内容编辑</small></div></div>
+        <nav class="staff-sidebar-nav" aria-label="编辑员功能导航">
+          <button type="button" id="caseEditNavButton" aria-expanded="false"><span>01</span>案例编辑</button>
+          <div class="staff-sidebar-subnav" id="caseEditSubnav" aria-label="案例编辑筛选" hidden>
+            <button class="active" type="button" data-editor-status="draft">待完善案例</button>
+            <button type="button" data-editor-status="revision">退回修改案例</button>
+            <button type="button" data-editor-status="review">已提交审核案例</button>
+          </div>
+          <button class="staff-sidebar-logout" type="button" id="sidebarLogoutButton"><span>02</span>退出</button>
+        </nav>
+        <p class="staff-sidebar-note">编辑员负责补充案例材料、脱敏处理，并提交审核。</p>
+      </aside>
+      <main class="admin-console staff-main">
       <section class="admin-toolbar" aria-label="案例管理工具栏">
         <div>
           <p class="eyebrow">Case Desk</p>
           <h1>编辑员工作台</h1>
         </div>
         <div class="admin-toolbar-actions">
+          <button class="secondary-button staff-hidden-action" type="button" id="logoutButton">退出登录</button>
           <button class="primary-link-button" type="button" id="runCollectionButton">立即采集</button>
         </div>
       </section>
@@ -44,6 +59,17 @@
         </div>
       </section>
     </main>
+    </div>
+
+    <div class="staff-alert-modal" id="staffAlertModal" hidden role="dialog" aria-modal="true" aria-labelledby="staffAlertTitle">
+      <div class="staff-alert-card">
+        <button class="staff-alert-close" type="button" id="staffAlertClose" aria-label="关闭">×</button>
+        <p class="staff-alert-kicker">提交提示</p>
+        <h2 id="staffAlertTitle">暂时不能提交</h2>
+        <p id="staffAlertMessage">请完善案例内容后再提交。</p>
+        <button class="primary-link-button" type="button" id="staffAlertConfirm">我知道了</button>
+      </div>
+    </div>
 
     <footer class="site-footer"><span>南开安全卫士</span><span>前后端案例库</span></footer>
     <script>
@@ -86,6 +112,16 @@
         document.querySelector('#adminSaveState').textContent = text;
       }
 
+      function showStaffAlert(title, message) {
+        document.querySelector('#staffAlertTitle').textContent = title || '提示';
+        document.querySelector('#staffAlertMessage').textContent = message || '请检查后再试。';
+        document.querySelector('#staffAlertModal').hidden = false;
+      }
+
+      function closeStaffAlert() {
+        document.querySelector('#staffAlertModal').hidden = true;
+      }
+
       function isStaticPagesHost() {
         return location.hostname.endsWith("github.io");
       }
@@ -99,13 +135,39 @@
         const response = await fetch(endpoint, { cache: "no-store", ...options });
         if (response.status === 401) {
           const next = encodeURIComponent(location.pathname || "/editor.html");
-          location.href = "/api/auth/login?role=editor&next=" + next;
-          throw new Error("尚未登录，正在跳转飞书验证。");
+          location.href = "/admin-login.html?role=editor&next=" + next;
+          throw new Error("尚未登录，正在跳转登录页。");
         }
         if (response.status === 403) throw new Error("当前飞书账号没有访问该工作台的权限。");
         if (!response.ok) throw new Error("后端接口返回 " + response.status + "，请确认 Node 后端和 MySQL 正常运行。");
         return response.json();
       }
+
+      document.querySelector('#logoutButton').addEventListener('click', async () => {
+        await fetch('/api/auth/logout', { method: 'POST' }).catch(() => null);
+        location.href = '/admin-login.html?role=editor&next=%2Feditor.html';
+      });
+      document.querySelector('#sidebarLogoutButton').addEventListener('click', () => document.querySelector('#logoutButton').click());
+      document.querySelector('#staffAlertClose').addEventListener('click', closeStaffAlert);
+      document.querySelector('#staffAlertConfirm').addEventListener('click', closeStaffAlert);
+      document.querySelector('#staffAlertModal').addEventListener('click', (event) => { if (event.target === event.currentTarget) closeStaffAlert(); });
+      document.querySelector('#caseEditNavButton').addEventListener('click', () => {
+        const button = document.querySelector('#caseEditNavButton');
+        const subnav = document.querySelector('#caseEditSubnav');
+        const opening = subnav.hidden;
+        subnav.hidden = !opening;
+        button.classList.toggle('active', opening);
+        button.setAttribute('aria-expanded', opening ? 'true' : 'false');
+      });
+      document.querySelectorAll('[data-editor-status]').forEach((button) => {
+        button.addEventListener('click', () => {
+          activeStatus = button.dataset.editorStatus;
+          document.querySelectorAll('[data-editor-status]').forEach((item) => item.classList.toggle('active', item === button));
+          renderStatusTabs();
+          renderCaseList();
+          document.querySelector('.admin-review-board')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
 
       async function fetchCaseLibrary() {
         libraryState = await readApiJson('/api/cases');
@@ -622,7 +684,8 @@
           refreshCollectionStatus();
           updateSaveState('已保存并提交给审核员');
         } catch (error) {
-          updateSaveState(error.message ? '还不能提交：' + error.message : '保存或提交失败：请确认登录状态和后端服务');
+          updateSaveState('提交未完成');
+          showStaffAlert('暂时不能提交', error.message || '保存或提交失败：请确认登录状态和后端服务。');
           if (button) {
             button.disabled = false;
             button.textContent = '保存并提交给审核员';

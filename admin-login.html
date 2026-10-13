@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>管理员登录 | 南开校园安全卫士</title>
+    <link rel="stylesheet" href="styles.css?v=20261012-admin-login" />
+  </head>
+  <body class="admin-login-page">
+    <main class="admin-login-shell">
+      <section class="admin-login-card" aria-labelledby="loginTitle">
+        <aside class="admin-login-visual">
+          <div class="admin-login-brand"><span>南</span><div><strong>南开校园安全卫士</strong><small>Nankai Safety Assistant</small></div></div>
+          <div class="admin-login-slogan">
+            <p>安全教育管理平台</p>
+            <h1>校园安全数据与内容统一管理</h1>
+            <span>用于学习任务发布、题库维护、学习统计与后台权限管理。</span>
+          </div>
+          <div class="admin-login-tags"><span>学习任务</span><span>题库管理</span><span>数据统计</span></div>
+        </aside>
+        <section class="admin-login-panel">
+          <div class="admin-login-heading">
+            <p id="loginRoleKicker">后台入口</p>
+            <h2 id="loginTitle">欢迎登录</h2>
+            <span>请输入后台账号密码，或使用已授权的飞书身份登录。</span>
+          </div>
+          <form id="adminLoginForm" class="admin-login-form" autocomplete="off">
+            <label><span id="usernameLabel">账号</span><input id="loginUsername" name="loginUsername" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore placeholder="后台账号" readonly required /></label>
+            <label><span id="passwordLabel">密码</span><input id="loginPassword" name="loginPassword" type="password" autocomplete="new-password" data-lpignore="true" data-1p-ignore placeholder="登录密码" readonly required /></label>
+            <button class="admin-login-submit" type="submit">登录后台</button>
+            <p id="loginMessage" role="status"></p>
+          </form>
+          <div class="admin-login-divider"><span>其他登录方式</span></div>
+          <a id="feishuLoginLink" class="admin-login-feishu" href="/api/auth/login?role=admin&next=%2Fadmin.html">飞书授权登录</a>
+          <p class="admin-login-tip">仅限已授权的管理员、编辑员和审核员访问后台管理功能。</p>
+        </section>
+      </section>
+    </main>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const next = params.get("next") || "/admin.html";
+      const role = params.get("role") || (next.includes("editor") ? "editor" : next.includes("reviewer") ? "reviewer" : "admin");
+      const roleText = { admin: "管理员入口", reviewer: "审核员入口", editor: "编辑员入口" };
+      const accountText = { admin: "管理员账号", reviewer: "审核员账号", editor: "编辑员账号" };
+      const message = document.querySelector("#loginMessage");
+      document.querySelector("#loginRoleKicker").textContent = roleText[role] || "后台入口";
+      document.querySelector("#usernameLabel").textContent = accountText[role] || "后台账号";
+      document.querySelector("#passwordLabel").textContent = (accountText[role] || "后台账号") + "密码";
+      document.querySelector("#loginUsername").placeholder = accountText[role] || "后台账号";
+      document.querySelector("#feishuLoginLink").href = "/api/auth/login?role=" + encodeURIComponent(role) + "&next=" + encodeURIComponent(next);
+      function clearLoginFields() {
+        document.querySelector("#loginUsername").value = "";
+        document.querySelector("#loginPassword").value = "";
+      }
+      clearLoginFields();
+      setTimeout(clearLoginFields, 100);
+      window.addEventListener("pageshow", clearLoginFields);
+      ["#loginUsername", "#loginPassword"].forEach((selector) => {
+        const input = document.querySelector(selector);
+        input.addEventListener("focus", () => input.removeAttribute("readonly"));
+        input.addEventListener("click", () => input.removeAttribute("readonly"));
+      });
+      document.querySelector("#adminLoginForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const form = new FormData(event.currentTarget);
+        message.classList.remove("is-error");
+        message.classList.add("is-success");
+        message.textContent = "正在登录…";
+        try {
+          const response = await fetch("/api/auth/password-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: form.get("loginUsername"), password: form.get("loginPassword"), role, next })
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(data.error || "登录失败");
+          location.href = data.next || next;
+        } catch (error) {
+          message.classList.remove("is-success");
+          message.classList.add("is-error");
+          message.textContent = error.message;
+        }
+      });
+    </script>
+  </body>
+</html>

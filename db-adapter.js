@@ -1,5 +1,6 @@
 ﻿const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const { spawnSync } = require("child_process");
 
 const root = __dirname;
@@ -53,6 +54,26 @@ function sqlString(value) {
   return `'${String(value).replace(/\\/g, "\\\\").replace(/'/g, "''")}'`;
 }
 
+function hashPassword(password) {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const iterations = 120000;
+  const digest = crypto.pbkdf2Sync(String(password || ""), salt, iterations, 32, "sha256").toString("hex");
+  return `pbkdf2$${iterations}$${salt}$${digest}`;
+}
+
+function verifyPassword(password, storedHash) {
+  const parts = String(storedHash || "").split("$");
+  if (parts.length !== 4 || parts[0] !== "pbkdf2") return false;
+  const iterations = Number(parts[1]);
+  const salt = parts[2];
+  const expected = parts[3];
+  if (!iterations || !salt || !expected) return false;
+  const actual = crypto.pbkdf2Sync(String(password || ""), salt, iterations, 32, "sha256").toString("hex");
+  const expectedBuffer = Buffer.from(expected, "hex");
+  const actualBuffer = Buffer.from(actual, "hex");
+  return expectedBuffer.length === actualBuffer.length && crypto.timingSafeEqual(expectedBuffer, actualBuffer);
+}
+
 function mysqlExec(sql, includeDatabase = true) {
   const config = mysqlConfig();
   const sqlWithCharset = includeDatabase ? `SET NAMES utf8mb4; ${sql}` : sql;
@@ -68,6 +89,30 @@ function mysqlExec(sql, includeDatabase = true) {
     throw new Error(message);
   }
   return result.stdout || "";
+}
+
+function mysqlColumnExists(tableName, columnName) {
+  const config = mysqlConfig();
+  const output = mysqlExec("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = " + sqlString(config.database) + " AND TABLE_NAME = " + sqlString(tableName) + " AND COLUMN_NAME = " + sqlString(columnName) + ";").trim();
+  return Number(output || "0") > 0;
+}
+
+function ensureMysqlColumn(tableName, columnName, definition) {
+  if (!mysqlColumnExists(tableName, columnName)) {
+    mysqlExec("ALTER TABLE " + mysqlIdentifier(tableName) + " ADD COLUMN " + mysqlIdentifier(columnName) + " " + definition + ";");
+  }
+}
+
+function mysqlIndexExists(tableName, indexName) {
+  const config = mysqlConfig();
+  const output = mysqlExec("SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = " + sqlString(config.database) + " AND TABLE_NAME = " + sqlString(tableName) + " AND INDEX_NAME = " + sqlString(indexName) + ";").trim();
+  return Number(output || "0") > 0;
+}
+
+function ensureMysqlIndex(tableName, indexName, definition) {
+  if (!mysqlIndexExists(tableName, indexName)) {
+    mysqlExec("ALTER TABLE " + mysqlIdentifier(tableName) + " ADD " + definition + ";");
+  }
 }
 
 function initMysqlSchema() {
@@ -105,6 +150,8 @@ function initMysqlSchema() {
     CREATE TABLE IF NOT EXISTS admin_users (
       id INT AUTO_INCREMENT PRIMARY KEY,
       feishu_user_id VARCHAR(128) NOT NULL,
+      username VARCHAR(64) NULL,
+      password_hash VARCHAR(255) NULL,
       name VARCHAR(100) NOT NULL,
       role VARCHAR(32) NOT NULL,
       status VARCHAR(32) NOT NULL DEFAULT 'active',
@@ -112,6 +159,7 @@ function initMysqlSchema() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       UNIQUE KEY unique_feishu_user_id (feishu_user_id),
+      UNIQUE KEY unique_admin_username (username),
       KEY idx_role_status (role, status)
     ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
     CREATE TABLE IF NOT EXISTS students (
@@ -235,6 +283,9 @@ function initMysqlSchema() {
       KEY idx_notification_status (status)
     ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
   `);
+  ensureMysqlColumn("admin_users", "username", "VARCHAR(64) NULL AFTER feishu_user_id");
+  ensureMysqlColumn("admin_users", "password_hash", "VARCHAR(255) NULL AFTER username");
+  ensureMysqlIndex("admin_users", "unique_admin_username", "UNIQUE KEY unique_admin_username (username)");
 }
 
 function ensureMysqlSeed(seedDatabase) {
@@ -252,19 +303,76 @@ function ensureMysqlSeed(seedDatabase) {
 }
 
 function ensureDefaultAdminUsers() {
-  const count = Number((mysqlExec("SELECT COUNT(*) FROM admin_users;") || "0").trim() || "0");
-  if (count > 0) return;
-  mysqlExec(`INSERT INTO admin_users (feishu_user_id, name, role, status) VALUES
+  const username = process.env.ADMIN_USERNAME || "admin";
+  const password = process.env.ADMIN_PASSWORD || "admin123456";
+  const name = process.env.ADMIN_NAME || "系统管理员";
+  mysqlExec("INSERT INTO admin_users (feishu_user_id, username, password_hash, name, role, status) VALUES (" +
+    "'feishu-admin-placeholder', " +
+    sqlString(username) + ", " +
+    sqlString(hashPassword(password)) + ", " +
+    sqlString(name) + ", 'admin', 'active') " +
+    "ON DUPLICATE KEY UPDATE username = COALESCE(username, VALUES(username)), password_hash = COALESCE(password_hash, VALUES(password_hash)), name = IF(name = '管理员账号', VALUES(name), name), role = 'admin', status = 'active';");
+  mysqlExec(`INSERT IGNORE INTO admin_users (feishu_user_id, name, role, status) VALUES
     ('feishu-editor-placeholder', '编辑员账号', 'editor', 'active'),
     ('feishu-reviewer-placeholder', '审核员账号', 'reviewer', 'active');`);
 }
 
+function ensureDefaultAdminAccounts() {
+  ensureDefaultAdminUsers();
+}
+
+function findMysqlAdminAccountByUsername(username) {
+  const output = mysqlExec("SELECT id, username, COALESCE(password_hash, ''), name, role, status, COALESCE(DATE_FORMAT(last_login_at, '%Y-%m-%d %H:%i:%s'), ''), COALESCE(DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s'), ''), COALESCE(DATE_FORMAT(updated_at, '%Y-%m-%d %H:%i:%s'), '') FROM admin_users WHERE username = " + sqlString(username) + " LIMIT 1;").trim();
+  if (!output) return null;
+  const [id, accountUsername, passwordHash, name, role, status, lastLoginAt, createdAt, updatedAt] = output.split("\t");
+  return { id: Number(id), username: accountUsername, passwordHash, name, role, status, lastLoginAt, createdAt, updatedAt };
+}
+
+function markMysqlAdminAccountLogin(username) {
+  mysqlExec("UPDATE admin_users SET last_login_at = NOW() WHERE username = " + sqlString(username) + ";");
+  return findMysqlAdminAccountByUsername(username);
+}
+
+function upsertMysqlAdminUser(user) {
+  const allowedRoles = new Set(["admin", "reviewer", "editor"]);
+  const allowedStatuses = new Set(["active", "paused"]);
+  const id = Number(user.id) || 0;
+  const feishuUserId = String(user.feishuUserId || "").trim();
+  const username = String(user.username || "").trim();
+  const name = String(user.name || "").trim() || username || "后台用户";
+  const role = allowedRoles.has(user.role) ? user.role : "reviewer";
+  const status = allowedStatuses.has(user.status) ? user.status : "active";
+  const passwordHash = user.password ? hashPassword(user.password) : "";
+  const resolvedFeishuUserId = feishuUserId || (username ? "account:" + username : "manual:" + crypto.randomBytes(8).toString("hex"));
+  if (id > 0) {
+    const assignments = [
+      "feishu_user_id = " + sqlString(resolvedFeishuUserId),
+      "username = " + (username ? sqlString(username) : "NULL"),
+      "name = " + sqlString(name),
+      "role = " + sqlString(role),
+      "status = " + sqlString(status),
+      "updated_at = NOW()"
+    ];
+    if (passwordHash) assignments.push("password_hash = " + sqlString(passwordHash));
+    mysqlExec("UPDATE admin_users SET " + assignments.join(", ") + " WHERE id = " + id + ";");
+    return readMysqlUsers().find((item) => item.id === id) || null;
+  }
+  mysqlExec("INSERT INTO admin_users (feishu_user_id, username, password_hash, name, role, status) VALUES (" +
+    sqlString(resolvedFeishuUserId) + ", " +
+    (username ? sqlString(username) : "NULL") + ", " +
+    (passwordHash ? sqlString(passwordHash) : "NULL") + ", " +
+    sqlString(name) + ", " +
+    sqlString(role) + ", " +
+    sqlString(status) + ");");
+  return readMysqlUsers().find((item) => item.feishuUserId === resolvedFeishuUserId) || null;
+}
+
 function readMysqlUsers() {
-  const output = mysqlExec("SELECT id, feishu_user_id, name, role, status, COALESCE(DATE_FORMAT(last_login_at, '%Y-%m-%d %H:%i:%s'), ''), COALESCE(DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s'), ''), COALESCE(DATE_FORMAT(updated_at, '%Y-%m-%d %H:%i:%s'), '') FROM admin_users ORDER BY id;").trim();
+  const output = mysqlExec("SELECT id, feishu_user_id, COALESCE(username, ''), name, role, status, COALESCE(DATE_FORMAT(last_login_at, '%Y-%m-%d %H:%i:%s'), ''), COALESCE(DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s'), ''), COALESCE(DATE_FORMAT(updated_at, '%Y-%m-%d %H:%i:%s'), '') FROM admin_users ORDER BY id;").trim();
   if (!output) return [];
   return output.split(/\r?\n/).filter(Boolean).map((line) => {
-    const [id, feishuUserId, name, role, status, lastLoginAt, createdAt, updatedAt] = line.split("\t");
-    return { id: Number(id), feishuUserId, name, role, status, lastLoginAt, createdAt, updatedAt };
+    const [id, feishuUserId, username, name, role, status, lastLoginAt, createdAt, updatedAt] = line.split("\t");
+    return { id: Number(id), feishuUserId, username, name, role, status, lastLoginAt, createdAt, updatedAt };
   });
 }
 
@@ -547,12 +655,17 @@ module.exports = {
   mysqlConfig,
   initMysqlSchema,
   ensureMysqlSeed,
+  hashPassword,
+  verifyPassword,
   readMysqlDatabase,
   insertMysqlNotificationLog,
   readMysqlNotificationLogs,
   writeMysqlDatabase,
   findMysqlUserByFeishuId,
   markMysqlUserLogin,
+  findMysqlAdminAccountByUsername,
+  markMysqlAdminAccountLogin,
+  upsertMysqlAdminUser,
   updateMysqlUserRole,
   upsertMysqlStudent,
   upsertMysqlStudentProfile,

@@ -30,6 +30,7 @@ const seedPath = path.join(dataDir, "safety-cases.json");
 const dbPath = path.join(dataDir, "safety-case-db.json");
 const quizBankPath = path.join(dataDir, "quiz-questions.json");
 const quizUploadDir = path.join(dataDir, "quiz-uploads");
+const adminAccountsPath = path.join(dataDir, "admin-accounts.json");
 
 const protectedPages = { "/editor.html": "editor", "/reviewer.html": "reviewer", "/admin.html": "admin", "/knowledge.html": "student" };
 const oauthStates = new Map();
@@ -70,23 +71,32 @@ function signPayload(payload) { return crypto.createHmac("sha256", feishuAuthCon
 
 function makeSessionCookie(user) {
   const roles = Array.isArray(user.roles) && user.roles.length ? user.roles : String(user.role || "").split(",").map((item) => item.trim()).filter(Boolean);
-  const payload = base64Url(JSON.stringify({ feishuUserId: user.feishuUserId, name: user.name, role: user.role, roles, exp: Date.now() + 12 * 60 * 60 * 1000 }));
+  const payload = base64Url(JSON.stringify({ feishuUserId: user.feishuUserId, username: user.username || "", authType: user.authType || "feishu", name: user.name, role: user.role, roles, exp: Date.now() + 12 * 60 * 60 * 1000 }));
   return payload + "." + signPayload(payload);
 }
 
-function readSession(request) {
-  if (!authRequired()) return { feishuUserId: "dev", name: "开发模式", role: "admin" };
+function readSession(request, options = {}) {
   const token = parseCookies(request).nsg_session;
-  if (!token || !token.includes(".")) return null;
+  if (!token || !token.includes(".")) {
+    if (!authRequired() && !options.disableDevSession) return { feishuUserId: "dev", name: "开发模式", role: "admin" };
+    return null;
+  }
   const parts = token.split(".");
   const payload = parts[0];
   const signature = parts[1];
-  if (signPayload(payload) !== signature) return null;
+  if (signPayload(payload) !== signature) {
+    if (!authRequired() && !options.disableDevSession) return { feishuUserId: "dev", name: "开发模式", role: "admin" };
+    return null;
+  }
   try {
     const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    if (!session.exp || session.exp < Date.now()) return null;
+    if (!session.exp || session.exp < Date.now()) {
+      if (!authRequired() && !options.disableDevSession) return { feishuUserId: "dev", name: "开发模式", role: "admin" };
+      return null;
+    }
     return session;
   } catch (error) {
+    if (!authRequired() && !options.disableDevSession) return { feishuUserId: "dev", name: "开发模式", role: "admin" };
     return null;
   }
 }
@@ -105,7 +115,7 @@ function sessionRoles(session) {
 }
 
 function roleAllowed(session, requiredRole) {
-  if (!authRequired()) return true;
+  if (!authRequired() && (requiredRole === "student" || requiredRole === "any")) return true;
   if (!session) return false;
   if (requiredRole === "any") return true;
   const roles = sessionRoles(session);
@@ -170,7 +180,7 @@ async function feishuUserToLocalUser(feishuUser, requestedRole = "reviewer") {
 }
 
 function requireApiRole(request, response, role) {
-  const session = readSession(request);
+  const session = readSession(request, { disableDevSession: !["student", "any"].includes(role) });
   if (roleAllowed(session, role)) return session;
   sendJson(response, session ? 403 : 401, { error: session ? "权限不足：当前账号没有 " + role + " 权限，请重新登录或检查 admin_users 表。" : "未登录" });
   return null;
@@ -1077,6 +1087,53 @@ function ensureDatabase() {
     return;
   }
   if (!fs.existsSync(dbPath)) writeJson(dbPath, seed);
+  ensureJsonAdminAccounts();
+}
+
+function ensureJsonAdminAccounts() {
+  if (fs.existsSync(adminAccountsPath)) return;
+  const username = process.env.ADMIN_USERNAME || "admin";
+  const password = process.env.ADMIN_PASSWORD || "admin123456";
+  const name = process.env.ADMIN_NAME || "系统管理员";
+  writeJson(adminAccountsPath, {
+    updatedAt: new Date().toISOString(),
+    accounts: [{
+      id: "admin-local-001",
+      username,
+      passwordHash: dbAdapter.hashPassword(password),
+      name,
+      role: "admin",
+      status: "active",
+      lastLoginAt: ""
+    }]
+  });
+}
+
+function readJsonAdminAccount(username) {
+  ensureJsonAdminAccounts();
+  const document = readJson(adminAccountsPath, { accounts: [] });
+  return (document.accounts || []).find((account) => account.username === username) || null;
+}
+
+function markJsonAdminAccountLogin(username) {
+  const document = readJson(adminAccountsPath, { accounts: [] });
+  const account = (document.accounts || []).find((item) => item.username === username);
+  if (!account) return null;
+  account.lastLoginAt = new Date().toISOString().slice(0, 19).replace("T", " ");
+  document.updatedAt = new Date().toISOString();
+  writeJson(adminAccountsPath, document);
+  return account;
+}
+
+function findAdminAccountByUsername(username) {
+  ensureDatabase();
+  if (dbAdapter.mysqlEnabled()) return dbAdapter.findMysqlAdminAccountByUsername(username);
+  return readJsonAdminAccount(username);
+}
+
+function markAdminAccountLogin(username) {
+  if (dbAdapter.mysqlEnabled()) return dbAdapter.markMysqlAdminAccountLogin(username);
+  return markJsonAdminAccountLogin(username);
 }
 
 function normalizeDatabase(database) {
@@ -1211,6 +1268,43 @@ async function handleApi(request, response, url) {
     return true;
   }
 
+  if (url.pathname === "/api/admin/users" && request.method === "GET") {
+    if (!requireApiRole(request, response, "admin")) return true;
+    if (!dbAdapter.mysqlEnabled()) { sendJson(response, 503, { error: "角色管理需要 MySQL 数据库。" }); return true; }
+    sendJson(response, 200, { users: dbAdapter.readMysqlDatabase(seedDatabaseFromJson()).users || [] });
+    return true;
+  }
+
+  if (url.pathname === "/api/admin/users" && request.method === "POST") {
+    if (!requireApiRole(request, response, "admin")) return true;
+    if (!dbAdapter.mysqlEnabled()) { sendJson(response, 503, { error: "角色管理需要 MySQL 数据库。" }); return true; }
+    const body = await readRequestBody(request);
+    const username = String(body.username || "").trim();
+    const feishuUserId = String(body.feishuUserId || "").trim();
+    const password = String(body.password || "");
+    const role = String(body.role || "").trim();
+    const name = String(body.name || "").trim();
+    if (!["admin", "reviewer", "editor"].includes(role)) { sendJson(response, 422, { error: "请选择管理员、审核员或编辑员角色。" }); return true; }
+    if (!name) { sendJson(response, 422, { error: "请输入显示名称。" }); return true; }
+    if (!username && !feishuUserId) { sendJson(response, 422, { error: "账号和飞书用户 ID 至少填写一个。" }); return true; }
+    if (username && !body.id && !password) { sendJson(response, 422, { error: "新增账号密码登录用户时需要设置初始密码。" }); return true; }
+    try {
+      const user = dbAdapter.upsertMysqlAdminUser({
+        id: body.id,
+        username,
+        password,
+        feishuUserId,
+        name,
+        role,
+        status: body.status === "paused" ? "paused" : "active"
+      });
+      sendJson(response, 200, { user, users: dbAdapter.readMysqlDatabase(seedDatabaseFromJson()).users || [] });
+    } catch (error) {
+      sendJson(response, 422, { error: error.message || "用户保存失败，请检查账号或飞书 ID 是否重复。" });
+    }
+    return true;
+  }
+
   if (url.pathname === "/api/admin/quiz-bank/versions" && request.method === "GET") {
     if (!requireApiRole(request, response, "admin")) return true;
     const versions = dbAdapter.mysqlEnabled() ? dbAdapter.readMysqlQuizBankVersions() : [];
@@ -1333,6 +1427,39 @@ async function handleApi(request, response, url) {
   if (url.pathname === "/api/auth/logout" && request.method === "POST") {
     response.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Set-Cookie": "nsg_session=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax" });
     response.end(JSON.stringify({ ok: true }));
+    return true;
+  }
+
+  if (url.pathname === "/api/auth/password-login" && request.method === "POST") {
+    const body = await readRequestBody(request);
+    const username = String(body.username || "").trim();
+    const password = String(body.password || "");
+    if (!username || !password) {
+      sendJson(response, 422, { error: "请输入管理员账号和密码。" });
+      return true;
+    }
+    const account = findAdminAccountByUsername(username);
+    if (!account || account.status !== "active" || !dbAdapter.verifyPassword(password, account.passwordHash)) {
+      sendJson(response, 401, { error: "账号或密码不正确，或账号已停用。" });
+      return true;
+    }
+    const savedAccount = markAdminAccountLogin(username) || account;
+    const localUser = {
+      feishuUserId: "admin:" + username,
+      username,
+      authType: "password",
+      name: savedAccount.name || username,
+      role: savedAccount.role || "admin",
+      roles: [savedAccount.role || "admin"]
+    };
+    const requiredRole = String(body.role || "").trim();
+    if (requiredRole && !roleAllowed(localUser, requiredRole)) {
+      sendJson(response, 403, { error: "当前账号没有访问该工作台的权限。" });
+      return true;
+    }
+    const cookie = "nsg_session=" + encodeURIComponent(makeSessionCookie(localUser)) + "; Path=/; HttpOnly; SameSite=Lax; Max-Age=43200";
+    response.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Set-Cookie": cookie });
+    response.end(JSON.stringify({ ok: true, user: { name: localUser.name, role: localUser.role }, next: body.next || "/admin.html" }));
     return true;
   }
 
@@ -1631,9 +1758,14 @@ const server = http.createServer(async (request, response) => {
     const safePath = path.normalize(urlPath).replace(/\\/g, "/").replace(/^(\.\.[/\\])+/, "");
     const requestedPath = safePath === "/" ? "/index.html" : safePath;
     const requiredPageRole = protectedPages[requestedPath];
-    if (authRequired() && requiredPageRole) {
-      const session = readSession(request);
+    const requiresStaffLogin = ["admin", "editor", "reviewer"].includes(requiredPageRole);
+    if ((authRequired() || requiresStaffLogin) && requiredPageRole) {
+      const session = readSession(request, { disableDevSession: requiresStaffLogin });
       if (!session) {
+        if (requiresStaffLogin) {
+          redirect(response, "/admin-login.html?role=" + encodeURIComponent(requiredPageRole) + "&next=" + encodeURIComponent(requestedPath));
+          return;
+        }
         const loginUrl = authLoginUrl(requiredPageRole, requestedPath);
         if (!loginUrl) {
           sendAuthError(response, 503, "飞书登录未配置", "请在 .env 中填写 FEISHU_APP_ID、FEISHU_APP_SECRET、PUBLIC_BASE_URL，并在飞书开放平台配置回调地址：" + feishuAuthConfig().redirectUri);
@@ -1656,6 +1788,10 @@ const server = http.createServer(async (request, response) => {
         dbAdapter.upsertMysqlStudentProfile({ feishuUserId: session.feishuUserId, name: session.name || "Feishu user" });
       }
       if (!roleAllowed(session, requiredPageRole)) {
+        if (requiresStaffLogin) {
+          redirect(response, "/admin-login.html?role=" + encodeURIComponent(requiredPageRole) + "&next=" + encodeURIComponent(requestedPath));
+          return;
+        }
         const loginUrl = authLoginUrl(requiredPageRole, requestedPath);
         if (loginUrl) {
           redirect(response, loginUrl);
