@@ -698,13 +698,20 @@ body.knowledge-help-preview {
   }
 
   .knowledge-help-preview .scene-gallery {
-    grid-template-columns: 40px minmax(0, 1fr) 40px !important;
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) 46px 46px minmax(0, 1fr) !important;
+    grid-template-areas:
+      "viewport viewport viewport viewport"
+      ". prev next ."
+      "dots dots dots dots" !important;
+    gap: 10px;
     width: 100%;
+    justify-items: center;
     align-items: center;
   }
 
   .knowledge-help-preview .scene-viewport {
+    justify-self: center;
+    width: min(100%, 560px);
     min-width: 0;
     border-radius: 18px;
     overflow: hidden;
@@ -755,10 +762,24 @@ body.knowledge-help-preview {
   }
 
   .knowledge-help-preview .scene-nav {
-    width: 40px;
+    width: 46px;
     height: 54px;
     border-radius: 14px;
     font-size: 26px;
+  }
+
+  .knowledge-help-preview .scene-prev {
+    justify-self: end;
+  }
+
+  .knowledge-help-preview .scene-next {
+    justify-self: start;
+  }
+
+  .knowledge-help-preview .scene-dots {
+    width: 100%;
+    justify-content: center;
+    margin-top: 2px;
   }
 
   .knowledge-help-preview .role-stage,
