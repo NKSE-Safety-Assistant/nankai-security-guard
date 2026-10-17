@@ -524,7 +524,6 @@ function readMysqlQuizTasks() {
 
 function createMysqlQuizTask(task) {
   initMysqlSchema();
-  if (task.status === "active") mysqlExec("UPDATE safety_education_tasks SET status = 'paused', updated_at = NOW() WHERE status = 'active';");
   mysqlExec("INSERT INTO safety_education_tasks (id, title, target_scope, expected_count, categories_json, question_count, pass_score, starts_at, ends_at, status, created_by, created_at, updated_at) VALUES (" +
     sqlString(task.id) + ", " + sqlString(task.title) + ", " + sqlString(task.targetScope) + ", " + Number(task.expectedCount || 0) + ", " +
     sqlString(JSON.stringify(task.categories || [])) + ", " + Number(task.questionCount || 10) + ", " + Number(task.passScore || 80) + ", " +
@@ -535,7 +534,6 @@ function createMysqlQuizTask(task) {
 
 function updateMysqlQuizTaskStatus(id, status) {
   initMysqlSchema();
-  if (status === "active") mysqlExec("UPDATE safety_education_tasks SET status = 'paused', updated_at = NOW() WHERE status = 'active' AND id <> " + sqlString(id) + ";");
   mysqlExec("UPDATE safety_education_tasks SET status = " + sqlString(status) + ", updated_at = NOW() WHERE id = " + sqlString(id) + ";");
   return readMysqlQuizTasks().find((item) => item.id === id) || null;
 }
