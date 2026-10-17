@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>安全教育管理 | 南开校园安全卫士</title>
     <script src="static-auth-guard.js"></script>
-    <link rel="stylesheet" href="styles.css?v=20260922-admin-v2" />
+    <link rel="stylesheet" href="styles.css?v=20261017-role-layout" />
   </head>
   <body class="admin-v2-page">
     <div class="admin-v2-shell">
@@ -21,13 +21,26 @@
           <section class="admin-v2-task-panel"><div class="admin-v2-section-head"><div><h2>学习任务</h2><p>创建、选择和调整已发布的安全教育任务</p></div></div><div id="taskList" class="admin-v2-task-list"></div></section>
           <section class="admin-v2-detail-panel"><div id="emptyState" class="admin-v2-empty"><strong>暂未创建学习任务</strong><p>新建任务后，学生端会按任务主题抽取题目并自动汇总学习数据。</p><button class="admin-v2-primary" type="button" data-open-modal>新建学习任务</button></div><div id="taskDetail" hidden><div class="admin-v2-detail-head"><div><span id="taskTypeLabel">安全教育任务</span><h2 id="taskTitle">--</h2><p id="taskScope">--</p></div><div id="taskActions" class="admin-v2-actions"></div></div><dl class="admin-v2-task-facts"><div><dt>学习主题</dt><dd id="taskCategories">--</dd></div><div><dt>题目与合格线</dt><dd id="taskRule">--</dd></div><div><dt>开始时间</dt><dd id="taskStart">--</dd></div><div><dt>截止时间</dt><dd id="taskEnd">--</dd></div></dl><div class="admin-v2-records"><div class="admin-v2-subhead"><h3>最近完成记录</h3><span id="attemptTotal">0 次完成</span></div><div class="admin-v2-table-wrap"><table><thead><tr><th>学生</th><th>得分</th><th>完成时间</th></tr></thead><tbody id="recentAttempts"></tbody></table></div></div></div></section>
         </section>
-        <section class="admin-v2-content" data-panel="analytics" hidden><section class="admin-v2-analytics-head"><div><h2>学习效果统计</h2><p id="analyticsDescription">选择任务后查看各主题的掌握情况和高频错题。</p></div><label>统计任务<select id="taskSelect"></select></label></section><div id="analyticsEmpty" class="admin-v2-empty" hidden><strong>暂无可统计的数据</strong><p>学生完成答题后，系统会在这里生成学习效果汇总。</p></div><div id="analyticsContent" class="admin-v2-analytics-grid"><section class="admin-v2-report"><div class="admin-v2-subhead"><h3>主题正确率</h3><span>按答题明细计算</span></div><div id="categoryStats" class="admin-v2-stat-list"></div></section><section class="admin-v2-report"><div class="admin-v2-subhead"><h3>高频错题</h3><span>用于后续重点复习</span></div><div id="wrongQuestions" class="admin-v2-wrong-list"></div></section></div></section>
+        <section class="admin-v2-content" data-panel="analytics" hidden>
+          <section class="admin-v2-task-panel">
+            <div class="admin-v2-section-head"><div><h2>学习任务</h2><p>选择任务，查看对应的学习效果统计</p></div></div>
+            <div id="analyticsTaskList" class="admin-v2-task-list"></div>
+          </section>
+          <div class="admin-v2-analytics-detail">
+            <section class="admin-v2-analytics-head"><div><h2>学习效果统计</h2><p id="analyticsDescription">选择左侧任务，查看各主题的掌握情况和高频错题。</p></div><select id="taskSelect" hidden aria-label="统计任务"></select></section>
+            <div id="analyticsEmpty" class="admin-v2-empty" hidden><strong>暂无可统计的数据</strong><p>学生完成答题后，系统会在这里生成学习效果汇总。</p></div>
+            <div id="analyticsContent" class="admin-v2-analytics-grid">
+              <section class="admin-v2-report"><div class="admin-v2-subhead"><h3>主题正确率</h3><span>按答题明细计算</span></div><div id="categoryStats" class="admin-v2-stat-list"></div></section>
+              <section class="admin-v2-report"><div class="admin-v2-subhead"><h3>高频错题</h3><span>用于后续重点复习</span></div><div id="wrongQuestions" class="admin-v2-wrong-list"></div></section>
+            </div>
+          </div>
+        </section>
         <section class="admin-v2-content" data-panel="question-bank" hidden>
           <section class="admin-v2-bank-panel">
             <div class="admin-v2-bank-stats"><div><span>当前版本</span><strong id="bankVersion">--</strong></div><div><span>题目总数</span><strong id="bankCount">--</strong></div><div><span>题目类型数</span><strong id="bankCategoryCount">--</strong></div><div><span>更新时间</span><strong id="bankUpdatedAt">--</strong></div></div>
             <div class="admin-v2-bank-categories"><div class="admin-v2-bank-category-head"><div><span>题目类型分布</span><strong>按当前题库统计各主题题量</strong></div><small id="bankCategoryTotal">正在读取…</small></div><div id="bankCategorySummary">正在读取题库类型…</div></div>
             <form id="quizBankForm" class="admin-v2-bank-form">
-              <label class="admin-v2-upload-zone" id="quizBankDropZone" for="quizBankFile"><strong>选择题库文件或拖入此处</strong><span>支持 Word .docx 和 Markdown .md；每题须包含题目类型、题干、A-D 选项、正确答案和解释。</span><div class="admin-v2-upload-action"><b>选择文件</b></div><p class="admin-v2-upload-tip">选择或拖入文件后，点击“上传题库”开始解析并更新题库。</p><div class="admin-v2-upload-format"><strong>文档格式</strong><p>每题以“1. 题干”或“问题：题干”开头，随后写“题目类型：消防安全”、A-D 四个选项、正确答案：A，以及解释：……。系统会自动生成题目编号并写入数据库；上传成功后会整体替换当前题库并保留备份。</p></div><input id="quizBankFile" type="file" accept=".docx,.md,.markdown,.txt,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain" required /></label>
+              <label class="admin-v2-upload-zone" id="quizBankDropZone" for="quizBankFile"><strong>选择题库文件或拖入此处</strong><span>支持 Word .docx 和 Markdown .md；支持单选、判断和多选题；每题须包含题干、选项、正确答案和解释。</span><div class="admin-v2-upload-action"><b>选择文件</b></div><p class="admin-v2-upload-tip">选择或拖入文件后，点击“上传题库”开始解析并更新题库。</p><div class="admin-v2-upload-format"><strong>文档格式</strong><p>每题以“1. 题干”或“问题：题干”开头，随后写题目分类、选项、答案和解析。单选题填写一个答案（如A）；判断题使用两个选项；多选题填写全部答案（如ABC）。系统会自动生成题目编号并写入数据库；上传成功后会补充到现有题库，按题干跳过重复题，并保留备份。</p></div><input id="quizBankFile" type="file" accept=".docx,.md,.markdown,.txt,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain" required /></label>
               <div id="bankPreview" class="admin-v2-bank-preview" hidden></div>
               <div class="admin-v2-form-footer"><span id="bankMessage" role="status">请选择题库文件后点击上传。</span><button class="admin-v2-primary" id="uploadQuizBankButton" type="button">上传题库</button></div>
             </form>
@@ -40,15 +53,15 @@
         <section class="admin-v2-content" data-panel="roles" hidden>
           <section class="admin-v2-role-panel">
             <div class="admin-v2-section-head"><div><h2>角色授权管理</h2><p>为后台工作人员配置管理员、审核员、编辑员权限；支持账号密码和飞书身份两种登录方式。</p></div></div>
-            <form id="roleForm" class="admin-v2-role-form">
+            <form id="roleForm" class="admin-v2-role-form" autocomplete="off">
               <input type="hidden" name="id" />
-              <label>显示名称<input name="name" placeholder="例如：保卫处管理员" required /></label>
-              <label>角色<select name="role" required><option value="admin">管理员</option><option value="reviewer">审核员</option><option value="editor">编辑员</option></select></label>
-              <label>状态<select name="status"><option value="active">启用</option><option value="paused">停用</option></select></label>
-              <label>飞书用户 ID<input name="feishuUserId" placeholder="用于飞书登录，可从飞书授权信息获取" /></label>
-              <label>账号<input name="username" placeholder="用于账号密码登录，可选" /></label>
-              <label>密码<input name="password" type="password" placeholder="新增账号必填；编辑时留空则不修改" /></label>
-              <div class="admin-v2-form-footer"><span id="roleMessage" role="status"></span><button class="admin-v2-primary" type="submit">保存授权</button></div>
+              <label>显示名称<input name="name" autocomplete="off" required /></label>
+              <label>角色<select name="role" required><option value="" selected disabled></option><option value="admin">管理员</option><option value="reviewer">审核员</option><option value="editor">编辑员</option></select></label>
+              <label>状态<select name="status" required><option value="" selected disabled></option><option value="active">启用</option><option value="paused">停用</option></select></label>
+              <label>飞书用户 ID<input name="feishuUserId" autocomplete="off" /></label>
+              <label>账号<input name="username" autocomplete="off" readonly data-lpignore="true" data-1p-ignore /></label>
+              <label>密码<input name="password" type="password" autocomplete="new-password" readonly data-lpignore="true" data-1p-ignore /></label>
+              <div class="admin-v2-form-footer"><span id="roleMessage" role="status"></span><button class="admin-v2-secondary" id="clearRoleForm" type="button">清空</button><button class="admin-v2-primary" type="submit">保存授权</button></div>
             </form>
             <div class="admin-v2-role-table-wrap"><table class="admin-v2-role-table"><thead><tr><th>名称</th><th>角色</th><th>状态</th><th>账号</th><th>飞书用户 ID</th><th>最近登录</th><th>操作</th></tr></thead><tbody id="roleTableBody"></tbody></table></div>
           </section>
@@ -57,6 +70,19 @@
     </div>
     <div class="admin-v2-modal" id="taskModal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="admin-v2-modal-card"><div class="admin-v2-modal-head"><div><p>任务配置</p><h2 id="modalTitle">新建学习任务</h2></div><button class="admin-v2-close" type="button" id="closeTaskModal" aria-label="关闭">关闭</button></div><form id="taskForm"><div class="admin-v2-form-grid"><label>任务名称<input name="title" required placeholder="例如：2026 级新生入学安全教育" /></label><label>应完成人数<input name="expectedCount" type="number" min="0" value="0" placeholder="用于计算完成率" /></label><label>题目数量<input name="questionCount" type="number" min="5" max="30" step="1" value="10" required /><small>5 至 30 题</small></label><label>合格分数<input name="passScore" type="number" min="0" max="100" value="80" /></label><label>开始时间<input name="startsAt" type="datetime-local" /></label><label>截止时间<input name="endsAt" type="datetime-local" /></label></div><fieldset class="admin-v2-fieldset"><legend>适用范围</legend><div class="admin-v2-scope-groups"><div><strong>本科生</strong><p><label><input type="checkbox" name="targetScopes" value="本科生 2026 级" />2026 级</label><label><input type="checkbox" name="targetScopes" value="本科生 2025 级" />2025 级</label><label><input type="checkbox" name="targetScopes" value="本科生 2024 级" />2024 级</label><label><input type="checkbox" name="targetScopes" value="本科生 2023 级" />2023 级</label></p></div><div><strong>研究生</strong><p><label><input type="checkbox" name="targetScopes" value="研究生 2026 级" />2026 级</label><label><input type="checkbox" name="targetScopes" value="研究生 2025 级" />2025 级</label><label><input type="checkbox" name="targetScopes" value="研究生 2024 级" />2024 级</label><label><input type="checkbox" name="targetScopes" value="研究生 2023 级" />2023 级</label></p></div></div></fieldset><fieldset class="admin-v2-fieldset"><legend>学习主题</legend><div id="categoryChoices" class="admin-v2-check-list"></div></fieldset><div class="admin-v2-form-footer"><span id="formMessage" role="status"></span><button class="admin-v2-primary" type="submit">校验并发布任务</button></div></form></div></div>
     <div class="admin-v2-toast" id="adminToast" hidden></div>
+    <div class="admin-v2-modal" id="passwordModal" hidden role="dialog" aria-modal="true" aria-labelledby="passwordModalTitle">
+      <div class="admin-v2-modal-card" style="max-width:480px">
+        <div class="admin-v2-modal-head"><h2 id="passwordModalTitle">修改密码</h2><button class="admin-v2-close" type="button" id="closePasswordModal">关闭</button></div>
+        <form id="passwordForm" autocomplete="off">
+          <input name="userId" type="hidden" />
+          <p id="passwordAccount"></p>
+          <div class="admin-v2-form-grid" style="grid-template-columns:1fr">
+            <label>新密码<input name="newPassword" type="text" autocomplete="off" minlength="8" maxlength="128" placeholder="请输入8至128位新密码" required /><small>管理员可直接查看本次输入的新密码。</small></label>
+          </div>
+          <div class="admin-v2-form-footer"><span id="passwordMessage" role="status"></span><button class="admin-v2-primary" type="submit" style="white-space:nowrap;flex-shrink:0">保存密码</button></div>
+        </form>
+      </div>
+    </div>
     <script>
       const state = { tasks: [], task: null, report: null, categories: [], view: "tasks", quizBankUpload: null, versions: [], users: [] };
       const $ = (selector) => document.querySelector(selector);
@@ -72,8 +98,61 @@
       function renderTaskSelect() { const select = $("#taskSelect"); select.innerHTML = state.tasks.length ? state.tasks.map((task) => `<option value="${escapeHtml(task.id)}" ${task.id === state.task?.id ? "selected" : ""}>${escapeHtml(task.title)}</option>`).join("") : '<option value="">暂无任务</option>'; select.disabled = !state.tasks.length; }
       function renderCategories() { const categories = state.categories.length ? state.categories : ["反诈骗", "网络安全", "消防安全", "交通安全", "治安安全", "实验室安全"]; $("#categoryChoices").innerHTML = categories.map((category, index) => `<label><input type="checkbox" name="categories" value="${escapeHtml(category)}" ${index < 2 ? "checked" : ""} />${escapeHtml(category)}</label>`).join(""); }
       function renderDetail() { const task = state.task; const report = state.report; const hasTask = Boolean(task); $("#emptyState").hidden = hasTask; $("#taskDetail").hidden = !hasTask; if (!hasTask) return; const expected = Number(task.expectedCount) || 0; const completion = expected ? Math.min(100, Math.round(report.participants * 100 / expected)) : null; const passRate = report.attempts ? Math.round(report.passCount * 100 / report.attempts) : 0; $("#overviewTaskTitle").textContent = task.title; $("#overviewTaskScope").textContent = task.targetScope; $("#overviewCompletion").textContent = expected ? completion + "%" : report.participants + " 人"; $("#overviewCompletionDetail").textContent = expected ? `${report.participants} / ${expected} 人已完成` : `${report.participants} 名学生已完成`; $("#overviewScore").textContent = report.attempts ? report.averageScore + " 分" : "--"; $("#overviewScoreDetail").textContent = report.attempts ? `合格率 ${passRate}%` : "暂无答题数据"; $("#overviewStatus").textContent = statusText[task.status] || task.status; $("#overviewDeadline").textContent = task.endsAt ? `截止 ${formatTime(task.endsAt)}` : "未设置截止时间"; $("#taskTitle").textContent = task.title; $("#taskScope").textContent = task.targetScope; $("#taskCategories").textContent = task.categories.join("、"); $("#taskRule").textContent = `${task.questionCount} 题 · ${task.passScore} 分合格`; $("#taskStart").textContent = formatTime(task.startsAt); $("#taskEnd").textContent = formatTime(task.endsAt); $("#attemptTotal").textContent = `${report.attempts} 次完成`; $("#taskActions").innerHTML = task.status === "active" ? '<button class="admin-v2-secondary" data-status="paused">暂停任务</button><button class="admin-v2-secondary" data-status="closed">结束任务</button>' : '<button class="admin-v2-primary" data-status="active">恢复任务</button>'; document.querySelectorAll("[data-status]").forEach((button) => button.addEventListener("click", () => changeStatus(button.dataset.status))); $("#recentAttempts").innerHTML = report.recentAttempts.length ? report.recentAttempts.map((item) => `<tr><td>${escapeHtml(item.studentName)}</td><td>${item.score} 分</td><td>${formatTime(item.completedAt)}</td></tr>`).join("") : '<tr><td colspan="3" class="admin-v2-muted">暂无完成记录</td></tr>'; $("#analyticsDescription").textContent = `当前查看：${task.title}`; $("#analyticsEmpty").hidden = report.attempts > 0; $("#analyticsContent").hidden = report.attempts === 0; $("#categoryStats").innerHTML = report.categoryStats.length ? report.categoryStats.map((item) => `<div class="admin-v2-stat-row"><div><strong>${escapeHtml(item.category)}</strong><span>${item.correct}/${item.total} 题正确</span></div><b>${item.accuracy}%</b></div>`).join("") : ""; $("#wrongQuestions").innerHTML = report.wrongQuestions.length ? report.wrongQuestions.map((item) => `<div class="admin-v2-wrong-row"><span>${escapeHtml(item.category)}</span><strong>${escapeHtml(item.question)}</strong><small>答错 ${item.wrongCount} 次</small></div>`).join("") : '<p class="admin-v2-muted">暂无错题数据。</p>'; }
-      function renderAll() { renderTaskList(); renderTaskSelect(); renderCategories(); renderDetail(); }
-      async function loadOverview(taskId = "") { try { const data = await request("/api/admin/quiz-overview" + (taskId ? "?taskId=" + encodeURIComponent(taskId) : "")); Object.assign(state, data); renderAll(); } catch (error) { $("#emptyState").hidden = false; $("#emptyState").innerHTML = `<strong>无法读取任务数据</strong><p>${escapeHtml(error.message)}</p>`; } }
+      function renderTaskActions() {
+        const task = state.task;
+        if (!task) {
+          $('#overviewTaskTitle').textContent = '尚未选择任务';
+          $('#overviewTaskScope').textContent = '请新建学习任务';
+          ['#overviewCompletion', '#overviewScore', '#overviewStatus', '#overviewDeadline'].forEach((id) => $(id).textContent = '--');
+          $('#overviewCompletionDetail').textContent = '暂无统计'; $('#overviewScoreDetail').textContent = '暂无统计';
+          $('#analyticsEmpty').hidden = false; $('#analyticsContent').hidden = true;
+          return;
+        }
+        if (task.status === 'closed') $('#taskActions').innerHTML = '<span class="admin-v2-ended-badge">已结束</span>';
+        if (!['paused', 'closed'].includes(task.status)) return;
+        const button = document.createElement('button');
+        button.type = 'button'; button.className = 'admin-v2-secondary'; button.textContent = '删除任务';
+        button.addEventListener('click', async () => {
+          if (!window.confirm(`确认删除“${task.title}”？删除后不再显示此任务，历史答题记录仍会保留。`)) return;
+          button.disabled = true;
+          try { await request(`/api/admin/quiz-tasks/${encodeURIComponent(task.id)}`, { method: 'DELETE' }); await loadOverview(); showToast('任务已删除'); }
+          catch (error) { showToast(error.message); button.disabled = false; }
+        });
+        $('#taskActions').append(button);
+      }
+      function renderAnalyticsTaskList() {
+        $('#analyticsTaskList').innerHTML = $('#taskList').innerHTML.replace(/data-task-id=/g, 'data-analytics-task-id=');
+      }
+      $('#analyticsTaskList').addEventListener('click', (event) => {
+        const button = event.target.closest('[data-analytics-task-id]');
+        if (button) loadOverview(button.getAttribute('data-analytics-task-id'));
+      });
+      function renderAll() { renderTaskList(); renderAnalyticsTaskList(); renderTaskSelect(); renderCategories(); renderDetail(); renderTaskActions(); }
+      let overviewRequestId = 0;
+      async function loadOverview(taskId = "") {
+        const requestId = ++overviewRequestId;
+        const requestedTask = state.tasks.find((task) => task.id === taskId);
+        if (requestedTask && state.view === 'analytics') {
+          $('#analyticsDescription').textContent = '正在读取：' + requestedTask.title;
+          document.querySelectorAll('[data-analytics-task-id]').forEach((button) => button.classList.toggle('selected', button.getAttribute('data-analytics-task-id') === taskId));
+        }
+        try {
+          const data = await request("/api/admin/quiz-overview" + (taskId ? "?taskId=" + encodeURIComponent(taskId) : ""));
+          if (requestId !== overviewRequestId) return;
+          if (data.tasks?.length && !data.task) {
+            const fallback = data.tasks.find((item) => item.status === 'active') || data.tasks[0];
+            if (fallback.id !== taskId) return loadOverview(fallback.id);
+            throw new Error('任务详情暂时无法读取，请稍后重试。');
+          }
+          Object.assign(state, data);
+          state.categories = data.availableCategories || state.categories;
+          renderAll();
+        } catch (error) {
+          if (requestId !== overviewRequestId) return;
+          showToast(error.message);
+          if (!state.task) { $('#emptyState').hidden = false; $('#emptyState').innerHTML = `<strong>任务详情暂时无法读取</strong><p>${escapeHtml(error.message)}</p>`; }
+        }
+      }
       async function changeStatus(status) { await request(`/api/admin/quiz-tasks/${encodeURIComponent(state.task.id)}/status`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) }); loadOverview(state.task.id); }
       function openModal() { $("#taskModal").hidden = false; document.body.classList.add("admin-v2-modal-open"); $("#taskForm [name=title]").focus(); } function closeModal() { $("#taskModal").hidden = true; document.body.classList.remove("admin-v2-modal-open"); }
       function renderQuizBankInfo(data) { const categories = Object.entries(data.categories || {}).sort((a, b) => b[1] - a[1]); const total = Number(data.questionCount) || categories.reduce((sum, item) => sum + Number(item[1] || 0), 0); const colors = ["#176fae", "#0f8b78", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#84cc16", "#ec4899"]; $("#bankVersion").textContent = data.version || "--"; $("#bankCount").textContent = `${total || 0} 题`; $("#bankCategoryCount").textContent = `${categories.length} 类`; $("#bankUpdatedAt").textContent = data.updatedAt ? formatTime(data.updatedAt) : "--"; $("#bankCategoryTotal").textContent = total ? `共 ${total} 题` : "暂无题目"; if (!categories.length) { $("#bankCategorySummary").innerHTML = '<p class="admin-v2-muted">暂无题目类型</p>'; return; } let current = 0; const segments = categories.map(([name, count], index) => { const start = current; const angle = total ? Number(count) * 360 / total : 0; current += angle; return `${colors[index % colors.length]} ${start.toFixed(2)}deg ${current.toFixed(2)}deg`; }).join(", "); const legend = categories.map(([name, count], index) => { const percent = total ? Math.round(Number(count) * 100 / total) : 0; return `<li><i style="background:${colors[index % colors.length]}"></i><span>${escapeHtml(name)}</span><strong>${count} 题</strong><em>${percent}%</em></li>`; }).join(""); $("#bankCategorySummary").innerHTML = `<div class="admin-v2-bank-pie-wrap"><div class="admin-v2-bank-pie" style="background: conic-gradient(${segments});"><span>${total}<small>题</small></span></div><ul class="admin-v2-bank-pie-legend">${legend}</ul></div>`; }
@@ -84,7 +163,7 @@
       function renderRoleUsers() { const body = $("#roleTableBody"); body.innerHTML = state.users.length ? state.users.map((user) => `<tr><td><strong>${escapeHtml(user.name)}</strong></td><td><span class="admin-v2-role-badge ${escapeHtml(user.role)}">${roleLabel(user.role)}</span></td><td>${user.status === "active" ? "启用" : "停用"}</td><td>${escapeHtml(user.username || "未设置")}</td><td>${escapeHtml(user.feishuUserId || "未设置")}</td><td>${escapeHtml(user.lastLoginAt || "未登录")}</td><td><button class="admin-v2-secondary" type="button" data-edit-user="${user.id}">编辑</button></td></tr>`).join("") : '<tr><td colspan="7" class="admin-v2-muted">暂无授权用户</td></tr>'; document.querySelectorAll("[data-edit-user]").forEach((button) => button.addEventListener("click", () => fillRoleForm(button.dataset.editUser))); }
       async function loadRoleUsers() { try { const data = await request("/api/admin/users"); state.users = data.users || []; renderRoleUsers(); } catch (error) { $("#roleMessage").textContent = error.message; } }
       function fillRoleForm(id) { const user = state.users.find((item) => String(item.id) === String(id)); if (!user) return; const form = $("#roleForm"); form.elements.id.value = user.id; form.elements.name.value = user.name || ""; form.elements.role.value = user.role || "reviewer"; form.elements.status.value = user.status || "active"; form.elements.feishuUserId.value = user.feishuUserId || ""; form.elements.username.value = user.username || ""; form.elements.password.value = ""; $("#roleMessage").textContent = "正在编辑：" + (user.name || "后台用户"); }
-      async function uploadSelectedQuizBank() { const file = state.quizBankUpload; const button = $("#uploadQuizBankButton"); if (!file) { showToast("请先选择题库文件"); $("#bankMessage").textContent = ""; return; } button.disabled = true; button.textContent = "解析中…"; $("#bankPreview").hidden = false; $("#bankMessage").textContent = "解析中，正在上传并读取题库内容…"; $("#bankPreview").innerHTML = `<strong>${escapeHtml(file.name)}</strong><span>解析中：正在识别题目类型、题干、选项、正确答案和解释。</span>`; try { const formData = new FormData(); formData.append("file", file); const response = await fetch("/api/admin/quiz-bank/import", { method: "POST", body: formData }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "题库更新失败"); renderQuizBankInfo(data); $("#bankMessage").textContent = `上传成功，解析完成：已将 ${data.questionCount} 道题写入题库。`; showToast("上传成功，解析完成"); state.quizBankUpload = null; $("#quizBankFile").value = ""; $("#bankPreview").innerHTML = `<strong>上传成功，解析完成</strong><span>题库已更新：${escapeHtml(data.fileName || "上传文件")}，共 ${data.questionCount} 道题。</span>`; loadOverview(); if (!$("#versionHistory").hidden) loadVersionHistory(); } catch (error) { $("#bankMessage").textContent = ""; showToast("解析失败：" + error.message); $("#bankPreview").innerHTML = `<strong>${escapeHtml(file.name)}</strong><span>解析失败，请检查文档格式后重新上传。</span>`; } finally { button.disabled = false; button.textContent = "上传题库"; } }
+      async function uploadSelectedQuizBank() { const file = state.quizBankUpload; const button = $("#uploadQuizBankButton"); if (!file) { showToast("请先选择题库文件"); $("#bankMessage").textContent = ""; return; } button.disabled = true; button.textContent = "解析中…"; $("#bankPreview").hidden = false; $("#bankMessage").textContent = "解析中，正在上传并读取题库内容…"; $("#bankPreview").innerHTML = `<strong>${escapeHtml(file.name)}</strong><span>解析中：正在识别题目类型、题干、选项、正确答案和解释。</span>`; try { const formData = new FormData(); formData.append("file", file); const response = await fetch("/api/admin/quiz-bank/import", { method: "POST", body: formData }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "题库更新失败"); renderQuizBankInfo(data); $("#bankMessage").textContent = `上传成功，解析完成：新增 ${data.addedCount ?? data.questionCount} 道，跳过重复 ${data.skippedCount ?? 0} 道，现有 ${data.questionCount} 道。`; showToast("上传成功，解析完成"); state.quizBankUpload = null; $("#quizBankFile").value = ""; $("#bankPreview").innerHTML = `<strong>上传成功，解析完成</strong><span>题库已更新：${escapeHtml(data.fileName || "上传文件")}，新增 ${data.addedCount ?? data.questionCount} 道，跳过重复 ${data.skippedCount ?? 0} 道，现有 ${data.questionCount} 道。</span>`; loadOverview(); if (!$("#versionHistory").hidden) loadVersionHistory(); } catch (error) { $("#bankMessage").textContent = ""; showToast("解析失败：" + error.message); $("#bankPreview").innerHTML = `<strong>${escapeHtml(file.name)}</strong><span>解析失败，请检查文档格式后重新上传。</span>`; } finally { button.disabled = false; button.textContent = "上传题库"; } }
       function selectQuizBankFile(file) { const allowed = /\.(docx|md|markdown|txt)$/i; state.quizBankUpload = allowed.test(file?.name || "") ? file : null; if (!state.quizBankUpload) { showToast("文件格式不支持，请选择 Word 或 Markdown 题库文件"); $("#bankPreview").hidden = true; $("#bankMessage").textContent = ""; return; } $("#bankPreview").hidden = false; $("#bankPreview").innerHTML = `<strong>${escapeHtml(file.name)}</strong><span>已选择文件，点击“上传题库”后开始解析。</span>`; $("#bankMessage").textContent = "已选择文件，等待上传。"; }
       $("#quizBankFile").addEventListener("change", (event) => selectQuizBankFile(event.target.files[0]));
       $("#uploadQuizBankButton").addEventListener("click", uploadSelectedQuizBank);
@@ -96,6 +175,42 @@
       document.querySelectorAll(".admin-v2-nav button[data-view]").forEach((button) => button.addEventListener("click", () => setView(button.dataset.view))); $("#adminLogoutButton").addEventListener("click", async () => { await fetch("/api/auth/logout", { method: "POST" }).catch(() => null); location.href = "/admin-login.html?role=admin&next=%2Fadmin.html"; }); $("#taskSelect").addEventListener("change", (event) => loadOverview(event.target.value)); $("#openTaskModal").addEventListener("click", openModal); document.querySelectorAll("[data-open-modal]").forEach((button) => button.addEventListener("click", openModal)); $("#closeTaskModal").addEventListener("click", closeModal); $("#taskModal").addEventListener("click", (event) => { if (event.target === event.currentTarget) closeModal(); });
       $("#roleForm").addEventListener("submit", async (event) => { event.preventDefault(); const form = event.currentTarget; const data = new FormData(form); const message = $("#roleMessage"); message.textContent = "正在保存授权…"; try { const result = await request("/api/admin/users", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: data.get("id"), name: data.get("name"), role: data.get("role"), status: data.get("status"), feishuUserId: data.get("feishuUserId"), username: data.get("username"), password: data.get("password") }) }); state.users = result.users || []; renderRoleUsers(); form.reset(); form.elements.id.value = ""; message.textContent = "授权已保存。"; } catch (error) { message.textContent = error.message; } });
       $("#taskForm").addEventListener("submit", async (event) => { event.preventDefault(); const taskForm = event.currentTarget; const form = new FormData(taskForm); const categories = form.getAll("categories"); const targetScopes = form.getAll("targetScopes"); const message = $("#formMessage"); if (!targetScopes.length) { message.textContent = "请选择至少一个适用年级。"; return; } if (!categories.length) { message.textContent = "请选择至少一个学习主题。"; return; } message.textContent = "正在发布…"; try { const data = await request("/api/admin/quiz-tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: form.get("title"), targetScopes, expectedCount: form.get("expectedCount"), categories, questionCount: form.get("questionCount"), passScore: form.get("passScore"), startsAt: form.get("startsAt"), endsAt: form.get("endsAt") }) }); taskForm.reset(); message.textContent = ""; closeModal(); await loadOverview(data.task.id); } catch (error) { message.textContent = error.message; } });
+      const resetRoleForm = () => { $('#roleForm').reset(); $('#roleForm').elements.id.value = ''; $('#roleForm').querySelectorAll('input').forEach((input) => input.value = ''); $('#roleMessage').textContent = ''; };
+      resetRoleForm();
+      $('#clearRoleForm').addEventListener('click', resetRoleForm);
+      window.addEventListener('pageshow', resetRoleForm);
+      $('#roleForm').querySelectorAll('input[readonly]').forEach((input) => { input.addEventListener('focus', () => input.removeAttribute('readonly')); input.addEventListener('click', () => input.removeAttribute('readonly')); });
+      const roleTableObserver = new MutationObserver(() => {
+        document.querySelectorAll('[data-edit-user]').forEach((button) => {
+          if (button.parentElement.querySelector('[data-change-password]')) return;
+          const action = document.createElement('button');
+          action.type = 'button'; action.className = 'admin-v2-secondary'; action.textContent = '修改密码';
+          action.dataset.changePassword = button.dataset.editUser;
+          action.style.cssText = 'white-space:nowrap;margin-left:8px;margin-top:4px';
+          action.addEventListener('click', () => {
+            const user = state.users.find((item) => String(item.id) === action.dataset.changePassword);
+            if (!user.username) { fillRoleForm(user.id); showToast('请先为该用户设置登录账号和密码'); $('#roleForm input[name=username]').focus(); return; }
+            $('#passwordForm').reset(); $('#passwordForm').elements.userId.value = user.id;
+            $('#passwordAccount').textContent = `${user.name}（${user.username}）`;
+            $('#passwordMessage').textContent = ''; $('#passwordModal').hidden = false;
+            $('#passwordForm').elements.newPassword.focus();
+          });
+          button.parentElement.append(action);
+        });
+      });
+      roleTableObserver.observe($('#roleTableBody'), { childList: true, subtree: true });
+      const closePasswordModal = () => { $('#passwordModal').hidden = true; $('#passwordForm').reset(); };
+      $('#closePasswordModal').addEventListener('click', closePasswordModal);
+      $('#passwordModal').addEventListener('click', (event) => { if (event.target === event.currentTarget) closePasswordModal(); });
+      $('#passwordForm').addEventListener('submit', async (event) => {
+        event.preventDefault(); const form = event.currentTarget;
+        if (!window.confirm('确认修改 ' + $('#passwordAccount').textContent + ' 的登录密码？保存后请使用新密码登录。')) return;
+        const button = form.querySelector('[type=submit]'); button.disabled = true;
+        $('#passwordMessage').textContent = '正在保存…';
+        try { await request(`/api/admin/users/${encodeURIComponent(form.elements.userId.value)}/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: form.elements.newPassword.value }) }); closePasswordModal(); showToast('密码已修改，下次登录请使用新密码'); }
+        catch (error) { $('#passwordMessage').textContent = error.message; }
+        finally { button.disabled = false; }
+      });
       loadUser(); loadOverview();
     </script>
   </body>

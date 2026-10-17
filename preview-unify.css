@@ -869,6 +869,29 @@ body.knowledge-help-preview {
   }
 }
 
+.knowledge-help-preview .knowledge-entry-tabs { display: flex; justify-content: center; gap: 8px; margin: 0 auto 20px; padding: 6px; width: min(100%, 420px); box-sizing: border-box; border: 1px solid #dce5ef; border-radius: 18px; background: #eaf0f7; }
+.knowledge-entry-tabs button { flex: 1; min-height: 48px; border: 0; border-radius: 13px; font: inherit; font-size: 18px; font-weight: 700; color: #52657a; background: transparent; cursor: pointer; }
+.knowledge-entry-tabs button[aria-selected="true"] { color: #fff; background: #1d5fbf; box-shadow: 0 4px 12px #1d5fbf20; }
+.knowledge-help-preview #quiz[hidden], .knowledge-help-preview #learningTasksPanel[hidden], .knowledge-help-preview #taskQuizRunner[hidden], .knowledge-help-preview #learningTaskCards[hidden] { display: none !important; }
+.knowledge-tasks-panel { max-width: 1040px; margin: 0 auto; }
+#learningTaskCards { display: grid; gap: 18px; }
+.knowledge-task-card { padding: 26px; border: 1px solid #dce5ef; border-radius: 22px; background: #fff; box-shadow: 0 10px 30px #14244008; }
+.knowledge-task-status { display: inline-flex; padding: 5px 10px; border-radius: 999px; background: #e8f5ef; color: #16805d; font-size: 13px; font-weight: 700; }
+.knowledge-task-card h3 { margin: 14px 0 10px; font-size: 26px; line-height: 1.35; color: #162033; }
+.knowledge-task-card p { margin: 8px 0; color: #667085; font-size: 15px; line-height: 1.7; }
+.knowledge-task-card .knowledge-task-result { color: #1d5fbf; }
+.knowledge-task-card .primary-button { margin-top: 14px; padding: 12px 24px; }
+.knowledge-task-empty { padding: 30px 24px; border: 1px solid #dce5ef; border-radius: 20px; background: #fff; color: #667085; line-height: 1.7; }
+.task-runner-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 18px; }
+.task-runner-head strong { font-size: 20px; line-height: 1.4; }
+.task-runner-head button { flex-shrink: 0; padding: 10px 14px; border: 1px solid #dce5ef; border-radius: 12px; background: #fff; color: #1d5fbf; font: inherit; cursor: pointer; }
+@media (max-width: 640px) {
+  .knowledge-task-card { padding: 20px 16px; border-radius: 20px; }
+  .knowledge-task-card h3 { font-size: 22px; }
+  .knowledge-entry-tabs button { font-size: 16px; }
+  .task-runner-head { align-items: start; flex-direction: column; }
+}
+
 /* editor_preview / reviewer_preview：对齐 admin.html 的深色侧边栏后台风格 */
 
 body.role-admin-preview {

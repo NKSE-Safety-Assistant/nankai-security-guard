@@ -38,6 +38,12 @@ const endingTitle = document.querySelector("#endingTitle");
 const endingText = document.querySelector("#endingText");
 const endingReport = document.querySelector("#endingReport");
 
+const roleLabels = {
+  experiencer: "体验者",
+  helper: "帮助者",
+  observer: "观察者",
+};
+
 const answers = [
   { keys: ["电动车", "充电", "自行车"], text: "电动车应在指定区域停放和充电，不建议飞线充电、楼内充电或占用疏散通道。发现异常可通过隐患上报登记位置、照片和风险描述。" },
   { keys: ["诈骗", "反诈", "客服", "链接", "转账", "退款", "低价"], text: "遇到陌生链接、冒充客服、低价转让、刷单返利、中奖缴费等情况，不点击、不转账、不透露验证码。可保留聊天记录并向辅导员或保卫处咨询。" },
@@ -54,12 +60,16 @@ const answers = [
 
 let quizQuestionBank = [];
 let activeQuizTask = null;
+let availableLearningTasks = [];
+let learningTasksError = '';
+let learningEntry = 'daily';
 let quizAttemptReported = false;
 
 function normalizeQuizQuestion(item) {
   const options = Array.isArray(item?.options) ? item.options.map((value) => String(value || "").trim()) : [];
-  const answer = Number(item?.answer);
-  if (!item?.id || !item?.category || !item?.question || options.length !== 4 || options.some((value) => !value) || !Number.isInteger(answer) || answer < 0 || answer > 3 || !item?.explain) return null;
+  const answer = Array.isArray(item?.answer) ? item.answer.map(Number) : Number(item?.answer);
+  const values = Array.isArray(answer) ? answer : [answer];
+  if (!item?.id || !item?.category || !item?.question || ![2, 4].includes(options.length) || options.some((value) => !value) || !values.length || values.some((value) => !Number.isInteger(value) || value < 0 || value >= options.length) || !item?.explain) return null;
   return { ...item, options, answer, explain: String(item.explain).trim(), scene: String(item.scene || "未分类场景").trim() };
 }
 
@@ -86,10 +96,78 @@ async function loadActiveQuizTask() {
     const response = await fetch("/api/quiz-task/active", { cache: "no-store" });
     if (!response.ok) throw new Error("No active task");
     const payload = await response.json();
-    activeQuizTask = payload.task || null;
+    availableLearningTasks = payload.tasks || (payload.task ? [payload.task] : []);
+    learningTasksError = '';
   } catch (error) {
-    activeQuizTask = null;
+    availableLearningTasks = [];
+    learningTasksError = '任务暂时无法读取，请登录后刷新重试。日常学习仍可使用。';
   }
+}
+
+function renderLearningTasks() {
+  const container = document.querySelector('#learningTaskCards');
+  if (!container) return;
+  container.replaceChildren();
+  if (!availableLearningTasks.length) {
+    const empty = document.createElement('p');
+    empty.className = 'knowledge-task-empty';
+    empty.textContent = learningTasksError || '暂无与你的学段、年级匹配的学习任务，可进入日常学习。';
+    container.append(empty);
+    return;
+  }
+  availableLearningTasks.forEach((task) => {
+    const card = document.createElement('article'); card.className = 'knowledge-task-card';
+    const status = document.createElement('span'); status.className = 'knowledge-task-status';
+    status.textContent = task.completion ? task.completion.passed ? '已完成 · 已合格' : '已完成 · 未合格' : '待完成';
+    const title = document.createElement('h3'); title.textContent = task.title;
+    const scope = document.createElement('p'); scope.textContent = task.targetScope;
+    const rule = document.createElement('p'); rule.textContent = `${task.questionCount}题 · ${task.passScore}分合格 · ${task.endsAt ? '截止 ' + task.endsAt : '未设置截止时间'}`;
+    const themes = document.createElement('p'); themes.textContent = '学习主题：' + task.categories.join('、');
+    const result = document.createElement('p'); result.className = 'knowledge-task-result';
+    result.textContent = task.completion ? `最近成绩 ${task.completion.score}分 · ${task.completion.completedAt}` : '完成全部答题后，将记录本次任务成绩。';
+    const button = document.createElement('button'); button.type = 'button'; button.className = 'primary-button';
+    button.textContent = task.completion ? '再次学习' : '开始学习';
+    button.addEventListener('click', () => {
+      const pool = quizQuestionBank.filter((item) => task.categories.includes(item.category));
+      if (pool.length < task.questionCount) { showToast('当前题量不足，请联系管理员更新任务。'); return; }
+      activeQuizTask = task;
+      document.querySelector('#taskRunnerTitle').textContent = task.title;
+      document.querySelector('#taskQuizRunner').hidden = false;
+      document.querySelector('#taskQuizRunner').append(document.querySelector('.quiz-card'));
+      document.querySelector('#learningTaskCards').hidden = true;
+      switchLearningMode('quiz'); startQuizRound();
+    });
+    card.append(status, title, scope, rule, themes, result, button); container.append(card);
+  });
+}
+
+function setLearningEntry(entry) {
+  learningEntry = entry;
+  document.querySelector('#learningTasksPanel').hidden = entry !== 'tasks';
+  document.querySelector('#quiz').hidden = entry !== 'daily';
+  document.querySelector('#taskEntryButton').setAttribute('aria-selected', String(entry === 'tasks'));
+  document.querySelector('#dailyEntryButton').setAttribute('aria-selected', String(entry === 'daily'));
+  if (entry === 'daily') {
+    activeQuizTask = null;
+    document.querySelector('#quiz .learning-grid').append(document.querySelector('.quiz-card'));
+    document.querySelector('#taskQuizRunner').hidden = true;
+    document.querySelector('#learningTaskCards').hidden = false;
+    switchLearningMode('quiz'); startQuizRound();
+  }
+}
+
+function initLearningEntries() {
+  if (!document.querySelector('#learningTasksPanel')) { activeQuizTask = null; startQuizRound(); return; }
+  renderLearningTasks();
+  document.querySelector('#taskEntryButton').addEventListener('click', () => setLearningEntry('tasks'));
+  document.querySelector('#dailyEntryButton').addEventListener('click', () => setLearningEntry('daily'));
+  document.querySelector('#backToTaskList').addEventListener('click', async () => {
+    activeQuizTask = null;
+    document.querySelector('#taskQuizRunner').hidden = true;
+    document.querySelector('#learningTaskCards').hidden = false;
+    await loadActiveQuizTask(); renderLearningTasks();
+  });
+  setLearningEntry(availableLearningTasks.length ? 'tasks' : 'daily');
 }
 
 function takeQuizQuestions(items, count, selectedIds, selectedScenes, allowRepeatedScene = false) {
@@ -438,6 +516,7 @@ let quizQuestions = [];
 let quizIndex = 0;
 let quizPoints = 0;
 let quizAttempts = [];
+let quizSelections = [];
 let previousQuizQuestionTexts = new Set();
 
 function shuffleQuestions(items) {
@@ -501,14 +580,17 @@ function getInitialTab() {
 
 function renderQuiz() {
   const current = quizQuestions[quizIndex];
+  quizSelections = [];
   answered = false;
   quizFinished = false;
-  quizProgress.textContent = `第 ${quizIndex + 1} / ${quizQuestions.length} 题 · 随机练习`;
+  if (!current) { quizQuestion.textContent = '暂无可用题目'; quizOptions.replaceChildren(); nextQuestion.disabled = true; return; }
+  nextQuestion.disabled = false;
+  quizProgress.textContent = `${activeQuizTask ? '任务学习' : '日常练习'} · 第 ${quizIndex + 1} / ${quizQuestions.length} 题 · ${Array.isArray(current.answer) ? "多选题" : current.options.length === 2 ? "判断题" : "单选题"}`;
   quizScore.textContent = `得分 ${quizPoints}`;
   quizQuestion.textContent = current.question;
   quizFeedback.className = "quiz-feedback";
-  quizFeedback.textContent = "请选择一个答案。";
-  nextQuestion.textContent = "下一题";
+  quizFeedback.textContent = Array.isArray(current.answer) ? "请选择所有正确选项，再点击提交答案。" : "请选择一个答案。";
+  nextQuestion.textContent = Array.isArray(current.answer) ? "提交答案" : "下一题";
   quizOptions.innerHTML = "";
 
   current.options.forEach((option, index) => {
@@ -532,7 +614,7 @@ function renderQuizReviewItem(item) {
   title.textContent = item.question;
   const answer = document.createElement("p");
   answer.innerHTML = "<b>正确做法：</b>";
-  answer.append(document.createTextNode(item.options[item.answer]));
+  answer.append(document.createTextNode((Array.isArray(item.answer) ? item.answer : [item.answer]).map((index) => `${String.fromCharCode(65 + index)}. ${item.options[index]}`).join("；")));
   const reason = document.createElement("p");
   reason.innerHTML = "<b>原因：</b>";
   reason.append(document.createTextNode(item.explain));
@@ -552,7 +634,7 @@ function renderQuizResult() {
   const summary = document.createElement("section");
   summary.className = `quiz-round-summary ${incorrectAttempts.length ? "needs-review" : "all-correct"}`;
   const summaryTitle = document.createElement("strong");
-  summaryTitle.textContent = incorrectAttempts.length ? `本轮有 ${incorrectAttempts.length} 个知识点需要复习` : "本轮 10 个知识点全部答对";
+  summaryTitle.textContent = incorrectAttempts.length ? `本轮有 ${incorrectAttempts.length} 个知识点需要复习` : `本轮 ${quizQuestions.length} 个知识点全部答对`;
   const summaryText = document.createElement("p");
   summaryText.textContent = incorrectAttempts.length ? "请先阅读下方错题的正确做法和原因，再重新开始下一轮练习。" : "建议继续开始下一轮，巩固不同类别的校园安全知识。";
   summary.append(summaryTitle, summaryText);
@@ -567,37 +649,68 @@ function renderQuizResult() {
 async function reportQuizAttempt() {
   if (quizAttemptReported || !quizAttempts.length) return;
   quizAttemptReported = true;
+  const reportingTask = activeQuizTask;
+  const reportingAttempts = [...quizAttempts];
+  if (reportingTask) showToast('正在保存任务成绩…');
   try {
     const response = await fetch("/api/quiz-attempts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        taskId: activeQuizTask?.id || "",
-        answers: quizAttempts.map((item) => ({ questionId: item.id, selectedAnswer: item.selectedAnswer }))
+        taskId: reportingTask?.id || "",
+        answers: reportingAttempts.map((item) => ({ questionId: item.id, selectedAnswer: item.selectedAnswer }))
       })
     });
-    if (!response.ok) throw new Error("Quiz attempt was not accepted");
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || '成绩保存失败');
+    if (reportingTask) {
+      showToast('任务成绩已保存');
+      await loadActiveQuizTask(); renderLearningTasks();
+    }
   } catch (error) {
     // A later round can retry when the network or sign-in state is restored.
     console.warn("Unable to report quiz attempt", error);
     quizAttemptReported = false;
+    if (reportingTask) {
+      showToast('任务成绩未保存：' + error.message);
+      if (activeQuizTask?.id === reportingTask.id && quizFinished) {
+        const retry = document.createElement('button'); retry.type = 'button'; retry.textContent = '重新提交成绩'; retry.className = 'primary-button';
+        retry.addEventListener('click', () => { retry.remove(); reportQuizAttempt(); }); quizOptions.append(retry);
+      }
+    }
   }
 }
 
 function chooseAnswer(index) {
   if (answered) return;
+  const current = quizQuestions[quizIndex];
+  if (Array.isArray(current.answer)) {
+    quizSelections = quizSelections.includes(index) ? quizSelections.filter((value) => value !== index) : [...quizSelections, index];
+    quizOptions.querySelectorAll(".quiz-option").forEach((button, optionIndex) => {
+      button.classList.toggle("selected", quizSelections.includes(optionIndex));
+      button.setAttribute("aria-pressed", String(quizSelections.includes(optionIndex)));
+    });
+    return;
+  }
+  submitQuizAnswer([index]);
+}
+
+function submitQuizAnswer(selected) {
+  if (answered) return;
   answered = true;
   const current = quizQuestions[quizIndex];
+  const correctAnswers = Array.isArray(current.answer) ? current.answer : [current.answer];
   const optionButtons = quizOptions.querySelectorAll(".quiz-option");
 
   optionButtons.forEach((button, optionIndex) => {
     button.disabled = true;
-    if (optionIndex === current.answer) button.classList.add("correct");
-    if (optionIndex === index && optionIndex !== current.answer) button.classList.add("wrong");
+    if (correctAnswers.includes(optionIndex)) button.classList.add("correct");
+    if (selected.includes(optionIndex) && !correctAnswers.includes(optionIndex)) button.classList.add("wrong");
   });
 
-  const isCorrect = index === current.answer;
-  quizAttempts.push({ ...current, selectedAnswer: index, correct: isCorrect });
+  const isCorrect = JSON.stringify([...selected].sort()) === JSON.stringify([...correctAnswers].sort());
+  quizAttempts.push({ ...current, selectedAnswer: selected, correct: isCorrect });
+  nextQuestion.textContent = "下一题";
   quizFeedback.className = `quiz-feedback is-result ${isCorrect ? "correct" : "wrong"}`;
   quizFeedback.replaceChildren();
   const resultLabel = document.createElement("strong");
@@ -605,11 +718,11 @@ function chooseAnswer(index) {
   resultLabel.textContent = isCorrect ? "回答正确" : "回答错误";
   const reason = document.createElement("span");
   reason.className = "quiz-reason";
-  reason.textContent = "原因：" + current.explain;
+  reason.textContent = "正确答案：" + correctAnswers.map((value) => String.fromCharCode(65 + value)).join("、") + "。原因：" + current.explain;
   quizFeedback.append(resultLabel, reason);
 
   if (isCorrect) {
-    quizPoints += 10;
+    quizPoints = Math.round(quizAttempts.filter((item) => item.correct).length * 100 / quizQuestions.length);
   }
   quizScore.textContent = `得分 ${quizPoints}`;
 }
@@ -734,8 +847,27 @@ function renderRoleSelection() {
 }
 
 function startLockedStory() {
-  activeStoryNode = currentRoleStory().start;
+  let scenario = currentScenario();
+  let roleStory = scenario?.roles?.[activeRole] || scenario?.roles?.experiencer;
+
+  // A published case can be suitable for browsing while its role script is still incomplete.
+  // Never enter an empty scene: use the complete local scenario set as a safe fallback.
+  if (!roleStory?.start || !roleStory.nodes?.[roleStory.start]) {
+    scamScenarios = fallbackScenarios;
+    activeScenarioIndex = 0;
+    activeRole = "experiencer";
+    scenario = currentScenario();
+    roleStory = scenario.roles.experiencer;
+    showToast("该案例的剧情脚本尚未完善，已为你切换到可完成的学习情景");
+  }
+
+  if (!scenario.roles[activeRole]) activeRole = "experiencer";
+  activeStoryNode = roleStory.start;
   renderRoleSimulation();
+  scenarioTabs.hidden = true;
+  roleStage.hidden = true;
+  endingStage.hidden = true;
+  storyStage.hidden = false;
   setStoryPhase("story");
   storyGameCard?.scrollIntoView({ block: "center", behavior: "smooth" });
 }
@@ -898,6 +1030,10 @@ if (nextQuestion) nextQuestion.addEventListener("click", () => {
   }
 
   if (!answered) {
+    if (Array.isArray(quizQuestions[quizIndex].answer) && quizSelections.length) {
+      submitQuizAnswer(quizSelections);
+      return;
+    }
     showToast("请先选择一个答案");
     return;
   }
@@ -911,7 +1047,7 @@ if (nextQuestion) nextQuestion.addEventListener("click", () => {
   renderQuiz();
 });
 
-if (quizQuestion && quizOptions) Promise.all([loadQuizQuestions(), loadActiveQuizTask()]).finally(() => startQuizRound());
+if (quizQuestion && quizOptions) Promise.all([loadQuizQuestions(), loadActiveQuizTask()]).finally(initLearningEntries);
 loadSafetyCaseScenarios().finally(initRoleSimulation);
 switchTab(getInitialTab(), false);
 

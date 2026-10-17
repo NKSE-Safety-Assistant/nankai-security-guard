@@ -77,7 +77,8 @@ function verifyPassword(password, storedHash) {
 function mysqlExec(sql, includeDatabase = true) {
   const config = mysqlConfig();
   const sqlWithCharset = includeDatabase ? `SET NAMES utf8mb4; ${sql}` : sql;
-  const result = spawnSync(config.cli, [...mysqlBaseArgs(config, includeDatabase), "--execute", sqlWithCharset], {
+  const result = spawnSync(config.cli, mysqlBaseArgs(config, includeDatabase), {
+    input: sqlWithCharset,
     cwd: root,
     encoding: "utf8",
     windowsHide: true,
@@ -115,8 +116,10 @@ function ensureMysqlIndex(tableName, indexName, definition) {
   }
 }
 
+let mysqlSchemaReady = false;
 function initMysqlSchema() {
   if (!mysqlEnabled()) return;
+  if (mysqlSchemaReady) return;
   const config = mysqlConfig();
   mysqlExec(`CREATE DATABASE IF NOT EXISTS ${mysqlIdentifier(config.database)} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`, false);
   mysqlExec(`
@@ -284,8 +287,12 @@ function initMysqlSchema() {
     ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
   `);
   ensureMysqlColumn("admin_users", "username", "VARCHAR(64) NULL AFTER feishu_user_id");
+  ensureMysqlColumn("quiz_questions", "answer_json", "TEXT NULL");
+  ensureMysqlColumn("quiz_attempt_answers", "selected_answers_json", "TEXT NULL");
+  ensureMysqlColumn("quiz_attempt_answers", "correct_answers_json", "TEXT NULL");
   ensureMysqlColumn("admin_users", "password_hash", "VARCHAR(255) NULL AFTER username");
   ensureMysqlIndex("admin_users", "unique_admin_username", "UNIQUE KEY unique_admin_username (username)");
+  mysqlSchemaReady = true;
 }
 
 function ensureMysqlSeed(seedDatabase) {
@@ -334,11 +341,16 @@ function markMysqlAdminAccountLogin(username) {
 }
 
 function upsertMysqlAdminUser(user) {
+  const reject = (message) => { const error = new Error(message); error.publicMessage = message; throw error; };
   const allowedRoles = new Set(["admin", "reviewer", "editor"]);
   const allowedStatuses = new Set(["active", "paused"]);
   const id = Number(user.id) || 0;
   const feishuUserId = String(user.feishuUserId || "").trim();
   const username = String(user.username || "").trim();
+  const users = readMysqlUsers();
+  if (id && !users.some((item) => item.id === id)) reject("该用户不存在，请刷新列表后重试。");
+  if (username && users.some((item) => item.id !== id && item.username.toLowerCase() === username.toLowerCase())) reject("该账号已被其他用户使用，请更换账号名称。");
+  if (feishuUserId && users.some((item) => item.id !== id && item.feishuUserId === feishuUserId)) reject("该飞书用户已关联其他后台账号，请编辑已有用户。");
   const name = String(user.name || "").trim() || username || "后台用户";
   const role = allowedRoles.has(user.role) ? user.role : "reviewer";
   const status = allowedStatuses.has(user.status) ? user.status : "active";
@@ -365,6 +377,14 @@ function upsertMysqlAdminUser(user) {
     sqlString(role) + ", " +
     sqlString(status) + ");");
   return readMysqlUsers().find((item) => item.feishuUserId === resolvedFeishuUserId) || null;
+}
+
+function updateMysqlAdminPassword(id, password) {
+  const user = readMysqlUsers().find((item) => item.id === Number(id));
+  if (!user) { const error = new Error("该用户不存在，请刷新后重试。"); error.statusCode = 404; throw error; }
+  if (!user.username) { const error = new Error("请先编辑该用户并设置登录账号，再修改密码。"); error.statusCode = 422; throw error; }
+  if (typeof password !== "string" || password.length < 8 || password.length > 128) { const error = new Error("新密码长度须为8至128位。"); error.statusCode = 422; throw error; }
+  mysqlExec("UPDATE admin_users SET password_hash = " + sqlString(hashPassword(password)) + ", updated_at = NOW() WHERE id = " + Number(id) + ";");
 }
 
 function readMysqlUsers() {
@@ -440,21 +460,23 @@ function readMysqlLearningRecords() {
 
 function readMysqlQuizQuestions() {
   initMysqlSchema();
-  const output = mysqlExec("SELECT id, category, scene, difficulty, source_type, question_text, options_json, answer_index, explanation, review_status FROM quiz_questions WHERE review_status = 'approved' ORDER BY id;").trim();
+  const output = mysqlExec("SELECT id, category, scene, difficulty, source_type, question_text, options_json, COALESCE(answer_json, CAST(answer_index AS CHAR)), explanation, review_status FROM quiz_questions WHERE review_status = 'approved' ORDER BY id;").trim();
   if (!output) return [];
   return output.split(/\r?\n/).filter(Boolean).map((line) => {
     const [id, category, scene, difficulty, sourceType, question, optionsJson, answer, explain, reviewStatus] = line.split("\t");
-    return { id, category, scene, difficulty, sourceType, question, options: JSON.parse(optionsJson || "[]"), answer: Number(answer), explain, reviewStatus };
+    const options = JSON.parse(optionsJson || "[]");
+    const parsedAnswer = JSON.parse(answer);
+    return { id, category, scene, difficulty, sourceType, question, options, answer: parsedAnswer, type: Array.isArray(parsedAnswer) ? "multiple" : options.length === 2 ? "boolean" : "single", explain, reviewStatus };
   });
 }
 
 function replaceMysqlQuizQuestions(questions = []) {
   initMysqlSchema();
   const inserts = questions.map((item) =>
-    "INSERT INTO quiz_questions (id, category, scene, difficulty, source_type, question_text, options_json, answer_index, explanation, review_status) VALUES (" +
+    "INSERT INTO quiz_questions (id, category, scene, difficulty, source_type, question_text, options_json, answer_index, answer_json, explanation, review_status) VALUES (" +
       sqlString(item.id) + ", " + sqlString(item.category) + ", " + sqlString(item.scene) + ", " + sqlString(item.difficulty) + ", " +
       sqlString(item.sourceType) + ", " + sqlString(item.question) + ", " + sqlString(JSON.stringify(item.options || [])) + ", " +
-      Number(item.answer) + ", " + sqlString(item.explain) + ", " + sqlString(item.reviewStatus || "approved") + ");"
+      Number(Array.isArray(item.answer) ? item.answer[0] : item.answer) + ", " + sqlString(JSON.stringify(item.answer)) + ", " + sqlString(item.explain) + ", " + sqlString(item.reviewStatus || "approved") + ");"
   ).join("\n");
   mysqlExec("START TRANSACTION;\nDELETE FROM quiz_questions;\n" + inserts + "\nCOMMIT;");
 }
@@ -491,11 +513,12 @@ function findMysqlQuizBankVersion(id) {
 
 function readMysqlQuizTasks() {
   initMysqlSchema();
-  const output = mysqlExec("SELECT id, title, target_scope, expected_count, categories_json, question_count, pass_score, COALESCE(DATE_FORMAT(starts_at, '%Y-%m-%d %H:%i'), ''), COALESCE(DATE_FORMAT(ends_at, '%Y-%m-%d %H:%i'), ''), status, created_by, COALESCE(DATE_FORMAT(created_at, '%Y-%m-%d %H:%i'), ''), COALESCE(DATE_FORMAT(updated_at, '%Y-%m-%d %H:%i'), '') FROM safety_education_tasks ORDER BY created_at DESC;").trim();
+  const output = mysqlExec("SELECT id, title, target_scope, expected_count, categories_json, question_count, pass_score, COALESCE(DATE_FORMAT(starts_at, '%Y-%m-%d %H:%i'), ''), COALESCE(DATE_FORMAT(ends_at, '%Y-%m-%d %H:%i'), ''), status, created_by, COALESCE(DATE_FORMAT(created_at, '%Y-%m-%d %H:%i'), ''), COALESCE(DATE_FORMAT(updated_at, '%Y-%m-%d %H:%i'), '') FROM safety_education_tasks WHERE status <> 'deleted' ORDER BY created_at DESC;").trim();
   if (!output) return [];
   return output.split(/\r?\n/).filter(Boolean).map((line) => {
     const [id, title, targetScope, expectedCount, categoriesJson, questionCount, passScore, startsAt, endsAt, status, createdBy, createdAt, updatedAt] = line.split("\t");
-    return { id, title, targetScope, expectedCount: Number(expectedCount), categories: JSON.parse(categoriesJson || "[]"), questionCount: Number(questionCount), passScore: Number(passScore), startsAt, endsAt, status, createdBy, createdAt, updatedAt };
+    const effectiveStatus = endsAt && new Date(endsAt.replace(' ', 'T') + ':00+08:00').getTime() <= Date.now() ? 'closed' : status;
+    return { id, title, targetScope, expectedCount: Number(expectedCount), categories: JSON.parse(categoriesJson || "[]"), questionCount: Number(questionCount), passScore: Number(passScore), startsAt, endsAt, status: effectiveStatus, createdBy, createdAt, updatedAt };
   });
 }
 
@@ -518,8 +541,16 @@ function updateMysqlQuizTaskStatus(id, status) {
 }
 
 function readMysqlActiveQuizTask() {
-  const now = new Date().toISOString().slice(0, 19).replace("T", " ");
-  return readMysqlQuizTasks().find((item) => item.status === "active" && (!item.startsAt || item.startsAt <= now.slice(0, 16)) && (!item.endsAt || item.endsAt >= now.slice(0, 16))) || null;
+  const now = Date.now();
+  return readMysqlQuizTasks().find((item) => item.status === "active" && (!item.startsAt || new Date(item.startsAt.replace(' ', 'T') + ':00+08:00').getTime() <= now)) || null;
+}
+
+function deleteMysqlQuizTask(id) {
+  const task = readMysqlQuizTasks().find((item) => item.id === id);
+  if (!task) return null;
+  if (task.status === 'active') { const error = new Error('请先暂停任务，再删除。'); error.statusCode = 422; throw error; }
+  mysqlExec("UPDATE safety_education_tasks SET status = 'deleted', updated_at = NOW() WHERE id = " + sqlString(id) + ";");
+  return task;
 }
 
 function insertMysqlQuizAttempt(attempt, answers = []) {
@@ -527,8 +558,8 @@ function insertMysqlQuizAttempt(attempt, answers = []) {
   mysqlExec("INSERT INTO quiz_attempts (id, task_id, student_feishu_user_id, student_name, score, total_questions, correct_count, completed_at) VALUES (" +
     sqlString(attempt.id) + ", " + (attempt.taskId ? sqlString(attempt.taskId) : "NULL") + ", " + sqlString(attempt.studentFeishuUserId) + ", " +
     sqlString(attempt.studentName) + ", " + Number(attempt.score) + ", " + Number(attempt.totalQuestions) + ", " + Number(attempt.correctCount) + ", NOW());");
-  for (const answer of answers) mysqlExec("INSERT INTO quiz_attempt_answers (attempt_id, question_id, category, selected_answer, correct_answer, is_correct) VALUES (" +
-    sqlString(attempt.id) + ", " + sqlString(answer.questionId) + ", " + sqlString(answer.category) + ", " + Number(answer.selectedAnswer) + ", " + Number(answer.correctAnswer) + ", " + (answer.isCorrect ? 1 : 0) + ");");
+  for (const answer of answers) mysqlExec("INSERT INTO quiz_attempt_answers (attempt_id, question_id, category, selected_answer, correct_answer, selected_answers_json, correct_answers_json, is_correct) VALUES (" +
+    sqlString(attempt.id) + ", " + sqlString(answer.questionId) + ", " + sqlString(answer.category) + ", " + Number(Array.isArray(answer.selectedAnswer) ? answer.selectedAnswer[0] : answer.selectedAnswer) + ", " + Number(Array.isArray(answer.correctAnswer) ? answer.correctAnswer[0] : answer.correctAnswer) + ", " + sqlString(JSON.stringify(answer.selectedAnswer)) + ", " + sqlString(JSON.stringify(answer.correctAnswer)) + ", " + (answer.isCorrect ? 1 : 0) + ");");
 }
 
 function readMysqlQuizAttempts(taskId = "") {
@@ -545,11 +576,11 @@ function readMysqlQuizAttempts(taskId = "") {
 function readMysqlQuizAttemptAnswers(taskId = "") {
   initMysqlSchema();
   const join = taskId ? " INNER JOIN quiz_attempts qa ON qa.id = qaa.attempt_id WHERE qa.task_id = " + sqlString(taskId) : "";
-  const output = mysqlExec("SELECT qaa.attempt_id, qaa.question_id, qaa.category, qaa.selected_answer, qaa.correct_answer, qaa.is_correct FROM quiz_attempt_answers qaa" + join + ";").trim();
+  const output = mysqlExec("SELECT qaa.attempt_id, qaa.question_id, qaa.category, COALESCE(qaa.selected_answers_json, CAST(qaa.selected_answer AS CHAR)), COALESCE(qaa.correct_answers_json, CAST(qaa.correct_answer AS CHAR)), qaa.is_correct FROM quiz_attempt_answers qaa" + join + ";").trim();
   if (!output) return [];
   return output.split(/\r?\n/).filter(Boolean).map((line) => {
     const [attemptId, questionId, category, selectedAnswer, correctAnswer, isCorrect] = line.split("\t");
-    return { attemptId, questionId, category, selectedAnswer: Number(selectedAnswer), correctAnswer: Number(correctAnswer), isCorrect: Number(isCorrect) === 1 };
+    return { attemptId, questionId, category, selectedAnswer: JSON.parse(selectedAnswer), correctAnswer: JSON.parse(correctAnswer), isCorrect: Number(isCorrect) === 1 };
   });
 }
 function readMysqlSources() {
@@ -666,6 +697,7 @@ module.exports = {
   findMysqlAdminAccountByUsername,
   markMysqlAdminAccountLogin,
   upsertMysqlAdminUser,
+  updateMysqlAdminPassword,
   updateMysqlUserRole,
   upsertMysqlStudent,
   upsertMysqlStudentProfile,
@@ -682,6 +714,7 @@ module.exports = {
   readMysqlQuizTasks,
   createMysqlQuizTask,
   updateMysqlQuizTaskStatus,
+  deleteMysqlQuizTask,
   readMysqlActiveQuizTask,
   insertMysqlQuizAttempt,
   readMysqlQuizAttempts,

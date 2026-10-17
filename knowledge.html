@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>南开安全卫士 - 知识学习</title>
-    <link rel="stylesheet" href="styles.css?v=20261011-learning-layout" />
-    <link rel="stylesheet" href="preview-unify.css?v=20261013-mobile" />
+    <link rel="stylesheet" href="styles.css?v=20261017-quiz-types" />
+    <link rel="stylesheet" href="preview-unify.css?v=20261017-learning-entries" />
 </head>
   <body class="knowledge-help-preview" data-default-tab="quiz">
     <header class="site-header">
@@ -42,7 +42,15 @@
           </div>
         </div>
 
-        <section class="tab-panel active" id="quiz" aria-label="知识学习">
+        <nav class="knowledge-entry-tabs" aria-label="学习入口">
+          <button type="button" id="taskEntryButton" aria-selected="true">学习任务</button>
+          <button type="button" id="dailyEntryButton" aria-selected="false">日常学习</button>
+        </nav>
+        <section id="learningTasksPanel" class="knowledge-tasks-panel" aria-label="学习任务">
+          <div id="learningTaskCards">正在读取学习任务…</div>
+          <div id="taskQuizRunner" hidden><div class="task-runner-head"><strong id="taskRunnerTitle"></strong><button type="button" id="backToTaskList">返回任务列表</button></div></div>
+        </section>
+        <section class="tab-panel active" id="quiz" aria-label="日常学习" hidden>
           <div class="module-grid learning-grid">
             <div class="module-intro">
               <h3>选择学习方式</h3>
@@ -117,6 +125,6 @@
 
     <footer class="site-footer"><span>南开安全卫士</span><span>校园安全知识学习</span></footer>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="app.js?v=20261011-story-role-labels"></script>
+    <script src="app.js?v=20261017-learning-entries"></script>
 </body>
 </html>
