@@ -2,7 +2,7 @@ const tabs = document.querySelectorAll(".tab-button");
 const featureCards = document.querySelectorAll(".feature-card[data-tab]");
 const panels = document.querySelectorAll(".tab-panel");
 const toast = document.querySelector("#toast");
-const callButton = document.querySelector("#callButton");
+const securityPhoneButtons = document.querySelectorAll("[data-security-phone]");
 const criticalAlarmButton = document.querySelector("#criticalAlarmButton");
 const supplementPanel = document.querySelector("#supplementPanel");
 const supplementForm = document.querySelector("#supplementForm");
@@ -67,10 +67,15 @@ let quizAttemptReported = false;
 
 function normalizeQuizQuestion(item) {
   const options = Array.isArray(item?.options) ? item.options.map((value) => String(value || "").trim()) : [];
-  const answer = Array.isArray(item?.answer) ? item.answer.map(Number) : Number(item?.answer);
+  const normalizedAnswer = Array.isArray(item?.answer) ? item.answer.map(Number) : Number(item?.answer);
+  const answer = item?.type === "multiple" && !Array.isArray(normalizedAnswer) ? [normalizedAnswer] : normalizedAnswer;
   const values = Array.isArray(answer) ? answer : [answer];
   if (!item?.id || !item?.category || !item?.question || ![2, 4].includes(options.length) || options.some((value) => !value) || !values.length || values.some((value) => !Number.isInteger(value) || value < 0 || value >= options.length) || !item?.explain) return null;
   return { ...item, options, answer, explain: String(item.explain).trim(), scene: String(item.scene || "未分类场景").trim() };
+}
+
+function isMultipleQuestion(item) {
+  return item?.type === "multiple" || Array.isArray(item?.answer);
 }
 
 async function loadQuizQuestions() {
@@ -585,12 +590,12 @@ function renderQuiz() {
   quizFinished = false;
   if (!current) { quizQuestion.textContent = '暂无可用题目'; quizOptions.replaceChildren(); nextQuestion.disabled = true; return; }
   nextQuestion.disabled = false;
-  quizProgress.textContent = `${activeQuizTask ? '任务学习' : '日常练习'} · 第 ${quizIndex + 1} / ${quizQuestions.length} 题 · ${Array.isArray(current.answer) ? "多选题" : current.options.length === 2 ? "判断题" : "单选题"}`;
+  quizProgress.textContent = `${activeQuizTask ? '任务学习' : '日常练习'} · 第 ${quizIndex + 1} / ${quizQuestions.length} 题 · ${isMultipleQuestion(current) ? "多选题" : current.options.length === 2 ? "判断题" : "单选题"}`;
   quizScore.textContent = `得分 ${quizPoints}`;
   quizQuestion.textContent = current.question;
   quizFeedback.className = "quiz-feedback";
-  quizFeedback.textContent = Array.isArray(current.answer) ? "请选择所有正确选项，再点击提交答案。" : "请选择一个答案。";
-  nextQuestion.textContent = Array.isArray(current.answer) ? "提交答案" : "下一题";
+  quizFeedback.textContent = isMultipleQuestion(current) ? "请选择所有正确选项，再点击提交答案。" : "请选择一个答案。";
+  nextQuestion.textContent = isMultipleQuestion(current) ? "提交答案" : "下一题";
   quizOptions.innerHTML = "";
 
   current.options.forEach((option, index) => {
@@ -684,7 +689,7 @@ async function reportQuizAttempt() {
 function chooseAnswer(index) {
   if (answered) return;
   const current = quizQuestions[quizIndex];
-  if (Array.isArray(current.answer)) {
+  if (isMultipleQuestion(current)) {
     quizSelections = quizSelections.includes(index) ? quizSelections.filter((value) => value !== index) : [...quizSelections, index];
     quizOptions.querySelectorAll(".quiz-option").forEach((button, optionIndex) => {
       button.classList.toggle("selected", quizSelections.includes(optionIndex));
@@ -1014,14 +1019,15 @@ if (supplementForm) supplementForm.addEventListener("submit", (event) => {
   supplementForm.querySelector("button").textContent = "已保存";
 });
 
-if (callButton) callButton.addEventListener("click", () => {
-  const phoneNumber = "022-123456";
+securityPhoneButtons.forEach((button) => button.addEventListener("click", () => {
+  const phoneNumber = button.dataset.securityPhone;
+  const campus = button.dataset.campus || "保卫处";
   if (isMobileDevice()) {
     window.location.href = `tel:${phoneNumber}`;
     return;
   }
-  showToast(`请使用电话拨打 ${phoneNumber}`);
-});
+  showToast(`${campus}保卫处：${phoneNumber}`);
+}));
 
 if (nextQuestion) nextQuestion.addEventListener("click", () => {
   if (quizFinished) {
@@ -1030,7 +1036,7 @@ if (nextQuestion) nextQuestion.addEventListener("click", () => {
   }
 
   if (!answered) {
-    if (Array.isArray(quizQuestions[quizIndex].answer) && quizSelections.length) {
+    if (isMultipleQuestion(quizQuestions[quizIndex]) && quizSelections.length) {
       submitQuizAnswer(quizSelections);
       return;
     }

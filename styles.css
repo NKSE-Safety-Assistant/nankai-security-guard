@@ -1135,6 +1135,7 @@ body.story-active { overflow: hidden; }
 .emergency-contact-strip span { color: #6a7780; font-size: 13px; }
 .emergency-contact-strip button { min-height: 38px; padding: 0 18px; border: 1px solid #b8c5cc; border-radius: 5px; color: #344650; background: #fff; font-weight: 800; cursor: pointer; white-space: nowrap; }
 .emergency-contact-strip button:hover { background: #f4f7f8; }
+.emergency-contact-strip .emergency-contact-actions { display: flex; grid-template-columns: none; gap: 10px; }
 
 @media (max-width: 700px) {
   .help-workspace {
@@ -1173,6 +1174,7 @@ body.story-active { overflow: hidden; }
   #supplementForm { grid-template-columns: 1fr; }
   .supplement-panel { padding: 20px 18px; }
   .emergency-contact-strip { align-items: stretch; flex-direction: column; }
+  .emergency-contact-strip .emergency-contact-actions { flex-direction: column; }
   .emergency-contact-strip button { width: 100%; }
   .report-card-head { align-items: stretch; flex-direction: column; }
   .report-card-head > div { align-items: flex-start; }

@@ -96,8 +96,11 @@
           </section>
 
           <aside class="emergency-contact-strip">
-            <div><strong>保卫处值班电话</strong><span>022-123456　（正式上线前由保卫处确认）</span></div>
-            <button type="button" id="callButton">电话联系保卫处</button>
+            <div><strong>保卫处值班电话</strong><span>八里台校区：23508962　　津南校区：85358962</span></div>
+            <div class="emergency-contact-actions">
+              <button type="button" data-security-phone="23508962" data-campus="八里台校区">拨打八里台校区</button>
+              <button type="button" data-security-phone="85358962" data-campus="津南校区">拨打津南校区</button>
+            </div>
           </aside>
         </section>
       </section>
@@ -105,7 +108,7 @@
 
     <footer class="site-footer"><span>南开安全卫士</span><span>一键求助</span></footer>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="app.js?v=20260922-feishu-report"></script>
+    <script src="app.js?v=20261017-security-phones"></script>
   </body>
 </html>
 <script>window.location.replace("help_new.html");</script>
