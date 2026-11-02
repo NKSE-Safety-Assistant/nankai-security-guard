@@ -13,6 +13,7 @@ const questions = [
 const records = [];
 const context = {
   Date, crypto: require('crypto'),
+  authRequired: () => true,
   dbAdapter: {
     mysqlEnabled: () => true,
     findMysqlStudentProfileByFeishuId: () => profile,

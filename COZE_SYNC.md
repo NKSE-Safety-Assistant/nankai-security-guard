@@ -11,7 +11,7 @@
 1. 定时访问保卫处官网栏目页。
 2. 发现新通知、制度或政策页面。
 3. 抓取标题、发布日期、来源链接、正文和附件链接。
-4. 生成 `data/guard_policy_sync/coze_knowledge.md`。
+4. 生成 `data/guard_policy_sync/coze_knowledge.md`，并自动合并人工核验的部门办事与户籍服务内容。
 5. 将这个文件接入 Coze 知识库。
 6. 智能体回答时只基于知识库和官网白名单来源回答。
 
@@ -36,6 +36,7 @@ sync-guard-policy.bat
 - `data/guard_policy_sync/articles.jsonl`：结构化记录，方便以后接 API。
 - `data/guard_policy_sync/articles.md`：人工检查清单。
 - `data/guard_policy_sync/manifest.json`：同步时间和来源说明。
+- `data/curated_service_knowledge.md`：人工核验的部门办事、户籍服务及待确认清单；自动同步时会合并进知识库，不能用爬虫结果覆盖。
 
 ## Windows 定时同步
 
@@ -81,6 +82,8 @@ C:\Users\Lenovo\Documents\Nankai Security Guard\sync-guard-policy.bat
 遇到多个版本的规定时，优先采用发布日期最新的官网内容，并提醒用户以官网最新通知为准。
 
 不要使用非南开大学官网、非南开新闻网、非南开大学保卫处官网的信息作为校内政策依据。
+
+回答部门办事、户籍、政审、车辆登记等流程时，优先检索“人工核验的部门办事与户籍服务”。必须区分“当前已核验”“年度限定”和“历史服务指南”。历史信息不得直接表述为当前有效；应明确提醒用户向承办部门确认。
 ```
 
 ## 后续全自动接入

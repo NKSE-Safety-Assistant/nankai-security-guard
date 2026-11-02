@@ -64,6 +64,7 @@ let availableLearningTasks = [];
 let learningTasksError = '';
 let learningEntry = 'daily';
 let quizAttemptReported = false;
+const demoTaskCompletionKey = 'nankai-safety-demo-task-completions';
 
 function normalizeQuizQuestion(item) {
   const options = Array.isArray(item?.options) ? item.options.map((value) => String(value || "").trim()) : [];
@@ -104,8 +105,24 @@ async function loadActiveQuizTask() {
     availableLearningTasks = payload.tasks || (payload.task ? [payload.task] : []);
     learningTasksError = '';
   } catch (error) {
+    const staticShowcase = location.hostname.endsWith('.github.io') || location.protocol === 'file:';
+    if (staticShowcase) {
+      try {
+        const response = await fetch('data/demo-learning-tasks.json', { cache: 'no-store' });
+        if (!response.ok) throw new Error('静态演示任务不存在');
+        const payload = await response.json();
+        const completions = JSON.parse(localStorage.getItem(demoTaskCompletionKey) || '{}');
+        availableLearningTasks = (payload.tasks || []).map((task) => ({ ...task, demoOnly: true, completion: completions[task.id] || null }));
+        learningTasksError = '';
+        return;
+      } catch (fallbackError) {
+        console.warn('静态演示任务读取失败', fallbackError);
+      }
+    }
     availableLearningTasks = [];
-    learningTasksError = '任务暂时无法读取，请登录后刷新重试。日常学习仍可使用。';
+    learningTasksError = staticShowcase
+      ? '当前静态展示地址未连接项目后端，无法读取正式学习任务。请从飞书正式菜单或部署后的服务地址进入。'
+      : '任务暂时无法读取，请确认已登录且数据库服务正常，然后刷新重试。日常学习仍可使用。';
   }
 }
 
@@ -123,13 +140,13 @@ function renderLearningTasks() {
   availableLearningTasks.forEach((task) => {
     const card = document.createElement('article'); card.className = 'knowledge-task-card';
     const status = document.createElement('span'); status.className = 'knowledge-task-status';
-    status.textContent = task.completion ? task.completion.passed ? '已完成 · 已合格' : '已完成 · 未合格' : '待完成';
+    status.textContent = task.completion ? task.completion.passed ? '已完成 · 已合格' : '已完成 · 未合格' : task.demoOnly ? '静态演示任务' : '待完成';
     const title = document.createElement('h3'); title.textContent = task.title;
     const scope = document.createElement('p'); scope.textContent = task.targetScope;
     const rule = document.createElement('p'); rule.textContent = `${task.questionCount}题 · ${task.passScore}分合格 · ${task.endsAt ? '截止 ' + task.endsAt : '未设置截止时间'}`;
     const themes = document.createElement('p'); themes.textContent = '学习主题：' + task.categories.join('、');
     const result = document.createElement('p'); result.className = 'knowledge-task-result';
-    result.textContent = task.completion ? `最近成绩 ${task.completion.score}分 · ${task.completion.completedAt}` : '完成全部答题后，将记录本次任务成绩。';
+    result.textContent = task.completion ? `最近成绩 ${task.completion.score}分 · ${task.completion.completedAt}` : task.demoOnly ? '本页可完成演示练习；正式成绩需从连接后端的飞书入口提交。' : '完成全部答题后，将记录本次任务成绩。';
     const button = document.createElement('button'); button.type = 'button'; button.className = 'primary-button';
     button.textContent = task.completion ? '再次学习' : '开始学习';
     button.addEventListener('click', () => {
@@ -398,12 +415,32 @@ function caseList(items) {
 }
 
 function buildScenarioFromCase(item, index) {
-  const warningSigns = caseList(item.warningSigns);
-  const safeActions = caseList(item.safeActions);
+  const isFireScenario = item.safetyType === "消防安全";
+  const hasDetailedFireContent = isFireScenario
+    && Array.isArray(item.warningSigns)
+    && item.warningSigns.length >= 4
+    && Array.isArray(item.safeActions)
+    && item.safeActions.length >= 4
+    && !item.warningSigns.some((value) => /专业人士来处理而忽视|需进一步|官方来源提示风险/.test(String(value)));
+  const warningSigns = isFireScenario && !hasDetailedFireContent ? [
+    "现场出现烟雾、异味或明火",
+    "人员聚集或疏散通道受阻",
+    "不熟悉消防器材和疏散路线",
+    "火情信息未及时上报",
+  ] : caseList(item.warningSigns);
+  const safeActions = isFireScenario && !hasDetailedFireContent ? [
+    "立即提醒周围人员并远离危险区域",
+    "按疏散指示有序撤离，不乘坐电梯",
+    "拨打119并联系保卫处，准确说明位置和火情",
+    "确保自身安全且火势处于初起阶段时使用合适消防器材",
+    "到达集合点后清点人员，不擅自返回",
+  ] : caseList(item.safeActions);
   const actor = item.actor || "同学";
   const peer = item.peer || "同学";
-  const authority = item.authority || "学校相关部门";
-  const sceneClass = item.sceneClass || sceneClassBySafetyType[item.safetyType] || "scene-task";
+  const authority = isFireScenario ? "保卫处或119" : (item.authority || "学校相关部门");
+  // Safety type is the source of truth for the cover. Older collected cases may
+  // still carry the generic scene-task class, which must not override a known type.
+  const sceneClass = sceneClassBySafetyType[item.safetyType] || item.sceneClass || "scene-task";
   const safetyTag = `${item.safetyType || "校园安全"} · ${item.campusScene || "典型情景"}`;
   const sourceLine = item.sourceName ? `来源：${item.sourceName}，已脱敏改编。` : "来源于审核通过的校园安全案例，已脱敏改编。";
 
@@ -421,7 +458,17 @@ function buildScenarioFromCase(item, index) {
           start: {
             lines: [["系统", item.hook || "你遇到了一个看似普通的校园安全情景。"], [actor, item.firstLure || "这件事看起来不算严重，先按习惯处理也许没问题。"]],
             prompt: "你正在现场，需要马上做出判断。",
-            thoughts: [[item.riskyChoice || "先按原计划继续。", "escalate"], [item.safeChoice || "先停下来核实。", "safeExit"]],
+            thoughts: [[item.riskyChoice || "先按原计划继续。", "escalate"], [item.safeChoice || "先停下来核实。", "assess"]],
+          },
+          assess: {
+            lines: [["系统", `你暂停了当前操作，并发现：${warningSigns.slice(0, 3).join("、")}。`], [peer, "我们先保证人员安全，再决定下一步。"]],
+            prompt: "面对已经出现的风险，首先应该做什么？",
+            thoughts: [[safeActions[0] || "先控制现场风险。", "protect"], ["先拍视频发到群里，等大家讨论。", "escalate"]],
+          },
+          protect: {
+            lines: [["系统", `你完成了第一步处置：${safeActions[0] || "暂停并核实"}。`], [actor, "眼前的危险暂时得到控制，但还没有形成闭环。"]],
+            prompt: "现场风险暂时受控后，还应采取哪项行动？",
+            thoughts: [[safeActions[1] || `联系${authority}核实。`, "report"], ["没有继续恶化就可以离开，不必记录。", "incident"]],
           },
           escalate: {
             lines: [["系统", item.escalation || "风险开始升级，情况比最初看起来更复杂。"], [actor, item.pressure || "现在有点压力，但继续下去似乎更省事。"]],
@@ -431,12 +478,16 @@ function buildScenarioFromCase(item, index) {
           askPeer: {
             lines: [[peer, `我觉得这里至少有这些风险：${warningSigns.slice(0, 2).join("、")}。`], ["系统", `建议动作：${safeActions.slice(0, 2).join("、")}。`]],
             prompt: "你愿意及时止损并按规范处理吗？",
-            thoughts: [[item.safeChoice || "停止风险操作并上报。", "safeHelped"], ["还是先等等，别把事情弄复杂。", "incident"]],
+            thoughts: [[item.safeChoice || "停止风险操作并上报。", "report"], ["还是先等等，别把事情弄复杂。", "incident"]],
+          },
+          report: {
+            lines: [["系统", `你准备联系${authority}，并整理现场信息。`], [authority, "请说明地点、风险现象、人员情况和已经采取的措施。"]],
+            prompt: "怎样完成一次有效上报？",
+            thoughts: [["说明准确位置、当前风险和处置情况，并保持联络。", "safeHelped"], ["只说“这里有危险”，随后立即挂断。", "incident"]],
           },
         },
         endings: {
-          safeExit: ["安全结局", "你在风险扩大前暂停操作，并通过官方渠道核实，避免了后续损失或事故。", safeActions.slice(0, 4)],
-          safeHelped: ["及时处置结局", "你听取提醒并采取规范处置，把一次危险苗头转化成了可复盘的安全经验。", safeActions.slice(0, 4)],
+          safeHelped: ["及时处置结局", "你完成了风险识别、现场处置、有效上报和复盘提醒，把危险苗头转化成了安全经验。", safeActions.slice(0, 4)],
           incident: ["风险发生结局", "你忽视了早期信号，风险继续扩大。复盘显示，关键节点本可以更早暂停和求助。", warningSigns.slice(0, 4)],
         },
       },
@@ -450,8 +501,18 @@ function buildScenarioFromCase(item, index) {
           },
           check: {
             lines: [["你", item.helperAction || "我们先停下来，一起核实信息和现场风险。"], [authority, `建议立即执行：${safeActions.slice(0, 3).join("、")}。`]],
-            prompt: "确认风险后，你还要不要陪同完成后续处理？",
-            thoughts: [["继续陪同处理、记录并提醒周围同学。", "success"], ["风险暂时停止了，后面让对方自己处理。", "partial"]],
+            prompt: "确认风险后，帮助者接下来应该怎么做？",
+            thoughts: [["陪同完成第一步安全处置，避免当事人独自冒险。", "protect"], ["告诉对方注意安全，自己先离开。", "partial"]],
+          },
+          protect: {
+            lines: [["系统", `你们共同执行了：${safeActions.slice(0, 2).join("、")}。`], [actor, "现在安全多了，还需要告诉谁吗？"]],
+            prompt: "为了让专业人员及时介入，你应该怎样协助？",
+            thoughts: [[`陪同联系${authority}，准确说明位置和情况。`, "report"], ["发到朋友圈提醒一下就够了。", "partial"]],
+          },
+          report: {
+            lines: [[authority, "请保留现场信息，并提醒周围人员远离风险区域。"], ["你", "我会陪同处理到风险解除。"]],
+            prompt: "处置结束后，帮助者还可以做什么？",
+            thoughts: [["记录关键经过，提醒相关同学并参加复盘。", "success"], ["删除记录，避免别人知道这件事。", "partial"]],
           },
         },
         endings: {
@@ -474,18 +535,38 @@ function buildScenarioFromCase(item, index) {
             thoughts: [[warningSigns[0] || "出现异常风险信号。", "detail"]],
           },
           detail: {
-            lines: [["回放", item.escalation || "随后风险继续扩大。"], ["提示", `关键处置动作包括：${safeActions.slice(0, 2).join("、")}。`]],
-            prompt: "这个案例最应该记住的处置原则是什么？",
-            thoughts: [[safeActions[0] || "暂停并核实。", "report"], ["等事情结束后再说。", "hintAction"]],
+            lines: [["回放", item.escalation || "随后风险继续扩大。"], ["提示", `关键风险信号包括：${warningSigns.slice(0, 3).join("、")}。`]],
+            prompt: "风险升级的关键原因是什么？",
+            thoughts: [[warningSigns[1] || "早期风险没有被及时处理。", "action"], ["只是运气不好，与前面的信号无关。", "hintEscalation"]],
+          },
+          hintEscalation: {
+            lines: [["提示", `回看升级前的信号：${warningSigns.slice(0, 3).join("、")}。`]],
+            prompt: "重新判断风险升级的原因。",
+            thoughts: [[warningSigns[1] || "早期风险没有被及时处理。", "action"]],
+          },
+          action: {
+            lines: [["回放", "现在把时间退回到风险尚未扩大的节点。"], ["提示", `可选择的安全动作包括：${safeActions.slice(0, 3).join("、")}。`]],
+            prompt: "在哪个节点介入最有效？",
+            thoughts: [["发现第一个异常信号时立即暂停并处置。", "report"], ["等出现明显事故后再介入。", "hintAction"]],
           },
           hintAction: {
             lines: [["提示", "校园安全风险要在早期节点处理，拖延往往会放大后果。"]],
-            prompt: "重新选择处置原则。",
-            thoughts: [[safeActions[0] || "暂停并核实。", "report"]],
+            prompt: "重新选择介入节点。",
+            thoughts: [["发现第一个异常信号时立即暂停并处置。", "report"]],
+          },
+          report: {
+            lines: [["复盘", `规范流程包括：${safeActions.slice(0, 3).join("、")}。`], ["系统", "观察者不仅要识别问题，还要判断信息是否足以支持上报。"]],
+            prompt: "一条合格的风险上报应包含什么？",
+            thoughts: [["准确地点、风险现象、人员情况和已采取措施。", "complete"], ["只需要一句“有危险”，不用说明位置。", "hintReport"]],
+          },
+          hintReport: {
+            lines: [["提示", "专业人员需要位置、现象和人员情况，才能快速判断并处置。"]],
+            prompt: "重新选择上报信息。",
+            thoughts: [["准确地点、风险现象、人员情况和已采取措施。", "complete"]],
           },
         },
         endings: {
-          report: ["学习结局", "你完成了案例拆解，能够识别关键风险信号，并说出可执行的安全动作。", [...warningSigns.slice(0, 2), ...safeActions.slice(0, 2)]],
+          complete: ["学习结局", "你完成了四步案例拆解，能够识别风险信号、判断升级原因、选择介入节点并完成有效上报。", [...warningSigns.slice(0, 2), ...safeActions.slice(0, 2)]],
         },
       },
     },
@@ -495,21 +576,33 @@ function buildScenarioFromCase(item, index) {
 async function loadSafetyCaseScenarios() {
   if (!scenarioTabs || !window.fetch) return;
   const sources = ["/api/cases?status=approved", "data/safety-cases.json"];
+  const mergedCases = new Map();
   for (const source of sources) {
     try {
       const response = await fetch(source, { cache: "no-store" });
       if (!response.ok) throw new Error("案例库读取失败");
       const library = await response.json();
       const approvedCases = Array.isArray(library.cases) ? library.cases.filter((item) => item.reviewStatus === "approved") : [];
-      const generatedScenarios = approvedCases.map(buildScenarioFromCase);
-      if (generatedScenarios.length) {
-        scamScenarios = generatedScenarios;
-        return;
-      }
+      approvedCases.forEach((item) => {
+        const key = item.id || `${item.safetyType || ""}::${item.campusScene || ""}::${item.title || ""}`;
+        if (!mergedCases.has(key)) mergedCases.set(key, item);
+      });
     } catch (error) {
       console.warn("案例库来源不可用", source, error);
     }
   }
+  const demoPriority = (item) => {
+    if (item.id === "fire-dorm-electric-001" || item.campusScene === "宿舍用电") return 0;
+    if (item.id === "fire-lab-electrical-smoke-002") return 1;
+    if (item.id === "fire-evacuation-blocked-003") return 2;
+    if (item.safetyType === "消防安全") return 3;
+    return 4;
+  };
+  const orderedCases = [...mergedCases.values()]
+    .sort((left, right) => demoPriority(left) - demoPriority(right))
+    .slice(0, 10);
+  const generatedScenarios = orderedCases.map(buildScenarioFromCase);
+  if (generatedScenarios.length) scamScenarios = generatedScenarios;
 }
 let activeRole = "experiencer";
 let activeScenarioIndex = 0;
@@ -534,7 +627,9 @@ function shuffleQuestions(items) {
 }
 
 function startQuizRound() {
-  const selectedCategories = Array.isArray(activeQuizTask?.categories) ? activeQuizTask.categories : [];
+  const selectedCategories = activeQuizTask && Array.isArray(activeQuizTask.categories)
+    ? activeQuizTask.categories
+    : ["消防安全"];
   const taskPool = selectedCategories.length
     ? quizQuestionBank.filter((item) => selectedCategories.includes(item.category))
     : quizQuestionBank;
@@ -590,7 +685,7 @@ function renderQuiz() {
   quizFinished = false;
   if (!current) { quizQuestion.textContent = '暂无可用题目'; quizOptions.replaceChildren(); nextQuestion.disabled = true; return; }
   nextQuestion.disabled = false;
-  quizProgress.textContent = `${activeQuizTask ? '任务学习' : '日常练习'} · 第 ${quizIndex + 1} / ${quizQuestions.length} 题 · ${isMultipleQuestion(current) ? "多选题" : current.options.length === 2 ? "判断题" : "单选题"}`;
+  quizProgress.textContent = `${activeQuizTask ? '任务学习' : '消防专题'} · 第 ${quizIndex + 1} / ${quizQuestions.length} 题 · ${isMultipleQuestion(current) ? "多选题" : current.options.length === 2 ? "判断题" : "单选题"}`;
   quizScore.textContent = `得分 ${quizPoints}`;
   quizQuestion.textContent = current.question;
   quizFeedback.className = "quiz-feedback";
@@ -641,7 +736,7 @@ function renderQuizResult() {
   const summaryTitle = document.createElement("strong");
   summaryTitle.textContent = incorrectAttempts.length ? `本轮有 ${incorrectAttempts.length} 个知识点需要复习` : `本轮 ${quizQuestions.length} 个知识点全部答对`;
   const summaryText = document.createElement("p");
-  summaryText.textContent = incorrectAttempts.length ? "请先阅读下方错题的正确做法和原因，再重新开始下一轮练习。" : "建议继续开始下一轮，巩固不同类别的校园安全知识。";
+  summaryText.textContent = incorrectAttempts.length ? "请先阅读下方错题的正确做法和原因，再重新开始下一轮练习。" : "建议继续开始下一轮，巩固不同场景下的消防安全知识。";
   summary.append(summaryTitle, summaryText);
   quizOptions.append(summary);
   incorrectAttempts.forEach((item) => quizOptions.append(renderQuizReviewItem(item)));
@@ -656,6 +751,26 @@ async function reportQuizAttempt() {
   quizAttemptReported = true;
   const reportingTask = activeQuizTask;
   const reportingAttempts = [...quizAttempts];
+  if (reportingTask?.demoOnly) {
+    const correctCount = reportingAttempts.filter((item) => item.correct).length;
+    const score = Math.round(correctCount * 100 / reportingAttempts.length);
+    const completion = {
+      score,
+      completedAt: new Date().toLocaleString('zh-CN', { hour12: false }),
+      passed: score >= reportingTask.passScore
+    };
+    try {
+      const completions = JSON.parse(localStorage.getItem(demoTaskCompletionKey) || '{}');
+      completions[reportingTask.id] = completion;
+      localStorage.setItem(demoTaskCompletionKey, JSON.stringify(completions));
+    } catch (error) {
+      console.warn('静态演示成绩保存失败', error);
+    }
+    reportingTask.completion = completion;
+    showToast('演示成绩已保存在当前浏览器；正式成绩需从飞书服务入口提交');
+    renderLearningTasks();
+    return;
+  }
   if (reportingTask) showToast('正在保存任务成绩…');
   try {
     const response = await fetch("/api/quiz-attempts", {

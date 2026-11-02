@@ -119,7 +119,6 @@ function roleAllowed(session, requiredRole) {
   if (!session) return false;
   if (requiredRole === "any") return true;
   const roles = sessionRoles(session);
-  if (roles.includes("admin")) return true;
   return roles.includes(requiredRole);
 }
 
@@ -1308,14 +1307,42 @@ function parseMultipartUpload(buffer, contentType) {
 }
 
 function eligibleQuizTasks(session) {
-  if (!dbAdapter.mysqlEnabled() || !session.feishuUserId || session.dev) return [];
+  if (!dbAdapter.mysqlEnabled() || !session.feishuUserId) return [];
+  const now = Date.now();
+  const taskTime = (value) => {
+    if (!value) return null;
+    const normalized = String(value).trim().replace(" ", "T");
+    const withSeconds = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(normalized) ? normalized + ":00" : normalized;
+    const timestamp = Date.parse(withSeconds + (/[zZ]|[+-]\d{2}:?\d{2}$/.test(withSeconds) ? "" : "+08:00"));
+    return Number.isFinite(timestamp) ? timestamp : null;
+  };
+  const activeTasks = dbAdapter.readMysqlQuizTasks().filter((task) =>
+    task.status === 'active' &&
+    (!task.startsAt || (taskTime(task.startsAt) !== null && taskTime(task.startsAt) <= now)) &&
+    (!task.endsAt || (taskTime(task.endsAt) !== null && taskTime(task.endsAt) >= now))
+  );
   const profile = dbAdapter.findMysqlStudentProfileByFeishuId(session.feishuUserId);
-  if (!profile || profile.status !== 'active' || !profile.grade || !profile.studyStage) return [];
+  // 飞书首次登录只会创建基础身份，尚没有学段和年级填写入口。
+  // 在资料补全前展示全部有效任务，避免飞书菜单进入后一直显示空任务；
+  // 资料完整后再按学段和年级严格筛选。
+  if (!profile || profile.status !== 'active' || !profile.grade || !profile.studyStage) {
+    return activeTasks;
+  }
   const scope = (profile.studyStage + profile.grade + '级').replace(/\s/g, '');
-  return dbAdapter.readMysqlQuizTasks().filter((task) => task.status === 'active' && (!task.startsAt || new Date(task.startsAt.replace(' ', 'T') + ':00+08:00').getTime() <= Date.now()) && task.targetScope.split('、').some((value) => value.replace(/\s/g, '') === scope));
+  return activeTasks.filter((task) => task.targetScope.split('、').some((value) => value.replace(/\s/g, '') === scope));
 }
 
 async function handleApi(request, response, url) {
+  if (url.pathname === "/api/health" && request.method === "GET") {
+    sendJson(response, 200, {
+      service: "nankai-security-guard",
+      status: "ok",
+      databaseMode: dbAdapter.mysqlEnabled() ? "mysql" : "json",
+      authenticationRequired: authRequired()
+    });
+    return true;
+  }
+
   if (url.pathname === "/api/quiz-task/active" && request.method === "GET") {
     const session = requireApiRole(request, response, "student");
     if (!session) return true;
@@ -1497,9 +1524,24 @@ async function handleApi(request, response, url) {
     const targetScope = targetScopes.length ? targetScopes.join("、") : String(body.targetScope || "").trim();
     const requestedQuestionCount = Number(body.questionCount);
     const questionCount = Number.isInteger(requestedQuestionCount) ? requestedQuestionCount : 0;
-    const passScore = Math.max(0, Math.min(100, Number(body.passScore) || 80));
+    const requestedPassScore = body.passScore === "" || body.passScore === null || body.passScore === undefined ? 80 : Number(body.passScore);
+    const passScore = Number.isInteger(requestedPassScore) ? requestedPassScore : -1;
+    const startsAt = body.startsAt ? String(body.startsAt).replace("T", " ") : "";
+    const endsAt = body.endsAt ? String(body.endsAt).replace("T", " ") : "";
+    const parseSubmittedTaskTime = (value) => {
+      if (!value) return null;
+      const normalized = value.replace(" ", "T");
+      const withSeconds = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(normalized) ? normalized + ":00" : normalized;
+      const timestamp = Date.parse(withSeconds + "+08:00");
+      return Number.isFinite(timestamp) ? timestamp : NaN;
+    };
     if (!title || !targetScope || !categories.length) { sendJson(response, 422, { error: "任务名称、适用范围和安全类别不能为空" }); return true; }
     if (questionCount < 5 || questionCount > 30) { sendJson(response, 422, { error: "题目数量须为 5 至 30 题之间的整数，无法发布当前学习任务。" }); return true; }
+    if (passScore < 0 || passScore > 100) { sendJson(response, 422, { error: "合格分数须为 0 至 100 之间的整数。" }); return true; }
+    const startsAtTime = parseSubmittedTaskTime(startsAt);
+    const endsAtTime = parseSubmittedTaskTime(endsAt);
+    if (Number.isNaN(startsAtTime) || Number.isNaN(endsAtTime)) { sendJson(response, 422, { error: "开始时间或截止时间格式不正确。" }); return true; }
+    if (startsAtTime !== null && endsAtTime !== null && startsAtTime >= endsAtTime) { sendJson(response, 422, { error: "截止时间必须晚于开始时间。" }); return true; }
     const availableQuestions = dbAdapter.readMysqlQuizQuestions().filter((item) => categories.includes(item.category));
     if (availableQuestions.length < questionCount) {
       const shortage = questionCount - availableQuestions.length;
@@ -1508,7 +1550,7 @@ async function handleApi(request, response, url) {
     }
     const task = dbAdapter.createMysqlQuizTask({
       id: "task-" + crypto.randomBytes(8).toString("hex"), title, targetScope, expectedCount: Math.max(0, Number(body.expectedCount) || 0), categories, questionCount, passScore,
-      startsAt: body.startsAt ? String(body.startsAt).replace("T", " ") : "", endsAt: body.endsAt ? String(body.endsAt).replace("T", " ") : "", status: body.status === "paused" ? "paused" : "active", createdBy: session.feishuUserId
+      startsAt, endsAt, status: body.status === "paused" ? "paused" : "active", createdBy: session.feishuUserId
     });
     sendJson(response, 201, { task });
     return true;
@@ -1727,6 +1769,10 @@ async function handleApi(request, response, url) {
       sendJson(response, 404, { error: "案例不存在" });
       return true;
     }
+    if (!["draft", "revision"].includes(normalizeStatus(item.reviewStatus))) {
+      sendJson(response, 409, { error: "只有待完善或退回修改的案例可以提交审核。" });
+      return true;
+    }
     const editableFields = [
       "safetyType",
       "campusScene",
@@ -1774,6 +1820,10 @@ async function handleApi(request, response, url) {
     const item = database.cases.find((caseItem) => caseItem.id === id);
     if (!item) {
       sendJson(response, 404, { error: "案例不存在" });
+      return true;
+    }
+    if (!["draft", "revision"].includes(normalizeStatus(item.reviewStatus))) {
+      sendJson(response, 409, { error: "案例已进入审核或发布流程，当前不可继续编辑。" });
       return true;
     }
     const editableFields = [
@@ -1834,6 +1884,10 @@ async function handleApi(request, response, url) {
   if (statusMatch && request.method === "PATCH") {
     const body = await readRequestBody(request);
     const targetStatus = normalizeStatus(body.reviewStatus);
+    if (!["review", "revision", "approved"].includes(targetStatus)) {
+      sendJson(response, 422, { error: "不支持的案例状态变更。" });
+      return true;
+    }
     const requiredRole = targetStatus === "review" ? "editor" : "reviewer";
     if (!requireApiRole(request, response, requiredRole)) return true;
     const database = readDatabase();
@@ -1844,8 +1898,28 @@ async function handleApi(request, response, url) {
       return true;
     }
     const previousStatus = normalizeStatus(item.reviewStatus);
+    const allowedTransition =
+      (targetStatus === "review" && ["draft", "revision"].includes(previousStatus)) ||
+      (targetStatus === "approved" && previousStatus === "review") ||
+      (targetStatus === "revision" && ["review", "approved"].includes(previousStatus));
+    if (!allowedTransition) {
+      sendJson(response, 409, { error: `案例不能从“${previousStatus}”直接变更为“${targetStatus}”。` });
+      return true;
+    }
+    if (["review", "approved"].includes(targetStatus)) {
+      const failures = caseSubmissionFailures(item);
+      if (failures.length) {
+        sendJson(response, 422, { error: "案例内容尚未达到提交或发布标准。", failures });
+        return true;
+      }
+    }
+    const reviewNote = String(body.reviewNote || "").trim();
+    if (targetStatus === "revision" && !reviewNote) {
+      sendJson(response, 422, { error: "退回案例时必须填写明确的修改原因。" });
+      return true;
+    }
     item.reviewStatus = targetStatus;
-    item.reviewNote = body.reviewNote || item.reviewNote || "";
+    item.reviewNote = reviewNote || item.reviewNote || "";
     item.reviewedAt = new Date().toISOString().slice(0, 10);
     database.updatedAt = item.reviewedAt;
     persistDatabase(database);

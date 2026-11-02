@@ -1,6 +1,7 @@
 .env
 .env.*
 !.env.example
+!.env.mysql.example
 node_modules/
 *.log
 *.tmp
@@ -11,3 +12,9 @@ __pycache__/
 .idea/
 .agents/
 .codex/
+
+# Local database snapshots and account stores contain operational data.
+database/*.sql
+data/admin-accounts.json
+data/quiz-backups/
+data/quiz-uploads/

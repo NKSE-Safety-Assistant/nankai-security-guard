@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>南开安全卫士 - 知识学习</title>
-    <link rel="stylesheet" href="styles.css?v=20261017-quiz-types" />
+    <link rel="stylesheet" href="styles.css?v=20261102-predeploy" />
     <link rel="stylesheet" href="preview-unify.css?v=20261017-learning-entries" />
 </head>
   <body class="knowledge-help-preview" data-default-tab="quiz">
@@ -17,6 +17,19 @@
             <small>Nankai Safety Assistant</small>
           </span>
         </div>
+        <nav class="role-entry-nav" aria-label="角色入口">
+          <a class="role-entry-home" href="knowledge.html" aria-current="page">学生学习</a>
+          <details class="role-entry-menu">
+            <summary>切换角色</summary>
+            <div class="role-entry-popover">
+              <p>请选择使用身份</p>
+              <a class="is-current" href="knowledge.html"><strong>学生</strong><span>答题、任务与情景学习</span></a>
+              <a href="admin-login.html?role=admin&amp;next=%2Fadmin.html"><strong>管理员</strong><span>任务、统计与角色管理</span></a>
+              <a href="admin-login.html?role=editor&amp;next=%2Feditor.html"><strong>编辑员</strong><span>编辑并提交安全案例</span></a>
+              <a href="admin-login.html?role=reviewer&amp;next=%2Freviewer.html"><strong>审核员</strong><span>审核并发布安全案例</span></a>
+            </div>
+          </details>
+        </nav>
       </div>
     </header>
 
@@ -54,11 +67,11 @@
           <div class="module-grid learning-grid">
             <div class="module-intro">
               <h3>选择学习方式</h3>
-              <p>一边通过答题巩固基础安全知识，一边进入官方案例库改编的校园安全情景，选择体验者、帮助者或观察者身份做判断。</p>
-              <ul class="plain-list"><li>安全答题：即时反馈答案依据</li><li>三角色学习：体验、帮助、观察风险</li><li>场景复盘：提炼下一次可执行的安全动作</li></ul>
+              <p>通过消防专题答题巩固应急知识，再进入官方案例改编的消防安全情景，选择体验者、帮助者或观察者身份做判断。</p>
+              <ul class="plain-list"><li>消防答题：10 道专题题目即时反馈</li><li>三角色学习：体验、帮助、观察风险</li><li>场景复盘：提炼下一次可执行的安全动作</li></ul>
             </div>
             <div class="learning-mode-switch" aria-label="选择知识学习方式">
-              <button class="learning-mode-button active" type="button" data-learning-mode="quiz"><span>安全答题</span><small>基础知识即时练习</small></button>
+              <button class="learning-mode-button active" type="button" data-learning-mode="quiz"><span>消防答题</span><small>消防知识即时练习</small></button>
               <button class="learning-mode-button" type="button" data-learning-mode="story"><span>三角色学习模式</span><small>进入沉浸式校园安全情景</small></button>
             </div>
             <div class="quiz-card learning-section active" data-learning-section="quiz">
@@ -88,9 +101,9 @@
                   <p id="gameBrief"></p>
                 </div>
                 <div class="role-picker" id="rolePicker" aria-label="选择学习角色">
-                  <button class="role-button active" type="button" data-role="experiencer"><span>体验者</span><small>成为当事人，在诱惑和压力里做决定</small></button>
-                  <button class="role-button" type="button" data-role="helper"><span>帮助者</span><small>陪同学核实信息，练习劝阻和止损</small></button>
-                  <button class="role-button" type="button" data-role="observer"><span>观察者</span><small>旁观骗局全过程，标记风险节点</small></button>
+                  <button class="role-button active" type="button" data-role="experiencer"><span>体验者</span><small>成为当事人，在现场压力下做安全判断</small></button>
+                  <button class="role-button" type="button" data-role="helper"><span>帮助者</span><small>协助同学识别风险并完成规范处置</small></button>
+                  <button class="role-button" type="button" data-role="observer"><span>观察者</span><small>回看事件全过程，标记风险与处置节点</small></button>
                 </div>
                 <button class="primary-button story-start" type="button" id="startStory">进入剧情</button>
               </div>
@@ -125,6 +138,6 @@
 
     <footer class="site-footer"><span>南开安全卫士</span><span>校园安全知识学习</span></footer>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="app.js?v=20261017-multiple-choice-fix"></script>
+    <script src="app.js?v=20261102-predeploy"></script>
 </body>
 </html>

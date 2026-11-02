@@ -687,6 +687,7 @@ module.exports = {
   hashPassword,
   verifyPassword,
   readMysqlDatabase,
+  upsertMysqlCase,
   insertMysqlNotificationLog,
   readMysqlNotificationLogs,
   writeMysqlDatabase,

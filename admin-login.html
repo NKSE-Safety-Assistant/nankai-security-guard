@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>后台登录 | 南开校园安全卫士</title>
-    <link rel="stylesheet" href="styles.css?v=20261012-admin-login" />
+    <link rel="stylesheet" href="styles.css?v=20261027-role-entry" />
   </head>
   <body class="admin-login-page">
     <main class="admin-login-shell">
@@ -19,6 +19,12 @@
           <div class="admin-login-tags"><span>学习任务</span><span>题库管理</span><span>数据统计</span></div>
         </aside>
         <section class="admin-login-panel">
+          <nav class="login-role-switch" aria-label="切换登录角色">
+            <a href="/knowledge.html" data-login-role="student">学生</a>
+            <a href="/admin-login.html?role=admin&amp;next=%2Fadmin.html" data-login-role="admin">管理员</a>
+            <a href="/admin-login.html?role=editor&amp;next=%2Feditor.html" data-login-role="editor">编辑员</a>
+            <a href="/admin-login.html?role=reviewer&amp;next=%2Freviewer.html" data-login-role="reviewer">审核员</a>
+          </nav>
           <div class="admin-login-heading">
             <p id="loginRoleKicker">后台入口</p>
             <h2 id="loginTitle">欢迎登录</h2>
@@ -51,6 +57,7 @@
       document.querySelector("#passwordLabel").textContent = (accountText[role] || "后台账号") + "密码";
       document.querySelector("#loginUsername").placeholder = accountText[role] || "后台账号";
       document.querySelector("#feishuLoginLink").href = "/api/auth/login?role=" + encodeURIComponent(role) + "&next=" + encodeURIComponent(next);
+      document.querySelector(`[data-login-role="${role}"]`)?.setAttribute("aria-current", "page");
       function clearLoginFields() {
         document.querySelector("#loginUsername").value = "";
         document.querySelector("#loginPassword").value = "";

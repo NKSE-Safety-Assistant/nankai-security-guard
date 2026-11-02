@@ -1,0 +1,19 @@
+{
+  "version": "2026-11-02",
+  "tasks": [
+    {
+      "id": "demo-fire-safety-showcase",
+      "title": "消防安全专题学习（静态演示）",
+      "targetScope": "全体学生演示",
+      "expectedCount": 0,
+      "categories": [
+        "消防安全"
+      ],
+      "questionCount": 10,
+      "passScore": 80,
+      "startsAt": "",
+      "endsAt": "",
+      "status": "active"
+    }
+  ]
+}

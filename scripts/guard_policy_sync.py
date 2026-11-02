@@ -203,7 +203,20 @@ def build_articles(article_rows):
     return articles
 
 
-def write_outputs(articles, output_dir):
+def append_curated_knowledge(file, curated_path):
+    if not curated_path or not curated_path.exists():
+        return False
+    curated = curated_path.read_text(encoding="utf-8").strip()
+    if not curated:
+        return False
+    file.write("\n# 人工核验的部门办事与户籍服务\n\n")
+    file.write("以下内容由项目维护人员依据南开大学官方页面整理，与官网自动同步内容一并供机器人检索。\n\n")
+    file.write(curated)
+    file.write("\n")
+    return True
+
+
+def write_outputs(articles, output_dir, curated_path=None):
     output_dir.mkdir(parents=True, exist_ok=True)
     generated_at = time.strftime("%Y-%m-%d %H:%M:%S")
     manifest = {
@@ -227,6 +240,7 @@ def write_outputs(articles, output_dir):
             file.write(f"- 栏目: {article['category']}\n")
             file.write(f"- 发布日期: {article['date'] or '官网未标明'}\n")
             file.write(f"- 来源链接: {article['url']}\n\n")
+    curated_included = False
     with (output_dir / "coze_knowledge.md").open("w", encoding="utf-8") as file:
         file.write("# 南开大学保卫处官网政策知识库\n\n")
         file.write("本文件由同步脚本从南开大学保卫处官网生成。回答时应优先引用原始来源链接和发布日期。\n\n")
@@ -242,18 +256,26 @@ def write_outputs(articles, output_dir):
                     file.write(f"- {attachment['title']}: {attachment['url']}\n")
                 file.write("\n")
             file.write("---\n\n")
+        curated_included = append_curated_knowledge(file, curated_path)
+    manifest["curated_service_knowledge"] = str(curated_path) if curated_included else None
+    (output_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def main():
     parser = argparse.ArgumentParser(description="Sync Nankai security policy pages for Coze knowledge.")
     parser.add_argument("--output", default="data/guard_policy_sync", help="Output directory.")
     parser.add_argument("--limit", type=int, default=0, help="Limit article count for testing.")
+    parser.add_argument(
+        "--curated",
+        default="data/curated_service_knowledge.md",
+        help="Curated service knowledge appended to the generated Coze document.",
+    )
     args = parser.parse_args()
     articles = build_articles(discover_articles(DEFAULT_SEEDS, limit=args.limit or None))
     if not articles:
         print("No articles were synced. Check network access or source page structure.", file=sys.stderr)
         sys.exit(2)
-    write_outputs(articles, Path(args.output))
+    write_outputs(articles, Path(args.output), Path(args.curated))
     print(f"Synced {len(articles)} articles into {Path(args.output).resolve()}")
 
 

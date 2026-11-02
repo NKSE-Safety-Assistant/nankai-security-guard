@@ -6,8 +6,8 @@
 
 根路径 index.html 仅用于自动跳转到知识学习页，不作为独立首页展示。
 
-- 知识学习：https://huo2xini.github.io/nankai-security-guard/knowledge.html
-- 一键求助：https://huo2xini.github.io/nankai-security-guard/help.html
+- 知识学习：https://nkse-safety-assistant.github.io/nankai-security-guard/knowledge.html
+- 一键求助：https://nkse-safety-assistant.github.io/nankai-security-guard/help.html
 
 政策问答不再做网页中转页，用户直接在飞书机器人中咨询。隐患上报不再做网页中转页，用户直接通过飞书表单提交。
 

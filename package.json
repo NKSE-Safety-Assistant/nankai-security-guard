@@ -4,6 +4,8 @@
   "private": true,
   "description": "南开安全卫士响应式网页 Demo",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node scripts/check-learning-tasks.js && node scripts/check-quiz-types.js && node scripts/check-predeploy.js",
+    "predeploy": "node scripts/check-predeploy.js && node scripts/check-event-demo.js"
   }
 }

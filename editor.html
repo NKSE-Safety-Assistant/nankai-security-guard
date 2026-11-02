@@ -212,8 +212,8 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ reviewStatus: status, reviewNote })
         });
-        if (!response.ok) throw new Error('状态保存失败');
-        const result = await response.json();
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || '状态保存失败');
         libraryState = result.database;
         updateSaveState(`已保存到后端：${new Date().toLocaleTimeString()}`);
       }
@@ -733,7 +733,9 @@
         try {
           updateSaveState('正在保存到后端');
           const noteBox = document.querySelector('#reviewNote');
-          await patchCaseStatus(id, status, noteBox ? noteBox.value.trim() : item.reviewNote || '');
+          const reviewNote = noteBox ? noteBox.value.trim() : item.reviewNote || '';
+          if (status === 'revision' && !reviewNote) { updateSaveState('退回案例前请填写明确的修改原因'); return; }
+          await patchCaseStatus(id, status, reviewNote);
           activeRole = nextRole || activeRole;
           activeStatus = status;
           activeCaseId = id;
@@ -743,7 +745,7 @@
           renderSources();
           refreshCollectionStatus();
         } catch (error) {
-          updateSaveState('保存失败，请确认后端已启动');
+          updateSaveState(error.message || '保存失败，请确认后端已启动');
         }
       }
 

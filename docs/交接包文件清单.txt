@@ -1,0 +1,105 @@
+﻿南开校园安全卫士完整交接包
+生成时间：2026-10-27 17:52:24
+项目目录：nankai-security-guard-main
+说明：包含当前源代码、运行配置、JSON 数据、MySQL 完整备份、启动脚本和项目文档。
+
+关键文件 SHA256
+AFB0ED7A483A797DA19B4249A442C5020E02CF5C82983CC1A0499939BBC4F195  server.js
+80791829BC8FB6A630CAEC967F8A05902C93D7D38ED15E533D4E5FA869756EEB  app.js
+007F1DDFB4426E0A22209F9A3CA45AFD07323EF86A305E99FDB32EC5603D75AD  knowledge.html
+DA60C2F4C705CB3FAD7B98C07C14D36EE3B04CC27062510BC17492B4AD210A03  admin-login.html
+4801A5AFA5A216B9AEE27B0EFEC34441077288A385CAFDD0EC520207220A799C  styles.css
+4DA558C9F8C181ED2321287804C068306BCF68EFF81A5591FE7C2AC2686CE8AD  data\quiz-questions.json
+7689EB015D11C27782A06BC05DADA9328F861A1F8CB14EA8CD57A6D2907991A1  data\safety-case-db.json
+55D6E72B77F836E9C9F6DED3884A4733AED973E24DF2DD5C3E678417086115C8  database\nankai_security_guard_full.sql
+676C40935DE8416D31690038086C60558E8391EE353D85752563038745B1634D  docs\南开校园安全卫士项目交接文档.docx
+573D6CE5AAEE159FA88495FA5D6991CE68893DD21613A59AE05E066AA73262E8  docs\测试验收清单-20261027.md
+
+全部文件清单
+         513  .env
+         790  .env.example
+         586  .env.mysql.example
+         109  .gitignore
+           0  .nojekyll
+        1277  导入-MySQL数据库.bat
+         216  活动演示自检.bat
+         424  启动-本地JSON版.bat
+         156  启动-消防活动演示版.bat
+        6702  admin-login.html
+       39354  admin.html
+       66087  app.js
+        4216  COZE_SYNC.md
+         399  data\admin-accounts.json
+        3655  data\case-schema.json
+        9841  data\curated_service_knowledge.md
+        1678  data\feishu-safety-case-fields.csv
+        5451  data\guard_policy_sync_test\articles.jsonl
+         662  data\guard_policy_sync_test\articles.md
+        5290  data\guard_policy_sync_test\coze_knowledge.md
+         272  data\guard_policy_sync_test\manifest.json
+       12078  data\guard_policy_sync\articles.jsonl
+        2159  data\guard_policy_sync\articles.md
+       21375  data\guard_policy_sync\coze_knowledge.md
+         343  data\guard_policy_sync\manifest.json
+       56487  data\quiz-backups\quiz-questions-2026-09-21T23-26-55-837Z.json
+       56487  data\quiz-backups\quiz-questions-2026-10-17T09-40-35-649Z.json
+       56487  data\quiz-backups\quiz-questions-2026-10-17T09-41-06-761Z.json
+      188743  data\quiz-backups\quiz-questions-2026-10-17T09-41-08-742Z.json
+      188743  data\quiz-backups\quiz-questions-2026-10-17T09-46-15-827Z.json
+      225733  data\quiz-backups\quiz-questions-2026-10-17T09-48-21-890Z.json
+      323876  data\quiz-backups\quiz-questions-2026-10-17T09-49-40-876Z.json
+      225733  data\quiz-questions.json
+       73905  data\quiz-uploads\quiz-version-386ee399fc26ccd51ceb.md
+      109568  data\quiz-uploads\quiz-version-642f1191f0c9bc562a0f.md
+       73905  data\quiz-uploads\quiz-version-9f53f9727b9cf94774e6.md
+       73905  data\quiz-uploads\quiz-version-a7c6a76518b71ae2a0b5.md
+       34449  data\quiz-uploads\quiz-version-baseline-20261013.md
+      109568  data\quiz-uploads\quiz-version-f7dab2897f43005167b3.md
+       89257  data\safety-case-db.json
+       16831  data\safety-cases.json
+      271719  database\nankai_security_guard_full.sql
+       39988  db-adapter.js
+         782  DEPLOY.md
+        3824  docs\11月6日消防活动展示准备计划.md
+       11386  docs\测试验收清单-20261027.md
+     1912062  docs\南开校园安全卫士-开发文档_更新版_预览.pdf
+     4165343  docs\南开校园安全卫士-开发文档_更新版.docx
+       49155  docs\南开校园安全卫士技术说明书_修订版.docx
+     1267062  docs\南开校园安全卫士使用手册.docx
+        8530  docs\南开校园安全卫士使用手册.md
+       44455  docs\南开校园安全卫士项目交接文档.docx
+       10510  docs\南开校园安全卫士项目交接文档.md
+        1960  docs\消防活动三块立屏内容方案.md
+        3440  docs\消防活动现场演示讲解词.md
+       49531  editor.html
+       12931  help_new.html
+        6251  help.html
+        2418  help\index.html
+         408  index.html
+        8490  knowledge.html
+       59504  nankai_security_guard(1).sql
+         192  package.json
+       24220  preview-unify.css
+        2128  README-部署说明.md
+        1819  README.md
+       34313  reviewer.html
+        4984  scripts\add-fire-demo-scenarios.js
+       18273  scripts\build_august_reports.py
+        9169  scripts\build_handoff_docx.py
+        6120  scripts\build_manual_docx.py
+        6036  scripts\build_quiz_docx.py
+        3947  scripts\build-handoff-package.ps1
+        3089  scripts\check-event-demo.js
+        3049  scripts\check-learning-tasks.js
+        2267  scripts\check-quiz-types.js
+       10779  scripts\guard_policy_sync.py
+         958  scripts\mysql-init.js
+        1436  scripts\start-event-demo.ps1
+       94665  server.js
+         814  setup-mysql.bat
+         356  start-website.bat
+         548  static-auth-guard.js
+      113205  styles.css
+         222  sync-guard-policy.bat
+        1152  verify-knowledge.js
+           0  docs\交接包文件清单.txt
