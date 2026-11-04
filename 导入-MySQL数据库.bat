@@ -17,9 +17,17 @@ if not exist "%MYSQL_BIN%\mysql.exe" (
   exit /b 1
 )
 set "MYSQL_PWD=%MYSQL_PASSWORD%"
+set "SQL_FILE=database\nankai_security_guard_full.sql"
+if not exist "%SQL_FILE%" set "SQL_FILE=database\nankai_security_guard_public_seed.sql"
+if not exist "%SQL_FILE%" (
+  echo [错误] 未找到可导入的数据库 SQL 文件。
+  set "MYSQL_PWD="
+  pause
+  exit /b 1
+)
 "%MYSQL_BIN%\mysql.exe" -h "%MYSQL_HOST%" -P "%MYSQL_PORT%" -u "%MYSQL_USER%" -e "CREATE DATABASE IF NOT EXISTS `%MYSQL_DATABASE%` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 if errorlevel 1 goto :failed
-"%MYSQL_BIN%\mysql.exe" -h "%MYSQL_HOST%" -P "%MYSQL_PORT%" -u "%MYSQL_USER%" "%MYSQL_DATABASE%" < "database\nankai_security_guard_full.sql"
+"%MYSQL_BIN%\mysql.exe" -h "%MYSQL_HOST%" -P "%MYSQL_PORT%" -u "%MYSQL_USER%" "%MYSQL_DATABASE%" < "%SQL_FILE%"
 if errorlevel 1 goto :failed
 set "MYSQL_PWD="
 echo [完成] MySQL 数据库已导入。

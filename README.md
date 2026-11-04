@@ -23,3 +23,5 @@
 ## 后端说明
 
 本地或服务器运行 Node.js 后端时，系统可连接 MySQL 数据库 nankai_security_guard，支持案例自动采集、查重、编辑审核、学生身份写入和学习记录保存。GitHub Pages 只能托管静态页面，不能运行后端和 MySQL 逻辑。
+
+公开仓库附带 `database/nankai_security_guard_public_seed.sql`，包含完整表结构以及题库、学习任务、案例和公开来源数据，不包含后台账号、飞书用户标识、学生资料、答题明细和通知记录。

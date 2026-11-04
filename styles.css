@@ -43,28 +43,24 @@ h1, h2, h3, p { margin: 0; }
   justify-content: space-between;
   gap: 24px;
   width: min(1180px, calc(100% - 40px));
-  min-height: 74px;
+  min-height: 82px;
   margin: 0 auto;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   color: inherit;
   text-decoration: none;
 }
 
 .brand-mark {
-  display: grid;
-  width: 46px;
-  height: 46px;
-  place-items: center;
-  border-radius: 8px;
-  background: linear-gradient(145deg, #1f68d6, #147d64);
-  color: white;
-  font-weight: 900;
-  box-shadow: 0 12px 28px rgba(31, 104, 214, 0.22);
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  object-fit: contain;
+  padding: 2px;
 }
 
 .brand strong { display: block; font-size: 18px; }
@@ -459,6 +455,8 @@ label { display: grid; gap: 6px; color: #36444f; font-size: 13px; font-weight: 9
 }
 @media (max-width: 560px) {
   .header-inner, main, .site-footer { width: calc(100% - 24px); }
+  .brand { gap: 11px; }
+  .brand-mark { width: 50px; height: 50px; flex-basis: 50px; }
   .brand strong { font-size: 16px; }
   .hero-copy { padding: 22px; }
   .hero h1 { font-size: 32px; }
@@ -1706,7 +1704,7 @@ body.story-active { overflow: hidden; }
 .admin-v2-shell { min-height: 100vh; display: grid; grid-template-columns: 236px minmax(0, 1fr); }
 .admin-v2-sidebar { background: #172738; color: #e8f0f7; padding: 26px 16px; display: flex; flex-direction: column; gap: 38px; }
 .admin-v2-brand { display: flex; align-items: center; gap: 11px; padding: 0 8px; }
-.admin-v2-mark { width: 34px; height: 34px; display: grid; place-items: center; background: #1976b9; color: #fff; font-size: 12px; font-weight: 800; letter-spacing: 0; }
+.admin-v2-mark { width: 52px; height: 52px; flex: 0 0 52px; object-fit: contain; padding: 5px; border-radius: 12px; background: #fff; box-shadow: 0 10px 22px rgba(0, 0, 0, .2); }
 .admin-v2-brand div { display: grid; gap: 3px; }
 .admin-v2-brand strong { color: #fff; font-size: 14px; }
 .admin-v2-brand small { color: #aebdca; font-size: 12px; }
@@ -1728,7 +1726,7 @@ body.story-active { overflow: hidden; }
 .staff-console-shell { min-height: 100vh; display: grid; grid-template-columns: 236px minmax(0, 1fr); }
 .staff-sidebar { position: sticky; top: 0; min-height: 100vh; background: #172738; color: #e8f0f7; padding: 26px 16px; display: flex; flex-direction: column; gap: 38px; }
 .staff-sidebar-brand { display: flex; align-items: center; gap: 11px; padding: 0 8px; }
-.staff-sidebar-brand > span { width: 34px; height: 34px; display: grid; place-items: center; background: #1976b9; color: #fff; font-size: 14px; font-weight: 900; }
+.staff-sidebar-brand > img { width: 52px; height: 52px; flex: 0 0 52px; object-fit: contain; padding: 5px; border-radius: 12px; background: #fff; box-shadow: 0 10px 22px rgba(0, 0, 0, .2); }
 .staff-sidebar-brand div { display: grid; gap: 3px; }
 .staff-sidebar-brand strong { color: #fff; font-size: 14px; }
 .staff-sidebar-brand small { color: #aebdca; font-size: 12px; }
@@ -1874,7 +1872,7 @@ body.story-active { overflow: hidden; }
 .admin-login-visual { position: relative; padding: 44px; display: flex; flex-direction: column; justify-content: space-between; color: #fff; background: linear-gradient(145deg, rgba(12, 83, 132, .96), rgba(12, 117, 108, .94)); }
 .admin-login-visual::after { content: ""; position: absolute; inset: auto -80px -120px auto; width: 360px; height: 360px; border-radius: 50%; background: rgba(255,255,255,.12); }
 .admin-login-brand { position: relative; z-index: 1; display: flex; align-items: center; gap: 14px; }
-.admin-login-brand > span { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; color: #0d6d84; background: #fff; font-weight: 900; font-size: 24px; box-shadow: 0 16px 30px rgba(0, 0, 0, .16); }
+.admin-login-brand > img { width: 74px; height: 74px; flex: 0 0 74px; object-fit: contain; padding: 7px; border-radius: 18px; background: #fff; box-shadow: 0 18px 34px rgba(0, 0, 0, .18); }
 .admin-login-brand strong { display: block; font-size: 22px; letter-spacing: -.02em; }
 .admin-login-brand small { color: rgba(255,255,255,.72); }
 .admin-login-slogan { position: relative; z-index: 1; max-width: 430px; }

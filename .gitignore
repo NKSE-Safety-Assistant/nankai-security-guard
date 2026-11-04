@@ -15,6 +15,7 @@ __pycache__/
 
 # Local database snapshots and account stores contain operational data.
 database/*.sql
+!database/nankai_security_guard_public_seed.sql
 data/admin-accounts.json
 data/quiz-backups/
 data/quiz-uploads/

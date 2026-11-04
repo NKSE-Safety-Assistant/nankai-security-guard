@@ -60,15 +60,20 @@ function checkQuestionsAndStaticTask() {
 function checkDeploymentFiles() {
   const required = [
     'server.js', 'db-adapter.js', 'knowledge.html', 'admin-login.html', 'admin.html', 'editor.html', 'reviewer.html',
-    'styles.css', 'app.js', 'database/nankai_security_guard_full.sql', '.env.example', '.env.mysql.example'
+    'styles.css', 'app.js', 'assets/nankai-security-logo.png', 'database/nankai_security_guard_full.sql', '.env.example', '.env.mysql.example'
   ];
   const missing = required.filter((relativePath) => !fs.existsSync(path.join(root, relativePath)));
   if (missing.length) fail(`部署文件缺失：${missing.join('、')}`);
   const knowledgeHtml = fs.readFileSync(path.join(root, 'knowledge.html'), 'utf8');
-  if (!knowledgeHtml.includes('20261102-predeploy')) fail('知识学习页未更新静态资源版本，部署后可能继续使用旧缓存');
+  if (!knowledgeHtml.includes('20261104-nankai-logo-large')) fail('知识学习页未更新静态资源版本，部署后可能继续使用旧缓存');
+  const brandedPages = ['knowledge.html', 'help.html', 'help/index.html', 'admin-login.html', 'admin.html', 'editor.html', 'reviewer.html', 'help_new.html'];
+  for (const relativePath of brandedPages) {
+    const html = fs.readFileSync(path.join(root, relativePath), 'utf8');
+    if (!html.includes('nankai-security-logo.png')) fail(`${relativePath} 尚未使用新版南开标识`);
+  }
   const css = fs.readFileSync(path.join(root, 'styles.css'), 'utf8');
   if (!/story-visual::after\s*\{[^}]*display:\s*none/s.test(css)) fail('情景封面的无意义占位装饰尚未禁用');
-  pass('部署文件、缓存版本和情景封面样式完整');
+  pass('部署文件、新版南开标识、缓存版本和情景封面样式完整');
 }
 
 try {

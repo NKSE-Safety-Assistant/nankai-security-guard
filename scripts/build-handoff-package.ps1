@@ -8,7 +8,7 @@ $parentRoot = Split-Path -Parent $projectRoot
 $projectName = Split-Path -Leaf $projectRoot
 
 if ([string]::IsNullOrWhiteSpace($OutputPath)) {
-    $OutputPath = Join-Path $parentRoot "南开校园安全卫士_最新版完整交接包.zip"
+    $OutputPath = Join-Path $parentRoot "南开校园安全卫士_20261027_完整交接包.zip"
 }
 $OutputPath = [System.IO.Path]::GetFullPath($OutputPath)
 if (-not $OutputPath.StartsWith($parentRoot, [System.StringComparison]::OrdinalIgnoreCase)) {

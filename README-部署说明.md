@@ -1,6 +1,6 @@
 # 南开校园安全卫士—完整部署包
 
-本包包含网页程序、Node.js 后端、当前 JSON 数据库、MySQL 完整备份及导入脚本。
+本项目包含网页程序、Node.js 后端、当前 JSON 数据库、MySQL 公开种子数据及导入脚本。内部交接包可另外携带经授权保存的全量数据库备份。
 
 ## 最快运行（推荐）
 
@@ -18,7 +18,7 @@
 3. 复制 `.env.mysql.example` 为 `.env`，填写自己电脑上的 MySQL 连接信息。
 4. 在命令行进入本目录，运行 `npm start`。
 
-MySQL 备份位于 `database/nankai_security_guard_full.sql`，含表结构和导出时的全部数据。
+公开数据库种子位于 `database/nankai_security_guard_public_seed.sql`，含完整表结构以及题库、学习任务、案例和公开来源数据，不包含后台账号、学生身份、答题明细和通知记录。内部全量备份仅供授权交接，不上传公开仓库。
 
 ## 页面入口
 
@@ -33,12 +33,12 @@ MySQL 备份位于 `database/nankai_security_guard_full.sql`，含表结构和�
 - 本包没有携带原电脑的飞书 App Secret、Webhook 和会话密钥。
 - 如需飞书登录或机器人通知，请参考 `.env.mysql.example` 自行填写新环境的配置。
 - 正式上线前，请修改管理员口令和 `SESSION_SECRET`，并不要将 `.env` 发布到公开仓库。
-- 数据库备份可能含业务数据和用户记录，仅应交给经授权人员。
+- 内部全量数据库备份可能含业务数据和用户记录，仅应交给经授权人员，禁止上传公开仓库。
 
 ## 目录说明
 
 - `data/`：JSON 数据库、题库、知识库与同步数据。
-- `database/`：MySQL 完整 SQL 备份。
+- `database/`：公开 MySQL 种子数据；内部交接环境可另行保存完整 SQL 备份。
 - `scripts/`：数据库初始化、检查和政策同步脚本。
 - `docs/`：项目使用手册和开发文档。
 

@@ -33,7 +33,7 @@ body.knowledge-help-preview {
 
 .knowledge-help-preview .header-inner {
   max-width: 1120px;
-  min-height: 74px;
+  min-height: 82px;
   margin: 0 auto;
   padding: 16px 22px;
   display: flex;
@@ -44,20 +44,17 @@ body.knowledge-help-preview {
 .knowledge-help-preview .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   color: var(--preview-ink);
   text-decoration: none;
 }
 
 .knowledge-help-preview .brand-mark {
-  width: 42px;
-  height: 42px;
-  border-radius: 13px;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  background: linear-gradient(135deg, var(--preview-blue), #0f8f8f);
-  box-shadow: 0 10px 25px rgba(29, 95, 191, 0.22);
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  object-fit: contain;
+  padding: 2px;
 }
 
 .knowledge-help-preview main {
@@ -554,7 +551,7 @@ body.knowledge-help-preview {
   }
 
   .knowledge-help-preview .header-inner {
-    min-height: 68px;
+    min-height: 72px;
     padding: 10px 14px;
     justify-content: flex-start;
     box-sizing: border-box;
@@ -566,10 +563,10 @@ body.knowledge-help-preview {
   }
 
   .knowledge-help-preview .brand-mark {
-    width: 40px;
-    height: 40px;
-    flex: 0 0 40px;
-    border-radius: 12px;
+    width: 50px;
+    height: 50px;
+    flex: 0 0 50px;
+    padding: 2px;
   }
 
   .knowledge-help-preview .brand strong {
@@ -927,13 +924,14 @@ body.role-admin-preview {
 }
 
 .role-admin-preview .brand-mark {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, #2d7ff0, #16a085);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  object-fit: contain;
+  padding: 4px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
 }
 
 .role-admin-preview .brand small {

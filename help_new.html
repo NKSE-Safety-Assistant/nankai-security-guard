@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>一键报警与隐患上报 - 南开安全卫士</title>
+  <link rel="icon" type="image/png" href="assets/nankai-security-logo.png" />
   <style>
     :root {
       --nk-blue: #1d5fbf;
@@ -54,14 +55,11 @@
       font-weight: 800;
     }
     .brand-mark {
-      width: 42px;
-      height: 42px;
-      border-radius: 13px;
-      display: grid;
-      place-items: center;
-      color: #fff;
-      background: linear-gradient(135deg, var(--nk-blue), #0f8f8f);
-      box-shadow: 0 10px 25px rgba(29, 95, 191, 0.22);
+      width: 58px;
+      height: 58px;
+      flex: 0 0 58px;
+      object-fit: contain;
+      padding: 2px;
     }
     .brand small {
       display: block;
@@ -313,7 +311,7 @@
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="index.html" aria-label="返回首页">
-        <span class="brand-mark">南</span>
+        <img class="brand-mark" src="assets/nankai-security-logo.png" alt="" aria-hidden="true" />
         <span>
           南开安全卫士
           <small>Nankai Safety Assistant</small>
