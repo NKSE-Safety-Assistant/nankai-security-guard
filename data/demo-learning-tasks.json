@@ -1,5 +1,5 @@
 {
-  "version": "2026-11-02",
+  "version": "2026-11-05",
   "tasks": [
     {
       "id": "demo-fire-safety-showcase",
@@ -8,6 +8,34 @@
       "expectedCount": 0,
       "categories": [
         "消防安全"
+      ],
+      "questionCount": 10,
+      "passScore": 80,
+      "startsAt": "",
+      "endsAt": "",
+      "status": "active"
+    },
+    {
+      "id": "demo-phishing-awareness-showcase",
+      "title": "钓鱼邮件与账号安全专题（静态演示）",
+      "targetScope": "全体学生演示",
+      "expectedCount": 0,
+      "categories": [
+        "网络安全"
+      ],
+      "questionCount": 10,
+      "passScore": 80,
+      "startsAt": "",
+      "endsAt": "",
+      "status": "active"
+    },
+    {
+      "id": "demo-fraud-prevention-showcase",
+      "title": "兼职刷单与诈骗防范专题（静态演示）",
+      "targetScope": "全体学生演示",
+      "expectedCount": 0,
+      "categories": [
+        "反诈骗"
       ],
       "questionCount": 10,
       "passScore": 80,

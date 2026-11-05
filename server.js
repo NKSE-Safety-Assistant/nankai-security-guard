@@ -1316,11 +1316,17 @@ function eligibleQuizTasks(session) {
     const timestamp = Date.parse(withSeconds + (/[zZ]|[+-]\d{2}:?\d{2}$/.test(withSeconds) ? "" : "+08:00"));
     return Number.isFinite(timestamp) ? timestamp : null;
   };
+  const taskPriority = (task) => {
+    if (task.categories.includes('消防安全')) return 0;
+    if (task.categories.includes('网络安全')) return 1;
+    if (task.categories.includes('反诈骗')) return 2;
+    return 3;
+  };
   const activeTasks = dbAdapter.readMysqlQuizTasks().filter((task) =>
     task.status === 'active' &&
     (!task.startsAt || (taskTime(task.startsAt) !== null && taskTime(task.startsAt) <= now)) &&
     (!task.endsAt || (taskTime(task.endsAt) !== null && taskTime(task.endsAt) >= now))
-  );
+  ).sort((left, right) => taskPriority(left) - taskPriority(right) || String(right.createdAt).localeCompare(String(left.createdAt)));
   const profile = dbAdapter.findMysqlStudentProfileByFeishuId(session.feishuUserId);
   // 飞书首次登录只会创建基础身份，尚没有学段和年级填写入口。
   // 在资料补全前展示全部有效任务，避免飞书菜单进入后一直显示空任务；
