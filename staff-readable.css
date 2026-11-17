@@ -1,0 +1,49 @@
+/* One readable scale, loaded after role-specific presentation styles. */
+:is(.admin-v2-page,.staff-console-page) { font-size: 16px; }
+:is(.admin-v2-brand,.staff-sidebar-brand) strong { font-size: 17px; }
+:is(.admin-v2-brand,.staff-sidebar-brand) small { font-size: 14px; }
+:is(.admin-v2-brand,.staff-sidebar-brand) { min-width: 0; padding-inline: 0; gap: 10px; align-items: center; }
+:is(.admin-v2-brand,.staff-sidebar-brand) > div { min-width: 0; flex: 1; }
+:is(.admin-v2-brand,.staff-sidebar-brand) :is(strong,small) { display: block; white-space: nowrap; overflow-wrap: normal; line-height: 1.5; }
+:is(.admin-v2-mark,.staff-sidebar-brand > img) { width: 54px; height: 64px; flex: 0 0 54px; object-fit: contain; }
+:is(.admin-v2-page,.staff-console-page) :is(.admin-v2-nav,.staff-sidebar-nav) button { font-size: 16px; min-height: 50px; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.staff-nav-icon { width: 22px; height: 22px; flex: 0 0 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+:is(.admin-v2-page,.staff-console-page) :is(.desk-utility,.desk-description,.admin-v2-side-note,.staff-sidebar-note,#adminUser) { font-size: 14px; }
+:is(.admin-v2-page,.staff-console-page) :is(.admin-v2-header,.admin-toolbar) h1 { font-size: 30px; }
+:is(.admin-v2-page,.staff-console-page) :is(.admin-v2-primary,.admin-v2-secondary,.primary-link-button,.primary-button,.secondary-button,.task-view-button,.task-state-tabs button) { font-size: 15px; min-height: 44px; }
+:is(.admin-v2-page,.staff-console-page) :is(input:not([type=checkbox]):not([type=radio]),textarea,select) { font-size: 16px; }
+.task-table-workspace :is(.task-management-table th,.task-management-table td,.task-management-table small,.task-scope-cell,.task-theme,.task-state,.task-table-footer,.task-search) { font-size: 14px !important; }
+.task-table-workspace .task-name-button { font-size: 16px; }
+.admin-v2-page .admin-v2-header h1 { font-size: 26px; line-height: 1.35; }
+.admin-v2-page .admin-v2-side-note strong { display: block; font-size: 16px; font-weight: 600; line-height: 1.5; }
+.admin-v2-page .admin-v2-side-note p { font-size: 14px; line-height: 1.7; margin: 8px 0 0; }
+.task-table-workspace .task-name-button { min-height: 0; line-height: 1.5; padding: 0; }
+.task-table-workspace .task-view-button { min-height: 36px; padding: 6px 0; }
+.task-table-workspace .task-theme { margin-top: 3px; line-height: 1.5; }
+.task-table-workspace .task-management-table :is(td,.task-scope-cell,small) { line-height: 1.6; }
+.task-table-workspace .task-management-table td { padding-block: 13px; }
+.task-table-workspace .task-scope-cell { white-space: pre-line; }
+.task-table-workspace .task-management-table th { padding-block: 11px; }
+.task-table-workspace .desk-utility { padding-top: 0; padding-bottom: 14px; }
+.task-table-workspace .admin-v2-header { margin-bottom: 20px; padding-bottom: 18px; }
+.task-table-workspace .admin-v2-header .desk-description { margin-top: 6px; }
+.task-table-workspace [data-panel="tasks"] .admin-v2-section-head { padding: 16px 24px; }
+.task-table-workspace [data-panel="tasks"] .admin-v2-section-head h2 { font-size: 18px; }
+.task-table-workspace .admin-v2-section-head p { margin: 5px 0 0; line-height: 1.5; }
+.task-table-workspace .task-table-toolbar { padding-block: 12px; }
+.task-table-workspace .task-state-tabs button { min-height: 36px; padding: 7px 12px; }
+.task-table-workspace .task-table-footer { padding-block: 12px; }
+:is(.admin-v2-page,.staff-console-page) :is(.admin-v2-section-head,.workspace-head) h2 { font-size: 20px; }
+:is(.admin-v2-page,.staff-console-page) :is(.admin-v2-table-wrap td,.admin-v2-table-wrap th,.admin-v2-task-facts dt,.admin-v2-task-facts dd,.task-form-fields label,.task-form-fields small) { font-size: 14px; }
+.staff-main :is(.admin-case-row strong,.admin-edit-form label,.admin-meta-grid,.admin-story-preview,.admin-note-label,.admin-checklist,.case-guidance-comparison ul) { font-size: 15px; }
+.staff-main :is(.admin-case-row small,.admin-collection-grid span,.admin-collection-grid p,.admin-collection-grid strong,.admin-status-tabs button,.desk-search,.desk-search input,.case-action-note,.case-section-nav button,.case-evidence-actions button) { font-size: 14px; }
+.staff-main .admin-detail-head h3 { font-size: 24px; }
+.staff-main .admin-meta-grid dt { font-size: 14px; }
+.staff-main .admin-edit-form textarea { font-size: 16px; }
+.staff-main .case-form-group legend { font-size: 18px; }
+:is(.admin-v2-page,.staff-console-page) input:is([type=checkbox],[type=radio]) { width: 20px; height: 20px; }
+.staff-console-page .site-footer { width: auto; max-width: none; margin: 0 24px 0 272px; }
+@media(max-width:1100px) and (min-width:801px) { .staff-console-page .site-footer { margin-left: 264px; } }
+@media(max-width:800px) { .staff-console-page .site-footer { margin-inline: 14px; } }
+@media(max-width:1100px) and (min-width:801px) { :is(.admin-v2-shell,.staff-console-shell) { grid-template-columns: 240px minmax(0,1fr); } }
+@media(max-width:800px) { :is(.admin-v2-page,.staff-console-page) :is(.admin-v2-header,.admin-toolbar) h1 { font-size: 26px; } :is(.admin-v2-mark,.staff-sidebar-brand > img) { width: 52px; height: 60px; flex-basis: 52px; } }

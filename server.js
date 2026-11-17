@@ -1850,6 +1850,7 @@ async function handleApi(request, response, url) {
     for (const field of editableFields) {
       if (Object.prototype.hasOwnProperty.call(body, field)) item[field] = body[field];
     }
+    if (Object.prototype.hasOwnProperty.call(body, "reviewNote")) item.reviewNote = String(body.reviewNote || "").trim();
     item.updatedAt = new Date().toISOString().slice(0, 10);
     database.updatedAt = item.updatedAt;
     persistDatabase(database);

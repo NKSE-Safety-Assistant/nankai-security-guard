@@ -7,8 +7,13 @@
     <link rel="icon" type="image/png" href="assets/nankai-security-logo.png" />
     <script src="static-auth-guard.js"></script>
     <link rel="stylesheet" href="styles.css?v=20261104-nankai-logo-large" />
+    <link rel="stylesheet" href="staff-workspace.css?v=20261117" />
+    <script src="staff-workspace.js?v=20261117-icons" defer></script>
+    <link rel="stylesheet" href="case-workspace.css?v=20261117-case-cards" />
+    <script src="case-workspace.js?v=20261117" defer></script>
+    <link rel="stylesheet" href="staff-readable.css?v=20261117-brand-fit" />
   </head>
-  <body class="staff-console-page" data-default-tab="admin">
+  <body class="staff-console-page" data-default-tab="admin" data-workspace-role="editor">
     <header class="site-header">
       <div class="header-inner">
         <a class="brand" href="index.html" aria-label="南开安全卫士首页">
@@ -166,7 +171,7 @@
           activeStatus = button.dataset.editorStatus;
           document.querySelectorAll('[data-editor-status]').forEach((item) => item.classList.toggle('active', item === button));
           renderStatusTabs();
-          renderCaseList();
+          renderReviewList();
           document.querySelector('.admin-review-board')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
       });
@@ -346,7 +351,7 @@
         list.innerHTML = cases.map((item) => {
           const selected = item.id === activeCaseId;
           const source = item.sourceName || '来源待补充';
-          return `<button class="admin-case-row compact ${selected ? 'active' : ''}" type="button" data-case-id="${item.id}"><span>${caseStatusLabel(item.reviewStatus)}</span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.safetyType)} · ${escapeHtml(item.campusScene)} · ${escapeHtml(source)}</small></button>`;
+          return `<button class="admin-case-row compact ${selected ? 'active' : ''}" type="button" data-case-id="${escapeHtml(item.id)}" aria-pressed="${selected}"><span>${caseStatusLabel(item.reviewStatus)}</span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.safetyType)} · ${escapeHtml(item.campusScene)} · ${escapeHtml(source)}</small><em class="case-open-label">${activeStatus === 'review' ? '查看内容' : '打开整理'} →</em></button>`;
         }).join('');
         list.querySelectorAll('[data-case-id]').forEach((button) => button.addEventListener('click', () => {
           activeCaseId = button.dataset.caseId;
@@ -373,7 +378,9 @@
 
       function hasArticleSourceUrl(value) {
         try {
-          const path = decodeURIComponent(new URL(value).pathname || '/').replace(/\/+$/, '') || '/';
+          const url = new URL(value);
+          if (url.protocol !== 'https:') return false;
+          const path = decodeURIComponent(url.pathname || '/').replace(/\/+$/, '') || '/';
           return path !== '/' && !/\/(?:list|listm|index|default|more)(?:\.[a-z0-9]+)?$/i.test(path) && /(?:info|content|article|detail|show|news|page|xxgk|c\d+a\d+|\/20\d{2}\/\d{2,}|\.s?html?$)/i.test(path);
         } catch (error) {
           return false;
@@ -426,7 +433,7 @@
 
       function isUsefulList(items) {
         if (!Array.isArray(items) || items.length < 3) return false;
-        return !items.some((item) => /需进一步|需完成|补充|待/.test(item));
+        return !items.some((item) => /需进一步|需完成|补充|待完善/.test(item));
       }
 
       function isSubstantiveNarrative(value) {
@@ -572,6 +579,7 @@
           escalation: value('escalation'),
           desensitization: value('desensitization'),
           sanitizedSourceText: value('sanitizedSourceText'),
+          reviewNote: document.querySelector('#reviewNote')?.value.trim() || '',
           warningSigns: splitList(formData.get('warningSigns')),
           safeActions: splitList(formData.get('safeActions'))
         };
@@ -641,6 +649,7 @@
           }
           if (sanitizedSourceText.value.trim() && !window.confirm('载入原文摘要会覆盖当前脱敏材料，是否继续？')) return;
           sanitizedSourceText.value = item.sourceExcerpt;
+          sanitizedSourceText.dispatchEvent(new Event('input', { bubbles: true }));
           sanitizedSourceText.focus();
           renderEditorLiveCheck(form);
           updateSaveState('已载入原文摘要，请在“脱敏后案例材料”中删除或泛化敏感信息后保存。');
@@ -766,7 +775,7 @@
           refreshCollectionStatus();
         } catch (error) {
           updateSaveState(error.message.includes('GitHub Pages') ? '静态页面不能连接数据库' : '需要登录或后端服务');
-          document.querySelector('#adminReviewList').innerHTML = '<p class="admin-empty">' + error.message + '</p>';
+          document.querySelector('#adminReviewList').innerHTML = '<p class="admin-error" role="alert">案例加载失败：' + escapeHtml(error.message) + '</p>';
           document.querySelector('#adminReviewDetail').innerHTML = '';
         }
       }

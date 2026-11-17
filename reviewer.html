@@ -7,6 +7,11 @@
     <link rel="icon" type="image/png" href="assets/nankai-security-logo.png" />
     <script src="static-auth-guard.js"></script>
     <link rel="stylesheet" href="styles.css?v=20261104-nankai-logo-large" />
+    <link rel="stylesheet" href="staff-workspace.css?v=20261117" />
+    <script src="staff-workspace.js?v=20261117-icons" defer></script>
+    <link rel="stylesheet" href="case-workspace.css?v=20261117" />
+    <script src="case-workspace.js?v=20261117" defer></script>
+    <link rel="stylesheet" href="staff-readable.css?v=20261117-brand-fit" />
   </head>
   <body class="staff-console-page" data-default-tab="admin">
     <header class="site-header">
@@ -138,7 +143,7 @@
           activeStatus = button.dataset.reviewerStatus;
           document.querySelectorAll('[data-reviewer-status]').forEach((item) => item.classList.toggle('active', item === button));
           renderStatusTabs();
-          renderCaseList();
+          renderReviewList();
           document.querySelector('.admin-review-board')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
       });
@@ -186,7 +191,7 @@
           body: JSON.stringify({ reviewStatus: status, reviewNote })
         });
         const result = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(result.error || '状态保存失败');
+        if (!response.ok) throw new Error([result.error || '状态保存失败', ...(result.failures || [])].join('；'));
         libraryState = result.database;
         updateSaveState(`已保存到后端：${new Date().toLocaleTimeString()}`);
       }
@@ -294,7 +299,7 @@
           return;
         }
         if (!cases.some((item) => item.id === activeCaseId)) activeCaseId = cases[0].id;
-        list.innerHTML = cases.map((item) => `<button class="admin-case-row ${item.id === activeCaseId ? 'active' : ''}" type="button" data-case-id="${item.id}"><span>${caseStatusLabel(item.reviewStatus)}</span><strong>${item.title}</strong><small>${item.safetyType} · ${item.campusScene}</small></button>`).join('');
+        list.innerHTML = cases.map((item) => `<button class="admin-case-row ${item.id === activeCaseId ? 'active' : ''}" type="button" data-case-id="${escapeHtml(item.id)}"><span>${escapeHtml(caseStatusLabel(item.reviewStatus))}</span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.safetyType)} · ${escapeHtml(item.campusScene)}</small></button>`).join('');
         list.querySelectorAll('[data-case-id]').forEach((button) => button.addEventListener('click', () => { activeCaseId = button.dataset.caseId; renderReviewList(); renderReviewDetail(findCase(activeCaseId)); }));
         renderReviewDetail(findCase(activeCaseId));
       }
@@ -309,7 +314,9 @@
 
       function hasArticleSourceUrl(value) {
         try {
-          const path = decodeURIComponent(new URL(value).pathname || '/').replace(/\/+$/, '') || '/';
+          const url = new URL(value);
+          if (url.protocol !== 'https:') return false;
+          const path = decodeURIComponent(url.pathname || '/').replace(/\/+$/, '') || '/';
           return path !== '/' && !/\/(?:list|listm|index|default|more)(?:\.[a-z0-9]+)?$/i.test(path) && /(?:info|content|article|detail|show|news|page|xxgk|c\d+a\d+|\/20\d{2}\/\d{2,}|\.s?html?$)/i.test(path);
         } catch (error) {
           return false;
@@ -359,7 +366,7 @@
 
       function isUsefulList(items) {
         if (!Array.isArray(items) || items.length < 3) return false;
-        return !items.some((item) => /需进一步|需完成|补充|待/.test(item));
+        return !items.some((item) => /需进一步|需完成|补充|待完善/.test(item));
       }
 
       function editorFieldsFor(item) {
@@ -389,7 +396,7 @@
       function actionButtonsFor(item, allPassed) {
         const status = normalizeReviewStatus(item.reviewStatus);
         const disabledSubmit = allPassed ? '' : 'disabled aria-disabled="true"';
-        const disabledReturn = allPassed ? 'disabled aria-disabled="true"' : '';
+        const disabledReturn = '';
         if (activeRole === 'editor') return `<button class="primary-link-button" type="button" id="submitCaseButton" ${disabledSubmit}>提交给审核员</button>`;
         if (status === 'approved') return `<button class="secondary-button" type="button" id="reviseCaseButton">撤回并退回编辑员</button>`;
         return `<button class="secondary-button" type="button" id="reviseCaseButton" ${disabledReturn}>退回编辑员修改</button><button class="primary-link-button" type="button" id="approveCaseButton" ${disabledSubmit}>审核通过并发布</button>`;
@@ -397,7 +404,7 @@
 
       function bindActionButtons(item, allPassed) {
         document.querySelector('#submitCaseButton')?.addEventListener('click', () => { if (allPassed) updateCaseStatus(item.id, 'review', 'editor'); });
-        document.querySelector('#reviseCaseButton')?.addEventListener('click', () => { if (normalizeReviewStatus(item.reviewStatus) === 'approved' || !allPassed) updateCaseStatus(item.id, 'revision', 'reviewer'); });
+        document.querySelector('#reviseCaseButton')?.addEventListener('click', () => { updateCaseStatus(item.id, 'revision', 'reviewer'); });
         document.querySelector('#approveCaseButton')?.addEventListener('click', () => { if (allPassed) updateCaseStatus(item.id, 'approved', 'reviewer'); });
       }
 
@@ -409,16 +416,18 @@
         }
         const checklistTitle = activeRole === 'editor' ? '编辑员整理项' : '审核员检查项';
         const checklist = [
-          ['来源是学校或权威官方渠道', /^https:\/\//.test(item.sourceUrl || '')],
+          ['原文链接格式有效（来源权威性需人工核验）', hasArticleSourceUrl(item.sourceUrl)],
           ['已完成信息脱敏说明', isCleanDesensitization(item.desensitization)],
+          ['已提供脱敏材料且未检出手机号、身份证号或邮箱', Boolean(String(item.sanitizedSourceText || '').trim()) && !/(?:1[3-9]\d{9}|\b\d{17}[\dXx]\b|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/i.test(item.sanitizedSourceText || '')],
           ['安全类型和具体校园情景清楚', Boolean(item.safetyType) && isSpecificScene(item.campusScene)],
+          ['情景开端与风险升级已完成具体叙述', [item.hook, item.escalation].every(value => Boolean(String(value || '').trim()) && !/(待补充|待完善|官方来源提到|需由编辑员|暂无)/.test(value))],
           ['风险信号不少于 3 条且不是模板句', isUsefulList(item.warningSigns)],
           ['安全动作不少于 3 条且可执行', isUsefulList(item.safeActions)]
         ];
         const failedItems = checklist.filter(([, checked]) => !checked).map(([text]) => text);
         const allPassed = failedItems.length === 0;
         const ruleNote = allPassed
-          ? '5 项均满足，可以进入下一步。'
+          ? '自动检查项均满足，请核验原文事实、脱敏效果和处置建议后作出审核决定。'
           : `还有 ${failedItems.length} 项不满足：${failedItems.join('、')}。`;
         detail.innerHTML = `
           <div class="admin-detail-head"><span>${activeRole === 'editor' ? '编辑员' : '审核员'} · ${caseStatusLabel(item.reviewStatus)}</span><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.safetyType)} · ${escapeHtml(item.campusScene)} · ${escapeHtml(item.subtitle || '')}</p></div>
@@ -489,8 +498,8 @@
           if (status === 'revision' && !reviewNote) { updateSaveState('退回案例前请填写明确的修改原因'); return; }
           await patchCaseStatus(id, status, reviewNote);
           activeRole = nextRole || activeRole;
-          activeStatus = status;
-          activeCaseId = id;
+          activeStatus = status === 'revision' ? 'review' : status;
+          activeCaseId = status === 'revision' ? '' : id;
           renderRoleTabs();
           renderStatusTabs();
           renderReviewList();
@@ -517,7 +526,7 @@
           refreshCollectionStatus();
         } catch (error) {
           updateSaveState(error.message.includes('GitHub Pages') ? '静态页面不能连接数据库' : '需要登录或后端服务');
-          document.querySelector('#adminReviewList').innerHTML = '<p class="admin-empty">' + error.message + '</p>';
+          document.querySelector('#adminReviewList').innerHTML = '<p class="admin-error" role="alert">案例加载失败：' + escapeHtml(error.message) + '</p>';
           document.querySelector('#adminReviewDetail').innerHTML = '';
         }
       }

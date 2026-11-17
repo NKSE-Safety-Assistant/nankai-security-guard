@@ -29,6 +29,7 @@ const storyGameCard = document.querySelector(".story-game-card");
 const roleStage = document.querySelector("#roleStage");
 const storyStage = document.querySelector("#storyStage");
 const endingStage = document.querySelector("#endingStage");
+const endingVisual = document.querySelector("#endingVisual");
 const selectedScenePreview = document.querySelector("#selectedScenePreview");
 const storyVisual = document.querySelector("#storyVisual");
 const startStory = document.querySelector("#startStory");
@@ -43,6 +44,8 @@ const roleLabels = {
   helper: "帮助者",
   observer: "观察者",
 };
+
+const systemDialogueSpeakers = new Set(["系统", "提示", "回放", "来源", "复盘", "旁白", "群公告"]);
 
 const answers = [
   { keys: ["电动车", "充电", "自行车"], text: "电动车应在指定区域停放和充电，不建议飞线充电、楼内充电或占用疏散通道。发现异常可通过隐患上报登记位置、照片和风险描述。" },
@@ -167,15 +170,42 @@ function setLearningEntry(entry) {
   learningEntry = entry;
   document.querySelector('#learningTasksPanel').hidden = entry !== 'tasks';
   document.querySelector('#quiz').hidden = entry !== 'daily';
+  const isHome = entry === 'home';
+  const homeHead = document.querySelector('#learningHomeHead');
+  const homeEntries = document.querySelector('.learning-home-entries');
+  const homeBack = document.querySelector('#learningHomeBack');
+  const backLabel = document.querySelector('#learningBackLabel');
+  const modeBack = document.querySelector('#dailyModeBack');
+  if (homeHead) homeHead.hidden = !isHome;
+  if (homeEntries) homeEntries.hidden = !isHome;
+  if (homeBack) homeBack.hidden = entry !== 'tasks';
+  if (backLabel) backLabel.textContent = '返回学习首页';
+  if (modeBack) modeBack.hidden = true;
   document.querySelector('#taskEntryButton').setAttribute('aria-selected', String(entry === 'tasks'));
   document.querySelector('#dailyEntryButton').setAttribute('aria-selected', String(entry === 'daily'));
+  activeQuizTask = null;
+  document.querySelector('#quiz .learning-grid').append(document.querySelector('.quiz-card'));
+  document.querySelector('#taskQuizRunner').hidden = true;
+  document.querySelector('#learningTaskCards').hidden = false;
   if (entry === 'daily') {
-    activeQuizTask = null;
-    document.querySelector('#quiz .learning-grid').append(document.querySelector('.quiz-card'));
-    document.querySelector('#taskQuizRunner').hidden = true;
-    document.querySelector('#learningTaskCards').hidden = false;
-    switchLearningMode('quiz'); startQuizRound();
+    document.querySelector('.learning-mode-switch').hidden = false;
+    document.querySelector('.learning-mode-footnote').hidden = false;
+    switchLearningMode('');
+    document.querySelectorAll('.learning-section').forEach((section) => { section.hidden = true; });
+    document.querySelector('#learningHomeBack').hidden = false;
   }
+}
+
+function enterDailyMode(mode) {
+  switchLearningMode(mode);
+  document.querySelector('.learning-mode-switch').hidden = true;
+  document.querySelector('.learning-mode-footnote').hidden = true;
+  document.querySelector('#learningHomeBack').hidden = true;
+  document.querySelectorAll('.learning-section').forEach((section) => {
+    section.hidden = section.dataset.learningSection !== mode;
+  });
+  document.querySelector('#dailyModeBack').hidden = false;
+  if (mode === 'quiz') startQuizRound();
 }
 
 function initLearningEntries() {
@@ -183,13 +213,14 @@ function initLearningEntries() {
   renderLearningTasks();
   document.querySelector('#taskEntryButton').addEventListener('click', () => setLearningEntry('tasks'));
   document.querySelector('#dailyEntryButton').addEventListener('click', () => setLearningEntry('daily'));
-  document.querySelector('#backToTaskList').addEventListener('click', async () => {
-    activeQuizTask = null;
-    document.querySelector('#taskQuizRunner').hidden = true;
-    document.querySelector('#learningTaskCards').hidden = false;
-    await loadActiveQuizTask(); renderLearningTasks();
+  document.querySelector('#learningHomeBack')?.addEventListener('click', () => setLearningEntry('home'));
+  document.querySelector('#dailyModeBack')?.addEventListener('click', () => setLearningEntry('daily'));
+  document.querySelector('#backToTaskList')?.addEventListener('click', async () => {
+    setLearningEntry('tasks');
+    await loadActiveQuizTask();
+    renderLearningTasks();
   });
-  setLearningEntry(availableLearningTasks.length ? 'tasks' : 'daily');
+  setLearningEntry('home');
 }
 
 function takeQuizQuestions(items, count, selectedIds, selectedScenes, allowRepeatedScene = false) {
@@ -240,6 +271,7 @@ const fallbackScenarios = [
     brief: "大三学生小林想换手机，手头有点紧。她被拉进一个副业兼职群，群里不断有人晒返利截图。",
     roles: {
       experiencer: {
+        selfSpeaker: "你",
         start: "start",
         nodes: {
           start: {
@@ -277,6 +309,7 @@ const fallbackScenarios = [
         },
       },
       helper: {
+        selfSpeaker: "你",
         start: "start",
         nodes: {
           start: {
@@ -297,6 +330,7 @@ const fallbackScenarios = [
         },
       },
       observer: {
+        selfSpeaker: "",
         start: "start",
         nodes: {
           start: { lines: [["旁白", "你正在观看刷单诈骗回放。"], ["阶段1", "微信群发布日入500广告，大量账号晒返利截图。"]], prompt: "第1阶段最明显的风险点是什么？", thoughts: [["高收益兼职和群内返利截图集中出现。", "trust"], ["群里人很多，所以应该可信。", "missedTrust"]] },
@@ -410,6 +444,40 @@ const sceneClassBySafetyType = {
   "网络安全": "scene-cyber",
 };
 
+const coverClassByCaseId = {
+  "fire-dorm-electric-001": "cover-dorm-electric",
+  "fire-lab-electrical-smoke-002": "cover-lab-outlet-smoke",
+  "fire-evacuation-blocked-003": "cover-blocked-evacuation",
+  "fire-canteen-oil-pan-004": "cover-canteen-oil-fire",
+  "fire-ebike-battery-smoke-005": "cover-ebike-battery-smoke",
+  "fraud-part-time-rebate-001": "cover-part-time-rebate",
+  "traffic-ebike-charge-001": "cover-improper-ebike-charging",
+  "security-night-follow-001": "cover-night-following",
+  "lab-chemical-waste-001": "cover-chemical-waste",
+  "cyber-phishing-password-001": "cover-phishing-login",
+};
+
+function resolveScenarioCover(item) {
+  if (coverClassByCaseId[item.id]) return coverClassByCaseId[item.id];
+  // Collected cases have generated IDs. Match a concrete scene, never the broad category alone.
+  const sceneCovers = {
+    '消防安全::大型活动消防': 'cover-campus-fire-event',
+    '消防安全::宿舍用电': 'cover-dorm-electric',
+    '消防安全::实验室电器起火': 'cover-lab-outlet-smoke',
+    '消防安全::疏散通道堵塞': 'cover-blocked-evacuation',
+    '消防安全::食堂后厨油锅起火': 'cover-canteen-oil-fire',
+    '消防安全::电动车充电棚电池冒烟': 'cover-ebike-battery-smoke',
+    '反诈骗::兼职刷单': 'cover-part-time-rebate',
+    '交通安全::电动车充电': 'cover-improper-ebike-charging',
+    '治安安全::夜间出行': 'cover-night-following',
+    '实验室安全::废液处理': 'cover-chemical-waste',
+    '网络安全::钓鱼链接': 'cover-phishing-login',
+    '网络安全::钓鱼邮件': 'cover-phishing-login',
+    '网络安全::统一身份认证仿冒': 'cover-phishing-login'
+  };
+  return sceneCovers[`${item.safetyType}::${item.campusScene}`] || '';
+}
+
 function caseList(items) {
   return Array.isArray(items) && items.length ? items : ["识别风险", "暂停操作", "向官方渠道核实"];
 }
@@ -441,6 +509,7 @@ function buildScenarioFromCase(item, index) {
   // Safety type is the source of truth for the cover. Older collected cases may
   // still carry the generic scene-task class, which must not override a known type.
   const sceneClass = sceneClassBySafetyType[item.safetyType] || item.sceneClass || "scene-task";
+  const coverClass = resolveScenarioCover(item);
   const safetyTag = `${item.safetyType || "校园安全"} · ${item.campusScene || "典型情景"}`;
   const sourceLine = item.sourceName ? `来源：${item.sourceName}，已脱敏改编。` : "来源于审核通过的校园安全案例，已脱敏改编。";
 
@@ -449,6 +518,7 @@ function buildScenarioFromCase(item, index) {
     label: item.title || item.campusScene || "校园安全案例",
     subtitle: item.subtitle || item.campusScene || "真实案例改编",
     sceneClass,
+    coverClass,
     tag: safetyTag,
     brief: `${item.hook || "这是一个校园安全案例。"} ${sourceLine}`,
     roles: {
@@ -607,6 +677,7 @@ async function loadSafetyCaseScenarios() {
 let activeRole = "experiencer";
 let activeScenarioIndex = 0;
 let activeStoryNode = "start";
+let storyConversation = [];
 let scenarioTouchStartX = 0;
 let scenarioCarouselPosition = 1;
 const QUESTIONS_PER_ROUND = 10;
@@ -662,7 +733,11 @@ function switchTab(target, shouldScroll = true) {
 
 function switchLearningMode(mode) {
   learningModeButtons.forEach((button) => button.classList.toggle("active", button.dataset.learningMode === mode));
-  learningSections.forEach((section) => section.classList.toggle("active", section.dataset.learningSection === mode));
+  learningSections.forEach((section) => {
+    const selected = section.dataset.learningSection === mode;
+    section.classList.toggle("active", selected);
+    section.hidden = !selected;
+  });
 }
 
 function getInitialTab() {
@@ -854,6 +929,8 @@ function setStoryPhase(phase) {
   storyStage.hidden = phase !== "story";
   endingStage.hidden = phase !== "ending";
   storyGameStatus.textContent = phase === "select" ? "选择场景" : phase === "role" ? "选择身份" : phase === "story" ? "剧情锁定" : "结局复盘";
+  startOverStory.hidden = phase === "select";
+  storyGameCard?.classList.toggle("scenario-selected", phase !== "select");
   storyGameCard?.classList.toggle("story-mode", phase === "story");
   document.body.classList.toggle("story-active", phase === "story");
 }
@@ -905,7 +982,7 @@ function createScenarioCard(scenario, index) {
   button.type = "button";
   button.className = "scene-card";
   button.dataset.scenarioIndex = index;
-  button.innerHTML = `<span class="scene-illustration ${scenario.sceneClass}" aria-hidden="true"></span><span class="scene-content"><span class="scene-badge">情景演练 0${index + 1}</span><span class="scene-label">${scenario.label}</span><strong>${scenario.subtitle}</strong><small>${scenario.tag}</small><em>进入演练</em></span>`;
+  button.innerHTML = `<span class="scene-illustration ${scenario.sceneClass} ${scenario.coverClass || ""}" aria-hidden="true"></span><span class="scene-content"><span class="scene-badge">情景演练 0${index + 1}</span><span class="scene-label">${scenario.label}</span><strong>${scenario.subtitle}</strong><small>${scenario.tag}</small><em>进入演练</em></span>`;
   button.addEventListener("click", () => {
     activeScenarioIndex = index;
     activeRole = "experiencer";
@@ -960,7 +1037,7 @@ function renderRoleSelection() {
   const scenario = currentScenario();
   scenarioTitle.textContent = scenario.label;
   scenarioBrief.textContent = scenario.brief;
-  selectedScenePreview.className = `selected-scene ${scenario.sceneClass}`;
+  selectedScenePreview.className = `selected-scene ${scenario.sceneClass} ${scenario.coverClass || ""}`;
   selectedScenePreview.innerHTML = `<span>${scenario.subtitle}</span><strong>${scenario.label}</strong>`;
   rolePicker?.querySelectorAll(".role-button").forEach((button) => button.classList.toggle("active", button.dataset.role === activeRole));
   setStoryPhase("role");
@@ -983,6 +1060,7 @@ function startLockedStory() {
 
   if (!scenario.roles[activeRole]) activeRole = "experiencer";
   activeStoryNode = roleStory.start;
+  storyConversation = [];
   renderRoleSimulation();
   scenarioTabs.hidden = true;
   roleStage.hidden = true;
@@ -992,6 +1070,35 @@ function startLockedStory() {
   storyGameCard?.scrollIntoView({ block: "center", behavior: "smooth" });
 }
 
+function getDialogueRole(speaker, forcedRole = "") {
+  if (forcedRole) return forcedRole;
+  const isSystem = systemDialogueSpeakers.has(speaker) || /^阶段\d+$/.test(speaker);
+  if (isSystem) return "system";
+  return speaker === "你" ? "self" : "other";
+}
+
+function renderStoryConversation() {
+  simDialogue.innerHTML = "";
+  storyConversation.forEach(({ speaker, text, role: forcedRole }) => {
+    const line = document.createElement("article");
+    const dialogueRole = getDialogueRole(speaker, forcedRole);
+    const isSelf = dialogueRole === "self";
+    line.className = `story-line dialogue-${dialogueRole}${isSelf ? " user-chat" : ""}`;
+    line.dataset.avatar = isSelf ? "我" : Array.from(speaker || "对")[0];
+    line.innerHTML = "<span></span><p></p>";
+    line.querySelector("span").textContent = speaker;
+    line.querySelector("p").textContent = text;
+    simDialogue.append(line);
+  });
+  requestAnimationFrame(() => {
+    simDialogue.scrollTop = simDialogue.scrollHeight;
+  });
+}
+
+function normalizeDialogueText(text) {
+  return String(text || "").replace(/\s+/g, " ").trim();
+}
+
 function renderRoleSimulation() {
   if (!scenarioTitle || !simDialogue || !simActions) return;
   const scenario = currentScenario();
@@ -999,17 +1106,15 @@ function renderRoleSimulation() {
   const node = roleStory.nodes[activeStoryNode];
   roleName.textContent = roleLabels[activeRole];
   roleScenarioTag.textContent = scenario.tag;
-  storyVisual.className = `story-visual ${scenario.sceneClass}`;
-  simDialogue.innerHTML = "";
+  storyVisual.className = `story-visual ${scenario.sceneClass} ${scenario.coverClass || ""}`;
   node.lines.forEach(([speaker, text]) => {
-    const line = document.createElement("article");
-    const userSide = ["你", "小林", "小周", "小文", "陈晨", "室友", "长辈", "同学"].includes(speaker);
-    line.className = `story-line${userSide ? " user-chat" : ""}`;
-    line.innerHTML = "<span></span><p></p>";
-    line.querySelector("span").textContent = speaker;
-    line.querySelector("p").textContent = text;
-    simDialogue.append(line);
+    const previousMessage = storyConversation[storyConversation.length - 1];
+    const repeatsSelectedThought = speaker === "你"
+      && previousMessage?.speaker === "你"
+      && normalizeDialogueText(previousMessage.text) === normalizeDialogueText(text);
+    if (!repeatsSelectedThought) storyConversation.push({ speaker, text });
   });
+  renderStoryConversation();
   simTask.textContent = node.prompt;
   simFeedback.textContent = "剧情已锁定，做出选择后将进入下一幕。";
   simActions.innerHTML = "";
@@ -1018,14 +1123,16 @@ function renderRoleSimulation() {
     button.type = "button";
     button.className = "thought-choice";
     button.textContent = text;
-    button.addEventListener("click", () => advanceStory(next));
+    button.addEventListener("click", () => advanceStory(next, text));
     simActions.append(button);
   });
 }
 
-function advanceStory(next) {
+function advanceStory(next, selectedText) {
   const roleStory = currentRoleStory();
+  storyConversation.push({ speaker: "你", text: selectedText, role: "self" });
   if (roleStory.endings[next]) {
+    renderStoryConversation();
     renderEnding(next);
     return;
   }
@@ -1052,7 +1159,14 @@ async function recordLearningCompletion(endingKey) {
 }
 function renderEnding(endingKey) {
   const [title, text, report] = currentRoleStory().endings[endingKey];
-  endingBadge.textContent = roleLabels[activeRole];
+  const scenario = currentScenario();
+  const dangerEndings = new Set(["incident", "failed", "scammed", "wrongHelp"]);
+  const warningEndings = new Set(["partial", "partialStop", "lossStopped"]);
+  const completionLabels = { experiencer: "体验已完成", helper: "帮助已完成", observer: "观察已完成" };
+  endingStage.dataset.outcome = dangerEndings.has(endingKey) ? "danger" : warningEndings.has(endingKey) ? "warning" : "safe";
+  endingVisual.className = `ending-visual ${scenario.sceneClass} ${scenario.coverClass || ""}`;
+  endingVisual.dataset.label = scenario.label;
+  endingBadge.textContent = completionLabels[activeRole] || "学习已完成";
   endingTitle.textContent = title;
   endingText.textContent = text;
   endingReport.innerHTML = report.map((item) => `<span>${item}</span>`).join("");
@@ -1074,6 +1188,7 @@ function initRoleSimulation() {
   startOverStory.addEventListener("click", () => {
     activeStoryNode = "start";
     activeRole = "experiencer";
+    storyConversation = [];
     renderScenarioTabs();
     setStoryPhase("select");
   });
@@ -1083,7 +1198,7 @@ featureCards.forEach((card) => card.addEventListener("click", (event) => {
   event.preventDefault();
   switchTab(card.dataset.tab);
 }));
-learningModeButtons.forEach((button) => button.addEventListener("click", () => switchLearningMode(button.dataset.learningMode)));
+learningModeButtons.forEach((button) => button.addEventListener("click", () => enterDailyMode(button.dataset.learningMode)));
 document.querySelectorAll("[data-jump-tab]").forEach((button) => button.addEventListener("click", () => switchTab(button.dataset.jumpTab)));
 
 

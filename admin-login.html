@@ -5,32 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>后台登录 | 南开校园安全卫士</title>
     <link rel="icon" type="image/png" href="assets/nankai-security-logo.png" />
-    <link rel="stylesheet" href="styles.css?v=20261104-nankai-logo-large" />
+    <link rel="stylesheet" href="staff-login.css?v=20261117-single-column-large" />
   </head>
-  <body class="admin-login-page">
+  <body class="admin-login-page staff-login-page">
     <main class="admin-login-shell">
+      <header class="admin-login-brand"><img src="assets/nankai-security-logo.png" alt="" aria-hidden="true" /><div><strong>南开校园安全卫士</strong><small>Nankai Safety Assistant</small></div></header>
       <section class="admin-login-card" aria-labelledby="loginTitle">
-        <aside class="admin-login-visual">
-          <div class="admin-login-brand"><img src="assets/nankai-security-logo.png" alt="" aria-hidden="true" /><div><strong>南开校园安全卫士</strong><small>Nankai Safety Assistant</small></div></div>
-          <div class="admin-login-slogan">
-            <p>安全教育管理平台</p>
-            <h1>校园安全数据与内容统一管理</h1>
-            <span>用于学习任务发布、题库维护、学习统计与后台权限管理。</span>
-          </div>
-          <div class="admin-login-tags"><span>学习任务</span><span>题库管理</span><span>数据统计</span></div>
-        </aside>
         <section class="admin-login-panel">
-          <nav class="login-role-switch" aria-label="切换登录角色">
-            <a href="/knowledge.html" data-login-role="student">学生</a>
+          <div class="admin-login-heading"><h1 id="loginTitle">工作人员登录</h1><p>请选择工作身份，使用已授权的账号登录。</p></div>
+          <nav class="login-role-switch" aria-label="选择工作人员登录身份">
             <a href="/admin-login.html?role=admin&amp;next=%2Fadmin.html" data-login-role="admin">管理员</a>
             <a href="/admin-login.html?role=editor&amp;next=%2Feditor.html" data-login-role="editor">编辑员</a>
             <a href="/admin-login.html?role=reviewer&amp;next=%2Freviewer.html" data-login-role="reviewer">审核员</a>
           </nav>
-          <div class="admin-login-heading">
-            <p id="loginRoleKicker">后台入口</p>
-            <h2 id="loginTitle">欢迎登录</h2>
-            <span>请输入后台账号密码，或使用已授权的飞书身份登录。</span>
-          </div>
+          <p id="rolePurpose" class="login-role-purpose"></p>
           <form id="adminLoginForm" class="admin-login-form" autocomplete="off">
             <label><span id="usernameLabel">账号</span><input id="loginUsername" name="loginUsername" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore placeholder="后台账号" readonly required /></label>
             <label><span id="passwordLabel">密码</span><input id="loginPassword" name="loginPassword" type="password" autocomplete="new-password" data-lpignore="true" data-1p-ignore placeholder="登录密码" readonly required /></label>
@@ -39,21 +27,26 @@
           </form>
           <div class="admin-login-divider"><span>其他登录方式</span></div>
           <a id="feishuLoginLink" class="admin-login-feishu" href="/api/auth/login?role=admin&next=%2Fadmin.html">飞书授权登录</a>
-          <p class="admin-login-tip">仅限已授权的管理员、编辑员和审核员访问后台管理功能。</p>
         </section>
       </section>
+      <footer class="login-footer"><p class="admin-login-tip">仅限已授权的工作人员使用</p><a class="admin-login-back" href="knowledge.html">返回学生学习平台</a></footer>
     </main>
     <script>
       const params = new URLSearchParams(location.search);
       const next = params.get("next") || "/admin.html";
       const role = params.get("role") || (next.includes("editor") ? "editor" : next.includes("reviewer") ? "reviewer" : "admin");
-      const roleText = { admin: "管理员入口", reviewer: "审核员入口", editor: "编辑员入口" };
       const accountText = { admin: "管理员账号", reviewer: "审核员账号", editor: "编辑员账号" };
       const titleText = { admin: "管理员登录", reviewer: "审核员登录", editor: "编辑员登录" };
       const message = document.querySelector("#loginMessage");
+      const roleBriefs = {
+        admin: '学习任务 · 题库维护 · 学习统计 · 角色管理',
+        editor: '来源核对 · 材料脱敏 · 情景编写 · 提交审核',
+        reviewer: '内容核验 · 审核发布 · 退回修改'
+      };
+      document.querySelector('#rolePurpose').textContent = roleBriefs[role] || roleBriefs.admin;
       const isGithubPages = location.hostname.endsWith(".github.io");
       document.title = (titleText[role] || "后台登录") + " | 南开校园安全卫士";
-      document.querySelector("#loginRoleKicker").textContent = roleText[role] || "后台入口";
+      document.querySelector("#loginTitle").textContent = titleText[role] || "工作人员登录";
       document.querySelector("#usernameLabel").textContent = accountText[role] || "后台账号";
       document.querySelector("#passwordLabel").textContent = (accountText[role] || "后台账号") + "密码";
       document.querySelector("#loginUsername").placeholder = accountText[role] || "后台账号";
@@ -88,6 +81,8 @@
         message.classList.remove("is-error");
         message.classList.add("is-success");
         message.textContent = "正在登录…";
+        const submitButton = event.currentTarget.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
         try {
           const response = await fetch("/api/auth/password-login", {
             method: "POST",
@@ -101,6 +96,8 @@
           message.classList.remove("is-success");
           message.classList.add("is-error");
           message.textContent = error.message;
+        } finally {
+          submitButton.disabled = false;
         }
       });
     </script>

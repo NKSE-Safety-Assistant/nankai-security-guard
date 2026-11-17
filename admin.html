@@ -7,6 +7,11 @@
     <link rel="icon" type="image/png" href="assets/nankai-security-logo.png" />
     <script src="static-auth-guard.js"></script>
     <link rel="stylesheet" href="styles.css?v=20261104-nankai-logo-large" />
+    <link rel="stylesheet" href="staff-workspace.css?v=20261117" />
+    <script src="staff-workspace.js?v=20261117-icons" defer></script>
+    <link rel="stylesheet" href="admin-tasks.css?v=20261117" />
+    <script src="admin-tasks.js?v=20261117-compact" defer></script>
+    <link rel="stylesheet" href="staff-readable.css?v=20261117-compact" />
   </head>
   <body class="admin-v2-page">
     <div class="admin-v2-shell">
@@ -148,13 +153,26 @@
           Object.assign(state, data);
           state.categories = data.availableCategories || state.categories;
           renderAll();
+          return true;
         } catch (error) {
           if (requestId !== overviewRequestId) return;
           showToast(error.message);
           if (!state.task) { $('#emptyState').hidden = false; $('#emptyState').innerHTML = `<strong>任务详情暂时无法读取</strong><p>${escapeHtml(error.message)}</p>`; }
+          return false;
         }
       }
-      async function changeStatus(status) { await request(`/api/admin/quiz-tasks/${encodeURIComponent(state.task.id)}/status`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status }) }); loadOverview(state.task.id); }
+      async function changeStatus(status) {
+        if (status === 'closed' && !window.confirm('结束后将停止学生提交本任务。确定结束吗？')) return;
+        const taskId = state.task.id;
+        const buttons = [...document.querySelectorAll('#taskActions button')];
+        buttons.forEach(button => button.disabled = true);
+        try {
+          await request(`/api/admin/quiz-tasks/${encodeURIComponent(taskId)}/status`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+          await loadOverview(taskId);
+          showToast(status === 'active' ? '任务已恢复' : status === 'paused' ? '任务已暂停' : '任务已结束');
+        } catch (error) { showToast(error.message); }
+        finally { buttons.forEach(button => button.disabled = false); }
+      }
       function openModal() { $("#taskModal").hidden = false; document.body.classList.add("admin-v2-modal-open"); $("#taskForm [name=title]").focus(); } function closeModal() { $("#taskModal").hidden = true; document.body.classList.remove("admin-v2-modal-open"); }
       function renderQuizBankInfo(data) { const categories = Object.entries(data.categories || {}).sort((a, b) => b[1] - a[1]); const total = Number(data.questionCount) || categories.reduce((sum, item) => sum + Number(item[1] || 0), 0); const colors = ["#176fae", "#0f8b78", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4", "#84cc16", "#ec4899"]; $("#bankVersion").textContent = data.version || "--"; $("#bankCount").textContent = `${total || 0} 题`; $("#bankCategoryCount").textContent = `${categories.length} 类`; $("#bankUpdatedAt").textContent = data.updatedAt ? formatTime(data.updatedAt) : "--"; $("#bankCategoryTotal").textContent = total ? `共 ${total} 题` : "暂无题目"; if (!categories.length) { $("#bankCategorySummary").innerHTML = '<p class="admin-v2-muted">暂无题目类型</p>'; return; } let current = 0; const segments = categories.map(([name, count], index) => { const start = current; const angle = total ? Number(count) * 360 / total : 0; current += angle; return `${colors[index % colors.length]} ${start.toFixed(2)}deg ${current.toFixed(2)}deg`; }).join(", "); const legend = categories.map(([name, count], index) => { const percent = total ? Math.round(Number(count) * 100 / total) : 0; return `<li><i style="background:${colors[index % colors.length]}"></i><span>${escapeHtml(name)}</span><strong>${count} 题</strong><em>${percent}%</em></li>`; }).join(""); $("#bankCategorySummary").innerHTML = `<div class="admin-v2-bank-pie-wrap"><div class="admin-v2-bank-pie" style="background: conic-gradient(${segments});"><span>${total}<small>题</small></span></div><ul class="admin-v2-bank-pie-legend">${legend}</ul></div>`; }
       async function loadQuizBankInfo() { try { renderQuizBankInfo(await request("/api/admin/quiz-bank")); } catch (error) { $("#bankMessage").textContent = error.message; } }

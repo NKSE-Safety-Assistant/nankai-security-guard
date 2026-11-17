@@ -6,7 +6,7 @@
     <title>南开安全卫士 - 知识学习</title>
     <link rel="icon" type="image/png" href="assets/nankai-security-logo.png" />
     <link rel="stylesheet" href="styles.css?v=20261104-nankai-logo-large" />
-    <link rel="stylesheet" href="preview-unify.css?v=20261017-learning-entries" />
+    <link rel="stylesheet" href="preview-unify.css?v=20261117-fire-event-cover" />
 </head>
   <body class="knowledge-help-preview" data-default-tab="quiz">
     <header class="site-header">
@@ -18,19 +18,7 @@
             <small>Nankai Safety Assistant</small>
           </span>
         </div>
-        <nav class="role-entry-nav" aria-label="角色入口">
-          <a class="role-entry-home" href="knowledge.html" aria-current="page">学生学习</a>
-          <details class="role-entry-menu">
-            <summary>切换角色</summary>
-            <div class="role-entry-popover">
-              <p>请选择使用身份</p>
-              <a class="is-current" href="knowledge.html"><strong>学生</strong><span>答题、任务与情景学习</span></a>
-              <a href="admin-login.html?role=admin&amp;next=%2Fadmin.html"><strong>管理员</strong><span>任务、统计与角色管理</span></a>
-              <a href="admin-login.html?role=editor&amp;next=%2Feditor.html"><strong>编辑员</strong><span>编辑并提交安全案例</span></a>
-              <a href="admin-login.html?role=reviewer&amp;next=%2Freviewer.html"><strong>审核员</strong><span>审核并发布安全案例</span></a>
-            </div>
-          </details>
-        </nav>
+        <span class="student-site-label">校园安全学习平台</span>
       </div>
     </header>
 
@@ -49,18 +37,25 @@
       </section>
 
       <section class="workspace knowledge-workspace">
-        <div class="workspace-head">
+        <div class="workspace-head" id="learningHomeHead">
           <div>
-            <p class="eyebrow">Knowledge Learning</p>
-            <h2>知识学习</h2>
+            <p class="eyebrow">NANKAI · CAMPUS SAFETY</p>
+            <h2>把安全感，练成日常。</h2>
+            <p class="learning-home-copy">从身边的校园情景开始，学会识别风险，也知道下一步怎么做。</p>
           </div>
+          <div class="learning-home-mark" aria-hidden="true"><span>校园安全</span><strong>识别风险<br />从容行动</strong><i></i></div>
         </div>
 
-        <nav class="knowledge-entry-tabs" aria-label="学习入口">
-          <button type="button" id="taskEntryButton" aria-selected="true">学习任务</button>
-          <button type="button" id="dailyEntryButton" aria-selected="false">日常学习</button>
+        <nav class="knowledge-entry-tabs learning-home-entries" aria-label="学习入口">
+          <button type="button" id="taskEntryButton" aria-selected="true" data-entry="tasks">
+            <span class="entry-index">01 / REQUIRED</span><strong>学习任务</strong><small>查看老师布置的任务、截止时间与完成情况</small><em>进入任务 <b aria-hidden="true">↗</b></em>
+          </button>
+          <button type="button" id="dailyEntryButton" aria-selected="false" data-entry="daily">
+            <span class="entry-index">02 / EXPLORE</span><strong>日常学习</strong><small>自主答题，或在校园情景中练习安全判断</small><em>开始探索 <b aria-hidden="true">↗</b></em>
+          </button>
         </nav>
-        <section id="learningTasksPanel" class="knowledge-tasks-panel" aria-label="学习任务">
+        <button class="learning-home-back" id="learningHomeBack" type="button" hidden><span aria-hidden="true">←</span> <span id="learningBackLabel">返回学习首页</span></button>
+        <section id="learningTasksPanel" class="knowledge-tasks-panel" aria-label="学习任务" hidden>
           <div id="learningTaskCards">正在读取学习任务…</div>
           <div id="taskQuizRunner" hidden><div class="task-runner-head"><strong id="taskRunnerTitle"></strong><button type="button" id="backToTaskList">返回任务列表</button></div></div>
         </section>
@@ -72,20 +67,23 @@
               <ul class="plain-list"><li>消防答题：10 道专题题目即时反馈</li><li>三角色学习：体验、帮助、观察风险</li><li>场景复盘：提炼下一次可执行的安全动作</li></ul>
             </div>
             <div class="learning-mode-switch" aria-label="选择知识学习方式">
-              <button class="learning-mode-button active" type="button" data-learning-mode="quiz"><span>消防答题</span><small>消防知识即时练习</small></button>
-              <button class="learning-mode-button" type="button" data-learning-mode="story"><span>三角色学习模式</span><small>进入沉浸式校园安全情景</small></button>
+              <button class="learning-mode-button" type="button" data-learning-mode="quiz"><span>安全答题</span><small>用几分钟练习识别常见风险</small><b aria-hidden="true">↗</b></button>
+              <button class="learning-mode-button" type="button" data-learning-mode="story"><span>三角色模式</span><small>进入校园安全案例，换个身份做判断</small><b aria-hidden="true">↗</b></button>
             </div>
-            <div class="quiz-card learning-section active" data-learning-section="quiz">
+            <p class="learning-mode-footnote"><span>自主学习</span>选择一种方式开始：通过答题巩固安全知识，或进入情景案例练习判断。</p>
+            <button class="learning-home-back learning-daily-back" id="dailyModeBack" type="button" hidden><span aria-hidden="true">←</span> 返回日常学习</button>
+            <div class="quiz-card learning-section" data-learning-section="quiz" hidden>
               <div class="quiz-meta"><span id="quizProgress">第 1 题</span><strong id="quizScore">得分 0</strong></div>
               <h3 id="quizQuestion"></h3>
               <div class="quiz-options" id="quizOptions"></div>
               <p class="quiz-feedback" id="quizFeedback"></p>
               <button class="primary-button" type="button" id="nextQuestion">下一题</button>
             </div>
-            <div class="story-game-card learning-section" data-learning-section="story">
+            <div class="story-game-card learning-section" data-learning-section="story" hidden>
+              <button class="learning-home-back scenario-selection-back" type="button" id="startOverStory" hidden><span aria-hidden="true">←</span> 返回场景选择</button>
               <div class="story-game-head">
                 <div>
-                  <span class="story-kicker">三角色剧情学习</span>
+                  <span class="story-kicker">三角色情景</span>
                   <h3>选择一个案例，进入校园安全剧情</h3>
                   <p>案例来自审核通过的校园安全案例库，已完成信息脱敏。选择身份后进入剧情，中途不能退出，需要走到结局后再返回。</p>
                 </div>
@@ -115,7 +113,10 @@
                   <strong id="gameRoleName">体验者</strong>
                 </div>
                 <div class="story-visual" id="storyVisual" aria-hidden="true"></div>
-                <div class="story-board" id="storyBoard" aria-label="剧情文本"></div>
+                <div class="story-chat-panel">
+                  <div class="story-chat-head"><strong>聊天记录</strong><span>在线</span></div>
+                  <div class="story-board" id="storyBoard" aria-label="剧情文本"></div>
+                </div>
                 <div class="thought-panel">
                   <span>脑中想法</span>
                   <p id="thoughtPrompt"></p>
@@ -125,11 +126,22 @@
               </div>
 
               <div class="ending-stage" id="endingStage" hidden>
-                <div class="ending-badge" id="endingBadge">学习结局</div>
-                <h3 id="endingTitle">完成学习</h3>
-                <p id="endingText"></p>
+                <div class="ending-hero">
+                  <div class="ending-copy">
+                    <div class="ending-badge" id="endingBadge">学习已完成</div>
+                    <div class="ending-title-row">
+                      <span class="ending-symbol" aria-hidden="true"></span>
+                      <h3 id="endingTitle">完成学习</h3>
+                    </div>
+                    <p class="ending-text" id="endingText"></p>
+                  </div>
+                  <div class="ending-visual" id="endingVisual" aria-hidden="true"></div>
+                </div>
+                <div class="ending-report-head">
+                  <strong>本次学习要点</strong>
+                  <span>回顾关键风险，让下一次选择更安全。</span>
+                </div>
                 <div class="ending-report" id="endingReport"></div>
-                <button class="secondary-action" type="button" id="startOverStory">返回场景选择</button>
               </div>
             </div>
           </div>
@@ -137,8 +149,8 @@
       </section>
     </main>
 
-    <footer class="site-footer"><span>南开安全卫士</span><span>校园安全知识学习</span></footer>
+    <footer class="site-footer"><span>南开安全卫士 · 校园安全知识学习</span><a class="staff-entry-link" href="admin-login.html">工作人员入口</a></footer>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="app.js?v=20261102-predeploy"></script>
+    <script src="app.js?v=20261117-fire-event-cover"></script>
 </body>
 </html>
