@@ -1,0 +1,161 @@
+/* ============================================================
+   南开紫指挥台 · 设计令牌与基础层
+   Nankai Command Deck — tokens / reset / base
+   ============================================================ */
+
+:root {
+  /* —— 深紫侧栏色阶 —— */
+  --plum-950: #240622;
+  --plum-900: #2e0a2c;
+  --plum-800: #3d0b37;
+  --plum-700: #4d1146;
+  --plum-600: #5c1a55;
+
+  /* —— 南开紫主色阶 —— */
+  --nk-700: #78166c;
+  --nk-600: #8c207f;
+  --nk-500: #a03a93;
+  --nk-300: #c98fc1;
+  --nk-100: #f3e9f2;
+  --nk-50:  #faf5fa;
+
+  /* —— 画布与表面 —— */
+  --canvas: #f4f1f6;
+  --canvas-2: #ece7f0;
+  --surface: #ffffff;
+  --surface-2: #faf8fb;
+  --surface-3: #f5f2f7;
+
+  /* —— 文字 —— */
+  --text-900: #221423;
+  --text-800: #352636;
+  --text-700: #4a3d4c;
+  --text-500: #7a6e7c;
+  --text-400: #9a909c;
+  --on-dark: #ffffff;
+  --on-dark-70: rgba(255, 255, 255, 0.72);
+  --on-dark-50: rgba(255, 255, 255, 0.52);
+
+  /* —— 描边 —— */
+  --line: #e7e1ea;
+  --line-strong: #d8d0dc;
+  --line-dark: rgba(255, 255, 255, 0.12);
+
+  /* —— 语义色 —— */
+  --green-700: #1c7248;
+  --green-100: #e4f3ea;
+  --amber-700: #94640f;
+  --amber-100: #faf0d8;
+  --red-700: #b0334c;
+  --red-100: #fbe8ec;
+  --blue-700: #2c5aa5;
+  --blue-100: #e8effa;
+
+  /* —— 字体族 —— */
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
+  --font-sans: "Inter", "Noto Sans SC", "Microsoft YaHei UI", "PingFang SC", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", ui-monospace, Consolas, monospace;
+
+  /* —— 字号阶（整体放大，正文基准 16px） —— */
+  --fs-12: 13px;
+  --fs-13: 14px;
+  --fs-14: 16px;
+  --fs-15: 17px;
+  --fs-16: 18px;
+  --fs-18: 20px;
+  --fs-20: 22px;
+  --fs-22: 25px;
+  --fs-26: 29px;
+  --fs-28: 33px;
+  --fs-34: 38px;
+
+  /* —— 圆角 —— */
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 12px;
+  --r-xl: 14px;
+  --r-2xl: 16px;
+  --r-3xl: 18px;
+  --r-pill: 999px;
+
+  /* —— 阴影 —— */
+  --shadow-card: 0 1px 2px rgba(36, 6, 34, 0.05), 0 6px 18px rgba(36, 6, 34, 0.06);
+  --shadow-hover: 0 2px 6px rgba(36, 6, 34, 0.08), 0 12px 28px rgba(36, 6, 34, 0.10);
+  --shadow-elevated: 0 18px 48px rgba(36, 6, 34, 0.22);
+  --shadow-purple: 0 6px 16px rgba(120, 22, 108, 0.28);
+
+  /* —— 间距 —— */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  --sidebar-w: 264px;
+  --topbar-h: 60px;
+}
+
+/* —— 重置 —— */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--fs-14);
+  line-height: 1.6;
+  color: var(--text-800);
+  background: var(--canvas);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, p, dl, dd, figure { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--nk-700); text-decoration: none; }
+a:hover { color: var(--nk-600); }
+img { display: block; max-width: 100%; }
+table { border-collapse: collapse; width: 100%; }
+details summary { cursor: pointer; list-style: none; }
+details summary::-webkit-details-marker { display: none; }
+
+/* —— 标题默认衬线 —— */
+h1, h2, h3, h4 { font-family: var(--font-serif); color: var(--text-900); font-weight: 600; line-height: 1.35; }
+
+/* —— 焦点可见 —— */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--nk-500);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* —— 滚动条 —— */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #cfc5d2; border-radius: 999px; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: #b4a8b8; border: 2px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* —— 工具类 —— */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0);
+  white-space: nowrap; border: 0;
+}
+[hidden] { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

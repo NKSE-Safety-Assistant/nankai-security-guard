@@ -6,41 +6,33 @@
     <title>南开安全卫士 - 编辑员工作台</title>
     <link rel="icon" type="image/png" href="assets/nankai-security-logo.png" />
     <script src="static-auth-guard.js"></script>
-    <link rel="stylesheet" href="styles.css?v=20261104-nankai-logo-large" />
-    <link rel="stylesheet" href="staff-workspace.css?v=20261117" />
-    <script src="staff-workspace.js?v=20261117-icons" defer></script>
-    <link rel="stylesheet" href="case-workspace.css?v=20261117-case-cards" />
-    <script src="case-workspace.js?v=20261117" defer></script>
-    <link rel="stylesheet" href="staff-readable.css?v=20261117-brand-fit" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="deck-tokens.css?v=20261118-deck2" />
+    <link rel="stylesheet" href="deck-shell.css?v=20261118-deck2" />
+    <script src="staff-workspace.js?v=20261123-deploy" defer></script>
+    <script src="case-workspace.js?v=20261123-deploy" defer></script>
+    <link rel="stylesheet" href="deck-cases.css?v=20261118-deck2" />
   </head>
   <body class="staff-console-page" data-default-tab="admin" data-workspace-role="editor">
-    <header class="site-header">
-      <div class="header-inner">
-        <a class="brand" href="index.html" aria-label="南开安全卫士首页">
-          <img class="brand-mark" src="assets/nankai-security-logo.png" alt="" aria-hidden="true" />
-          <span><strong>南开安全卫士</strong><small>Nankai Safety Assistant</small></span>
-        </a>
-      </div>
-    </header>
-
     <div class="staff-console-shell">
       <aside class="staff-sidebar">
         <div class="staff-sidebar-brand"><img src="assets/nankai-security-logo.png" alt="" aria-hidden="true" /><div><strong>编辑员工作台</strong><small>案例内容编辑</small></div></div>
         <nav class="staff-sidebar-nav" aria-label="编辑员功能导航">
-          <button type="button" id="caseEditNavButton" aria-expanded="false"><span>01</span>案例编辑</button>
+          <button type="button" id="caseEditNavButton" aria-expanded="false"><span class="nav-label">案例编辑</span></button>
           <div class="staff-sidebar-subnav" id="caseEditSubnav" aria-label="案例编辑筛选" hidden>
-            <button class="active" type="button" data-editor-status="draft">待完善案例</button>
-            <button type="button" data-editor-status="revision">退回修改案例</button>
-            <button type="button" data-editor-status="review">已提交审核案例</button>
+            <button class="active" type="button" data-editor-status="draft"><span class="nav-label">待完善案例</span></button>
+            <button type="button" data-editor-status="revision"><span class="nav-label">退回修改案例</span></button>
+            <button type="button" data-editor-status="review"><span class="nav-label">已提交审核案例</span></button>
           </div>
-          <button class="staff-sidebar-logout" type="button" id="sidebarLogoutButton"><span>02</span>退出</button>
+          <button class="staff-sidebar-logout" type="button" id="sidebarLogoutButton"><span class="nav-label">退出登录</span></button>
         </nav>
         <p class="staff-sidebar-note">编辑员负责补充案例材料、脱敏处理，并提交审核。</p>
       </aside>
       <main class="admin-console staff-main">
       <section class="admin-toolbar" aria-label="案例管理工具栏">
         <div>
-          <p class="eyebrow">Case Desk</p>
           <h1>编辑员工作台</h1>
         </div>
         <div class="admin-toolbar-actions">
@@ -56,7 +48,7 @@
       </section>
 <section class="workspace admin-workspace admin-review-board">
         <div class="workspace-head">
-          <div><p class="eyebrow">Review Desk</p><h2>待办案例</h2></div>
+          <div><h2>待办案例</h2></div>
           <strong class="admin-save-state" id="adminSaveState">连接案例库中</strong>
         </div>
         <div class="admin-status-tabs" id="adminStatusTabs" role="tablist" aria-label="案例状态筛选"></div>
@@ -152,6 +144,7 @@
 
       document.querySelector('#logoutButton').addEventListener('click', async () => {
         await fetch('/api/auth/logout', { method: 'POST' }).catch(() => null);
+        try { localStorage.removeItem('nsg_token'); } catch (e) {}
         location.href = '/admin-login.html?role=editor&next=%2Feditor.html';
       });
       document.querySelector('#sidebarLogoutButton').addEventListener('click', () => document.querySelector('#logoutButton').click());
@@ -318,14 +311,14 @@
         const categories = publishedCategories();
         const activeCategory = categories.find((item) => item.type === activePublishedType) || categories[0];
         if (!activeCategory.scenes.includes(activePublishedScene)) activePublishedScene = '全部';
-        list.innerHTML = categories.map((category) => `<button class="admin-category-row ${category.type === activePublishedType ? 'active' : ''}" type="button" data-type="${category.type}"><span>${category.type}</span><strong>${category.count}</strong></button>`).join('');
+        list.innerHTML = categories.map((category) => `<button class="admin-category-row ${category.type === activePublishedType ? 'active' : ''}" type="button" data-type="${escapeHtml(category.type)}"><span>${escapeHtml(category.type)}</span><strong>${category.count}</strong></button>`).join('');
         list.querySelectorAll('[data-type]').forEach((button) => button.addEventListener('click', () => { activePublishedType = button.dataset.type; activePublishedScene = '全部'; renderPublishedBrowser(); }));
         const results = filteredPublishedCases();
         detail.innerHTML = `
           <div class="admin-published-head"><div><span>已发布案例库</span><h3>${activePublishedType === '全部' ? '全部安全类型' : activePublishedType}</h3><p>按安全类型和典型校园情景浏览，支持搜索标题、来源、风险点和安全动作。</p></div><strong>${results.length} 个结果</strong></div>
-          <div class="admin-search-row"><input id="publishedSearchInput" type="search" placeholder="搜索案例、来源、风险信号或安全动作" value="${publishedSearchQuery.replace(/"/g, '&quot;')}" /></div>
-          <div class="admin-scene-filter">${activeCategory.scenes.map((scene) => `<button class="${scene === activePublishedScene ? 'active' : ''}" type="button" data-scene="${scene}">${scene}</button>`).join('')}</div>
-          <div class="admin-published-grid">${results.length ? results.map((item) => `<article class="admin-published-card"><span>${item.safetyType} · ${item.campusScene}</span><strong>${item.title}</strong><p>${item.hook || item.subtitle || ''}</p><small>${item.sourceName || '来源待补充'}</small><div>${(item.warningSigns || []).slice(0, 3).map((sign) => `<em>${sign}</em>`).join('')}</div><button class="secondary-button" type="button" data-revise-approved="${item.id}">撤回并退回编辑员</button></article>`).join('') : '<p class="admin-empty">没有找到匹配的已发布案例。</p>'}</div>
+          <div class="admin-search-row"><input id="publishedSearchInput" type="search" placeholder="搜索案例、来源、风险信号或安全动作" value="${escapeHtml(publishedSearchQuery)}" /></div>
+          <div class="admin-scene-filter">${activeCategory.scenes.map((scene) => `<button class="${scene === activePublishedScene ? 'active' : ''}" type="button" data-scene="${escapeHtml(scene)}">${escapeHtml(scene)}</button>`).join('')}</div>
+          <div class="admin-published-grid">${results.length ? results.map((item) => `<article class="admin-published-card"><span>${escapeHtml(item.safetyType)} · ${escapeHtml(item.campusScene)}</span><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml(item.hook || item.subtitle || '')}</p><small>${escapeHtml(item.sourceName || '来源待补充')}</small><div>${(item.warningSigns || []).slice(0, 3).map((sign) => `<em>${escapeHtml(sign)}</em>`).join('')}</div><button class="secondary-button" type="button" data-revise-approved="${escapeHtml(item.id)}">撤回并退回编辑员</button></article>`).join('') : '<p class="admin-empty">没有找到匹配的已发布案例。</p>'}</div>
         `;
         const searchInput = document.querySelector('#publishedSearchInput');
         searchInput.addEventListener('input', (event) => { publishedSearchQuery = event.target.value; renderPublishedBrowser(); document.querySelector('#publishedSearchInput')?.focus(); });
@@ -351,7 +344,7 @@
         list.innerHTML = cases.map((item) => {
           const selected = item.id === activeCaseId;
           const source = item.sourceName || '来源待补充';
-          return `<button class="admin-case-row compact ${selected ? 'active' : ''}" type="button" data-case-id="${escapeHtml(item.id)}" aria-pressed="${selected}"><span>${caseStatusLabel(item.reviewStatus)}</span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.safetyType)} · ${escapeHtml(item.campusScene)} · ${escapeHtml(source)}</small><em class="case-open-label">${activeStatus === 'review' ? '查看内容' : '打开整理'} →</em></button>`;
+          return `<button class="admin-case-row compact ${selected ? 'active' : ''}" type="button" data-case-id="${escapeHtml(item.id)}" aria-pressed="${selected}"><span>${caseStatusLabel(item.reviewStatus)}</span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.safetyType)} · ${escapeHtml(item.campusScene)} · ${escapeHtml(source)}</small><em class="case-open-label">${activeStatus === 'review' ? '查看内容' : '打开整理'}</em></button>`;
         }).join('');
         list.querySelectorAll('[data-case-id]').forEach((button) => button.addEventListener('click', () => {
           activeCaseId = button.dataset.caseId;
@@ -392,9 +385,14 @@
         return `<a href="${escapeHtml(item.sourceUrl)}" target="_blank" rel="noreferrer">打开原文核验链接</a>`;
       }
 
+      function isWebSource(value) {
+        try { return ["https:", "http:"].includes(new URL(value).protocol); }
+        catch { return false; }
+      }
+
       function sourceCaptureMarkup(item) {
         if (!item.sourceOriginalTitle && !item.sourceExcerpt) return '';
-        const entry = item.sourceIndexUrl ? `<small>采集入口：<a href="${escapeHtml(item.sourceIndexUrl)}" target="_blank" rel="noreferrer">打开来源栏目</a></small>` : '';
+        const entry = isWebSource(item.sourceIndexUrl) ? `<small>采集入口：<a href="${escapeHtml(item.sourceIndexUrl)}" target="_blank" rel="noreferrer">打开来源栏目</a></small>` : '';
         return `<details class="admin-source-capture"><summary>采集原文信息</summary><strong>${escapeHtml(item.sourceOriginalTitle || item.title)}</strong><p>${escapeHtml(item.sourceExcerpt || '未获取到原文摘要，请打开原文核验链接。')}</p>${entry}</details>`;
       }
 
@@ -762,7 +760,7 @@
       function renderSources() {
         const sourceList = document.querySelector('#adminSourceList');
         if (!sourceList) return;
-        sourceList.innerHTML = (libraryState.sourcePool || []).map((item) => `<article><strong>${item.name}</strong><a href="${item.url}" target="_blank" rel="noreferrer">${item.url}</a><p>${(item.types || []).join('、')}</p></article>`).join('');
+        sourceList.innerHTML = (libraryState.sourcePool || []).map((item) => `<article><strong>${escapeHtml(item.name)}</strong>${isWebSource(item.url) ? `<a href="${escapeHtml(item.url)}" target="_blank" rel="noreferrer">${escapeHtml(item.url)}</a>` : ''}<p>${escapeHtml((item.types || []).join('、'))}</p></article>`).join('');
       }
 
       async function initAdminCases() {

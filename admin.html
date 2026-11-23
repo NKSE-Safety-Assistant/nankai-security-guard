@@ -6,18 +6,20 @@
     <title>安全教育管理 | 南开校园安全卫士</title>
     <link rel="icon" type="image/png" href="assets/nankai-security-logo.png" />
     <script src="static-auth-guard.js"></script>
-    <link rel="stylesheet" href="styles.css?v=20261104-nankai-logo-large" />
-    <link rel="stylesheet" href="staff-workspace.css?v=20261117" />
-    <script src="staff-workspace.js?v=20261117-icons" defer></script>
-    <link rel="stylesheet" href="admin-tasks.css?v=20261117" />
-    <script src="admin-tasks.js?v=20261117-compact" defer></script>
-    <link rel="stylesheet" href="staff-readable.css?v=20261117-compact" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="deck-tokens.css?v=20261118-deck2" />
+    <link rel="stylesheet" href="deck-shell.css?v=20261118-deck2" />
+    <script src="staff-workspace.js?v=20261123-deploy" defer></script>
+    <script src="admin-tasks.js?v=20261123-deploy" defer></script>
+    <link rel="stylesheet" href="deck-admin.css?v=20261118-deck2" />
   </head>
   <body class="admin-v2-page">
     <div class="admin-v2-shell">
       <aside class="admin-v2-sidebar">
         <div class="admin-v2-brand"><img class="admin-v2-mark" src="assets/nankai-security-logo.png" alt="" aria-hidden="true" /><div><strong>南开校园安全卫士</strong><small>安全教育管理</small></div></div>
-        <nav class="admin-v2-nav" aria-label="管理导航"><button class="active" type="button" data-view="tasks"><span>01</span>学习任务</button><button type="button" data-view="analytics"><span>02</span>学习统计</button><button type="button" data-view="question-bank"><span>03</span>题库管理</button><button type="button" data-view="roles"><span>04</span>角色管理</button><button class="admin-v2-logout" id="adminLogoutButton" type="button"><span>05</span>退出</button></nav>
+        <nav class="admin-v2-nav" aria-label="管理导航"><button class="active" type="button" data-view="tasks"><span class="nav-label">学习任务</span></button><button type="button" data-view="analytics"><span class="nav-label">学习统计</span></button><button type="button" data-view="question-bank"><span class="nav-label">题库管理</span></button><button type="button" data-view="roles"><span class="nav-label">角色管理</span></button><button class="admin-v2-logout" id="adminLogoutButton" type="button"><span class="nav-label">退出登录</span></button></nav>
         <div class="admin-v2-side-note"><strong>数据说明</strong><p>学习统计仅汇总已完成答题的飞书登录用户。</p></div>
       </aside>
       <main class="admin-v2-main">
@@ -191,7 +193,7 @@
       $("#quizBankDropZone").addEventListener("drop", (event) => selectQuizBankFile(event.dataTransfer.files[0]));
       $("#quizBankForm").addEventListener("submit", (event) => event.preventDefault());
       $("#toggleVersionHistory").addEventListener("click", async () => { const history = $("#versionHistory"); const opening = history.hidden; history.hidden = !opening; $("#toggleVersionHistory").textContent = opening ? "收起版本记录" : "查看版本记录"; if (opening) await loadVersionHistory(); });
-      document.querySelectorAll(".admin-v2-nav button[data-view]").forEach((button) => button.addEventListener("click", () => setView(button.dataset.view))); $("#adminLogoutButton").addEventListener("click", async () => { await fetch("/api/auth/logout", { method: "POST" }).catch(() => null); location.href = "/admin-login.html?role=admin&next=%2Fadmin.html"; }); $("#taskSelect").addEventListener("change", (event) => loadOverview(event.target.value)); $("#openTaskModal").addEventListener("click", openModal); document.querySelectorAll("[data-open-modal]").forEach((button) => button.addEventListener("click", openModal)); $("#closeTaskModal").addEventListener("click", closeModal); $("#taskModal").addEventListener("click", (event) => { if (event.target === event.currentTarget) closeModal(); });
+      document.querySelectorAll(".admin-v2-nav button[data-view]").forEach((button) => button.addEventListener("click", () => setView(button.dataset.view))); $("#adminLogoutButton").addEventListener("click", async () => { await fetch("/api/auth/logout", { method: "POST" }).catch(() => null); try { localStorage.removeItem("nsg_token"); } catch (e) {} location.href = "/admin-login.html?role=admin&next=%2Fadmin.html"; }); $("#taskSelect").addEventListener("change", (event) => loadOverview(event.target.value)); $("#openTaskModal").addEventListener("click", openModal); document.querySelectorAll("[data-open-modal]").forEach((button) => button.addEventListener("click", openModal)); $("#closeTaskModal").addEventListener("click", closeModal); $("#taskModal").addEventListener("click", (event) => { if (event.target === event.currentTarget) closeModal(); });
       $("#roleForm").addEventListener("submit", async (event) => { event.preventDefault(); const form = event.currentTarget; const data = new FormData(form); const message = $("#roleMessage"); message.textContent = "正在保存授权…"; try { const result = await request("/api/admin/users", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: data.get("id"), name: data.get("name"), role: data.get("role"), status: data.get("status"), feishuUserId: data.get("feishuUserId"), username: data.get("username"), password: data.get("password") }) }); state.users = result.users || []; renderRoleUsers(); form.reset(); form.elements.id.value = ""; message.textContent = "授权已保存。"; } catch (error) { message.textContent = error.message; } });
       $("#taskForm").addEventListener("submit", async (event) => { event.preventDefault(); const taskForm = event.currentTarget; const form = new FormData(taskForm); const categories = form.getAll("categories"); const targetScopes = form.getAll("targetScopes"); const message = $("#formMessage"); if (!targetScopes.length) { message.textContent = "请选择至少一个适用年级。"; return; } if (!categories.length) { message.textContent = "请选择至少一个学习主题。"; return; } message.textContent = "正在发布…"; try { const data = await request("/api/admin/quiz-tasks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title: form.get("title"), targetScopes, expectedCount: form.get("expectedCount"), categories, questionCount: form.get("questionCount"), passScore: form.get("passScore"), startsAt: form.get("startsAt"), endsAt: form.get("endsAt") }) }); taskForm.reset(); message.textContent = ""; closeModal(); await loadOverview(data.task.id); } catch (error) { message.textContent = error.message; } });
       const resetRoleForm = () => { $('#roleForm').reset(); $('#roleForm').elements.id.value = ''; $('#roleForm').querySelectorAll('input').forEach((input) => input.value = ''); $('#roleMessage').textContent = ''; };
