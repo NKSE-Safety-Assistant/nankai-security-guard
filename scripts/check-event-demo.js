@@ -24,26 +24,27 @@ function pass(label, detail) {
   if (health.service !== 'nankai-security-guard' || health.databaseMode !== 'mysql') throw new Error('服务未以 MySQL 模式启动');
   pass('服务与数据库模式', 'MySQL');
 
-  await readPage('/knowledge.html', '知识学习');
-  pass('知识学习页面');
+  const learningPage = await fetch(baseUrl + '/knowledge.html', { redirect: 'manual' });
+  if (learningPage.status !== 302 || learningPage.headers.get('location') !== '/api/auth/login?role=student') {
+    throw new Error('学生学习入口未跳转到飞书认证');
+  }
+  pass('学生学习入口要求飞书登录');
 
   await readPage('/help.html', '一键求助');
   pass('一键求助页面');
 
-  const bank = await readJson('/api/quiz-questions');
+  const bank = await readJson('/data/quiz-questions.json');
   const questions = Array.isArray(bank.questions) ? bank.questions : [];
   const fireQuestions = questions.filter((item) => item.category === '消防安全');
   if (questions.length < 1) throw new Error('题库为空');
   if (fireQuestions.length < 10) throw new Error(`消防安全题目仅 ${fireQuestions.length} 道`);
   pass('消防题库', `${fireQuestions.length} 道消防题，题库共 ${questions.length} 道`);
 
-  const taskPayload = await readJson('/api/quiz-task/active');
-  const tasks = Array.isArray(taskPayload.tasks) ? taskPayload.tasks : [];
-  const fireTask = tasks.find((task) => Array.isArray(task.categories) && task.categories.includes('消防安全'));
-  if (!fireTask) throw new Error('没有可用的消防安全学习任务');
-  pass('消防学习任务', `${fireTask.title} · ${fireTask.questionCount} 题`);
+  const taskResponse = await fetch(baseUrl + '/api/quiz-task/active');
+  if (taskResponse.status !== 401) throw new Error('学习任务接口未要求学生登录');
+  pass('个人学习任务接口要求学生登录');
 
-  const cases = await readJson('/api/cases');
+  const cases = await readJson('/api/cases?status=approved');
   const bundledCases = await readJson('/data/safety-cases.json');
   const caseItems = Array.isArray(cases) ? cases : Array.isArray(cases.cases) ? cases.cases : [];
   const bundledItems = Array.isArray(bundledCases.cases) ? bundledCases.cases : [];
@@ -69,7 +70,7 @@ function pass(label, detail) {
   if (visibleCases.slice(0, 3).some((item) => item.safetyType !== '消防安全')) throw new Error('前 3 个情景未全部按消防主题排序');
   pass('安全案例', `${visibleCases.length} 条可展示案例，前 3 个均为不同消防情景`);
 
-  console.log('\n自检完成：现场演示核心链路可用。\n');
+  console.log('\n自检完成。个人任务和成绩请用飞书学生账号验收。\n');
 })().catch((error) => {
   console.error(`\n  [失败] ${error.message}`);
   console.error('  请确认 MySQL 服务和本地项目均已启动，再重新运行自检。\n');

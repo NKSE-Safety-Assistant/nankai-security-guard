@@ -1438,6 +1438,9 @@ body.knowledge-help-preview {
 #learningTaskCards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .knowledge-task-card { position: relative; display: grid; align-content: start; min-height: 220px; padding: 22px; border: 1px solid #d9e4e1; border-radius: 14px; background: #fff; box-shadow: 0 4px 16px #14244006; transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease; }
 .knowledge-task-card:hover { transform: translateY(-2px); border-color: #94bdb1; box-shadow: 0 10px 24px #1424400d; }
+#learningProfileForm[hidden] { display: none; }
+#learningProfileForm { gap: 8px; margin-bottom: 16px; }
+#learningProfileForm label { display: grid; gap: 4px; max-width: 260px; }
 .knowledge-task-status { display: inline-flex; justify-self: start; padding: 5px 10px; border-radius: 7px; background: #e8f4ef; color: #176b58; font-size: 12px; font-weight: 750; }
 .knowledge-task-card h3 { margin: 14px 0 8px; font-size: 21px; line-height: 1.35; color: #162b33; }
 .knowledge-task-card p { margin: 5px 0; color: #657772; font-size: 14px; line-height: 1.65; }

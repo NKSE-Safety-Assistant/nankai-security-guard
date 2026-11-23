@@ -10,7 +10,6 @@ if errorlevel 1 (
 )
 set "DB_MODE=json"
 set "PORT=8021"
-set "FEISHU_AUTH_REQUIRED=false"
 echo 正在启动南开校园安全卫士...
 echo 启动后请访问 http://localhost:8021/
 start "" "http://localhost:8021/"

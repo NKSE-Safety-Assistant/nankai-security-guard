@@ -26,15 +26,17 @@
             <p id="loginMessage" role="status"></p>
           </form>
           <div class="admin-login-divider"><span>其他登录方式</span></div>
-          <a id="feishuLoginLink" class="admin-login-feishu" href="/api/auth/login?role=admin&next=%2Fadmin.html">飞书授权登录</a>
+          <a id="feishuLoginLink" class="admin-login-feishu" href="/api/auth/login?role=admin">飞书授权登录</a>
         </section>
       </section>
       <footer class="login-footer"><p class="admin-login-tip">仅限已授权的工作人员使用</p><a class="admin-login-back" href="knowledge.html">返回学生学习平台</a></footer>
     </main>
     <script>
       const params = new URLSearchParams(location.search);
-      const next = params.get("next") || "/admin.html";
-      const role = params.get("role") || (next.includes("editor") ? "editor" : next.includes("reviewer") ? "reviewer" : "admin");
+      const workspaces = { admin: "/admin.html", editor: "/editor.html", reviewer: "/reviewer.html" };
+      const requestedRole = params.get("role") || Object.keys(workspaces).find((key) => workspaces[key] === params.get("next"));
+      const role = Object.hasOwn(workspaces, requestedRole) ? requestedRole : "admin";
+      const next = workspaces[role];
       const accountText = { admin: "管理员账号", reviewer: "审核员账号", editor: "编辑员账号" };
       const titleText = { admin: "管理员登录", reviewer: "审核员登录", editor: "编辑员登录" };
       const message = document.querySelector("#loginMessage");
@@ -50,7 +52,7 @@
       document.querySelector("#usernameLabel").textContent = accountText[role] || "后台账号";
       document.querySelector("#passwordLabel").textContent = (accountText[role] || "后台账号") + "密码";
       document.querySelector("#loginUsername").placeholder = accountText[role] || "后台账号";
-      document.querySelector("#feishuLoginLink").href = "/api/auth/login?role=" + encodeURIComponent(role) + "&next=" + encodeURIComponent(next);
+      document.querySelector("#feishuLoginLink").href = "/api/auth/login?role=" + encodeURIComponent(role);
       document.querySelector(`[data-login-role="${role}"]`)?.setAttribute("aria-current", "page");
       function clearLoginFields() {
         document.querySelector("#loginUsername").value = "";

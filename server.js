@@ -32,13 +32,20 @@ const quizBankPath = path.join(dataDir, "quiz-questions.json");
 const quizUploadDir = path.join(dataDir, "quiz-uploads");
 const adminAccountsPath = path.join(dataDir, "admin-accounts.json");
 
-const protectedPages = { "/editor.html": "editor", "/reviewer.html": "reviewer", "/admin.html": "admin", "/knowledge.html": "student" };
+const loginDestinations = { editor: "/editor.html", reviewer: "/reviewer.html", admin: "/admin.html", student: "/knowledge.html" };
+const protectedPages = Object.fromEntries(Object.entries(loginDestinations).map(([role, page]) => [page, role]));
+const publicFiles = new Set([
+  "/index.html", "/admin-login.html", "/help.html", "/help_new.html", "/help/index.html",
+  "/app.js", "/admin-tasks.js", "/case-workspace.js", "/staff-workspace.js", "/static-auth-guard.js",
+  "/styles.css", "/preview-unify.css", "/help-center.css", "/staff-login.css", "/admin-tasks.css",
+  "/case-workspace.css", "/deck-admin.css", "/deck-cases.css", "/deck-shell.css", "/deck-tokens.css",
+  "/staff-readable.css", "/staff-workspace.css",
+  "/data/safety-cases.json", "/data/quiz-questions.json", "/data/demo-learning-tasks.json"
+]);
+const oauthLifetime = 300;
 const oauthStates = new Map();
+const temporarySessionKey = crypto.randomBytes(32);
 const notificationDedupes = new Map();
-
-function authRequired() {
-  return String(process.env.FEISHU_AUTH_REQUIRED || "true").toLowerCase() !== "false";
-}
 
 function publicBaseUrl() {
   return (process.env.PUBLIC_BASE_URL || ("http://localhost:" + port)).replace(/\/$/, "");
@@ -49,25 +56,39 @@ function feishuAuthConfig() {
   return {
     appId: process.env.FEISHU_APP_ID || "",
     appSecret: process.env.FEISHU_APP_SECRET || "",
+    tenantKey: process.env.FEISHU_TENANT_KEY?.trim() || "",
     redirectUri: process.env.FEISHU_REDIRECT_URI || (baseUrl + "/api/auth/callback"),
     scope: process.env.FEISHU_SCOPE || "",
-    sessionSecret: process.env.SESSION_SECRET || process.env.FEISHU_APP_SECRET || "dev-session-secret"
+    sessionSecret: process.env.SESSION_SECRET?.length >= 32 && process.env.SESSION_SECRET !== "change-this-random-session-secret"
+      ? process.env.SESSION_SECRET : temporarySessionKey
   };
 }
 
 function parseCookies(request) {
   const header = request.headers.cookie || "";
-  const result = {};
+  const result = Object.create(null);
   for (const part of header.split(";")) {
     const index = part.indexOf("=");
     if (index < 0) continue;
-    result[part.slice(0, index).trim()] = decodeURIComponent(part.slice(index + 1).trim());
+    try {
+      result[part.slice(0, index).trim()] = decodeURIComponent(part.slice(index + 1).trim());
+    } catch {
+      // Ignore malformed cookie values from the browser.
+    }
   }
   return result;
 }
 
 function base64Url(value) { return Buffer.from(value).toString("base64url"); }
-function signPayload(payload) { return crypto.createHmac("sha256", feishuAuthConfig().sessionSecret).update(payload).digest("base64url"); }
+function signPayload(payload) {
+  const { sessionSecret, appId, tenantKey } = feishuAuthConfig();
+  return crypto.createHmac("sha256", sessionSecret).update(JSON.stringify([appId, tenantKey, payload])).digest("base64url");
+}
+
+function authCookie(name, value, maxAge, cookiePath = "/") {
+  const secure = [publicBaseUrl(), feishuAuthConfig().redirectUri].some((url) => url.startsWith("https://"));
+  return `${name}=${encodeURIComponent(value)}; Path=${cookiePath}; Max-Age=${maxAge}; HttpOnly; SameSite=Lax${secure ? "; Secure" : ""}`;
+}
 
 function makeSessionCookie(user) {
   const roles = Array.isArray(user.roles) && user.roles.length ? user.roles : String(user.role || "").split(",").map((item) => item.trim()).filter(Boolean);
@@ -75,112 +96,123 @@ function makeSessionCookie(user) {
   return payload + "." + signPayload(payload);
 }
 
-function readSession(request, options = {}) {
+function readSession(request) {
   const token = parseCookies(request).nsg_session;
-  if (!token || !token.includes(".")) {
-    if (!authRequired() && !options.disableDevSession) return { feishuUserId: "dev", name: "开发模式", role: "admin" };
-    return null;
-  }
+  if (!token || !token.includes(".")) return null;
   const parts = token.split(".");
   const payload = parts[0];
   const signature = parts[1];
-  if (signPayload(payload) !== signature) {
-    if (!authRequired() && !options.disableDevSession) return { feishuUserId: "dev", name: "开发模式", role: "admin" };
+  const expected = Buffer.from(signPayload(payload));
+  const actual = Buffer.from(signature);
+  if (parts.length !== 2 || expected.length !== actual.length || !crypto.timingSafeEqual(expected, actual)) {
     return null;
   }
   try {
     const session = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    if (!session.exp || session.exp < Date.now()) {
-      if (!authRequired() && !options.disableDevSession) return { feishuUserId: "dev", name: "开发模式", role: "admin" };
-      return null;
-    }
+    if (!session.exp || session.exp < Date.now()) return null;
     return session;
-  } catch (error) {
-    if (!authRequired() && !options.disableDevSession) return { feishuUserId: "dev", name: "开发模式", role: "admin" };
+  } catch {
     return null;
   }
 }
 
 function sessionRoles(session) {
   if (!session) return [];
-  const cookieRoles = Array.isArray(session.roles) ? session.roles : String(session.role || "").split(",").map((item) => item.trim()).filter(Boolean);
-  const merged = new Set(cookieRoles);
-  if (session.feishuUserId && dbAdapter.mysqlEnabled()) {
-    const databaseUser = dbAdapter.findMysqlUserByFeishuId(session.feishuUserId);
-    if (databaseUser && databaseUser.status === "active") {
-      String(databaseUser.role || "").split(",").map((item) => item.trim()).filter(Boolean).forEach((role) => merged.add(role));
-    }
+  if (session.authType === "password") {
+    const account = dbAdapter.mysqlEnabled() ? dbAdapter.findMysqlAdminAccountByUsername(session.username) : readJsonAdminAccount(session.username);
+    return account?.status === "active" ? [account.role] : [];
   }
-  return Array.from(merged);
+  const account = dbAdapter.mysqlEnabled() && dbAdapter.findMysqlUserByFeishuId(session.feishuUserId);
+  return account?.status === "active" ? String(account.role || "").split(",").map((role) => role.trim()).filter(Boolean) : [];
 }
 
 function roleAllowed(session, requiredRole) {
-  if (!authRequired() && (requiredRole === "student" || requiredRole === "any")) return true;
   if (!session) return false;
-  if (requiredRole === "any") return true;
+  if (session.role === "student" || requiredRole === "student") {
+    return requiredRole === "student" && session.role === "student" && session.authType === "feishu" && Boolean(session.feishuUserId);
+  }
   const roles = sessionRoles(session);
+  if (requiredRole === "any") return roles.length > 0;
   return roles.includes(requiredRole);
 }
 
 function redirect(response, location, cookies = []) {
-  response.writeHead(302, { Location: location, "Set-Cookie": cookies });
+  response.writeHead(302, { Location: location, "Set-Cookie": cookies, "Cache-Control": "no-store" });
   response.end();
 }
 
 function sendAuthError(response, status, title, message) {
-  response.writeHead(status, { "Content-Type": "text/html; charset=utf-8" });
-  const html = `<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><title>${title}</title><link rel="stylesheet" href="/styles.css"></head><body><main class="admin-console"><section class="admin-toolbar"><div><p class="eyebrow">Access</p><h1>${title}</h1><p>${message}</p></div></section></main></body></html>`;
+  const escapeHtml = (value) => String(value).replace(/[&<>]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[char]);
+  response.writeHead(status, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "Referrer-Policy": "no-referrer" });
+  const html = `<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(title)}</title><link rel="stylesheet" href="/staff-login.css"></head><body><main class="admin-login-shell"><section class="admin-login-card"><div class="admin-login-panel admin-login-heading"><h1>${escapeHtml(title)}</h1><p>${escapeHtml(message)}</p><a class="admin-login-back" href="/">返回学生入口</a> · <a class="admin-login-back" href="/admin-login.html">返回工作人员入口</a></div></section></main></body></html>`;
   response.end(html);
 }
 
-function authLoginUrl(role, next) {
+function startFeishuLogin(response, role) {
   const config = feishuAuthConfig();
-  if (!config.appId || !config.appSecret) return "";
+  if (!config.appId || !config.appSecret) {
+    sendAuthError(response, 503, "飞书登录未配置", "请配置 FEISHU_APP_ID、FEISHU_APP_SECRET，并在飞书开放平台登记回调地址 " + config.redirectUri);
+    return;
+  }
+  const now = Date.now();
+  for (const [key, pending] of oauthStates) {
+    if (pending.expiresAt > now) break;
+    oauthStates.delete(key);
+  }
+  if (oauthStates.size >= 5000) {
+    sendAuthError(response, 503, "登录请求过多", "请稍后重新发起飞书登录。");
+    return;
+  }
   const state = crypto.randomBytes(18).toString("hex");
-  oauthStates.set(state, { role, next, createdAt: Date.now() });
+  const verifier = crypto.randomBytes(32).toString("base64url");
+  oauthStates.set(state, { role, verifier, expiresAt: now + oauthLifetime * 1000 });
   const url = new URL("https://accounts.feishu.cn/open-apis/authen/v1/authorize");
   url.searchParams.set("client_id", config.appId);
   url.searchParams.set("response_type", "code");
   url.searchParams.set("redirect_uri", config.redirectUri);
   url.searchParams.set("state", state);
+  url.searchParams.set("code_challenge", crypto.createHash("sha256").update(verifier).digest("base64url"));
+  url.searchParams.set("code_challenge_method", "S256");
   if (config.scope) url.searchParams.set("scope", config.scope);
-  return url.href;
+  redirect(response, url.href, [authCookie("nsg_oauth", state, oauthLifetime, "/api/auth/callback")]);
 }
 
-async function exchangeFeishuCode(code) {
+async function exchangeFeishuCode(code, verifier) {
   const config = feishuAuthConfig();
   const tokenResponse = await fetch("https://open.feishu.cn/open-apis/authen/v2/oauth/token", {
     method: "POST",
     headers: { "Content-Type": "application/json; charset=utf-8" },
-    body: JSON.stringify({ grant_type: "authorization_code", client_id: config.appId, client_secret: config.appSecret, code, redirect_uri: config.redirectUri })
+    redirect: "error",
+    signal: AbortSignal.timeout(10000),
+    body: JSON.stringify({ grant_type: "authorization_code", client_id: config.appId, client_secret: config.appSecret, code, redirect_uri: config.redirectUri, code_verifier: verifier })
   });
   const tokenData = await tokenResponse.json();
-  if (!tokenResponse.ok || tokenData.code !== 0 || !tokenData.access_token) throw new Error(tokenData.error_description || tokenData.msg || "飞书授权失败");
+  if (!tokenResponse.ok || tokenData.code !== 0 || typeof tokenData.access_token !== "string" || !tokenData.access_token) throw new Error("Feishu token exchange failed");
   const userResponse = await fetch("https://open.feishu.cn/open-apis/authen/v1/user_info", {
-    headers: { Authorization: "Bearer " + tokenData.access_token, "Content-Type": "application/json; charset=utf-8" }
+    redirect: "error",
+    signal: AbortSignal.timeout(10000),
+    headers: { Authorization: "Bearer " + tokenData.access_token }
   });
   const userData = await userResponse.json();
-  if (!userResponse.ok || userData.code !== 0 || !userData.data) throw new Error(userData.msg || "飞书用户信息读取失败");
+  if (!userResponse.ok || userData.code !== 0 || !userData.data) throw new Error("Feishu user info failed");
   return userData.data;
 }
 
-async function feishuUserToLocalUser(feishuUser, requestedRole = "reviewer") {
-  const feishuUserId = feishuUser.open_id || feishuUser.union_id || feishuUser.user_id;
+function feishuUserToLocalUser(feishuUser, requestedRole) {
+  const feishuUserId = feishuUser.open_id;
   const name = feishuUser.name || feishuUser.en_name || "Feishu user";
-  if (!feishuUserId) return null;
-  if (requestedRole === "student") {
-    const student = dbAdapter.upsertMysqlStudent(feishuUserId, name);
-    dbAdapter.upsertMysqlStudentProfile({ feishuUserId, name });
-    return student;
-  }
-  const matched = dbAdapter.findMysqlUserByFeishuId(feishuUserId);
-  if (!matched || matched.status !== "active") return null;
+  const matched = dbAdapter.mysqlEnabled() && dbAdapter.findMysqlUserByFeishuId(feishuUserId);
+  if (matched?.status !== "active" || !String(matched.role).split(",").map((role) => role.trim()).includes(requestedRole)) return null;
   return dbAdapter.markMysqlUserLogin(feishuUserId, name);
 }
 
 function requireApiRole(request, response, role) {
-  const session = readSession(request, { disableDevSession: !["student", "any"].includes(role) });
+  const session = readSession(request);
   if (roleAllowed(session, role)) return session;
+  if (role === "student") {
+    sendJson(response, 401, { error: "请使用飞书登录学生学习平台。" });
+    return null;
+  }
   sendJson(response, session ? 403 : 401, { error: session ? "权限不足：当前账号没有 " + role + " 权限，请重新登录或检查 admin_users 表。" : "未登录" });
   return null;
 }
@@ -1306,8 +1338,10 @@ function parseMultipartUpload(buffer, contentType) {
   throw new Error("未找到要上传的题库文件");
 }
 
-function eligibleQuizTasks(session) {
+function eligibleQuizTasks(session, profile) {
   if (!dbAdapter.mysqlEnabled() || !session.feishuUserId) return [];
+  if (profile === undefined) profile = dbAdapter.findMysqlStudentProfileByFeishuId(session.feishuUserId);
+  if (!profile || profile.status !== 'active' || !profile.grade || !profile.studyStage) return [];
   const now = Date.now();
   const taskTime = (value) => {
     if (!value) return null;
@@ -1327,13 +1361,6 @@ function eligibleQuizTasks(session) {
     (!task.startsAt || (taskTime(task.startsAt) !== null && taskTime(task.startsAt) <= now)) &&
     (!task.endsAt || (taskTime(task.endsAt) !== null && taskTime(task.endsAt) >= now))
   ).sort((left, right) => taskPriority(left) - taskPriority(right) || String(right.createdAt).localeCompare(String(left.createdAt)));
-  const profile = dbAdapter.findMysqlStudentProfileByFeishuId(session.feishuUserId);
-  // 飞书首次登录只会创建基础身份，尚没有学段和年级填写入口。
-  // 在资料补全前展示全部有效任务，避免飞书菜单进入后一直显示空任务；
-  // 资料完整后再按学段和年级严格筛选。
-  if (!profile || profile.status !== 'active' || !profile.grade || !profile.studyStage) {
-    return activeTasks;
-  }
   const scope = (profile.studyStage + profile.grade + '级').replace(/\s/g, '');
   return activeTasks.filter((task) => task.targetScope.split('、').some((value) => value.replace(/\s/g, '') === scope));
 }
@@ -1344,7 +1371,8 @@ async function handleApi(request, response, url) {
       service: "nankai-security-guard",
       status: "ok",
       databaseMode: dbAdapter.mysqlEnabled() ? "mysql" : "json",
-      authenticationRequired: authRequired()
+      authenticationRequired: true,
+      studentAuthenticationRequired: true
     });
     return true;
   }
@@ -1352,11 +1380,31 @@ async function handleApi(request, response, url) {
   if (url.pathname === "/api/quiz-task/active" && request.method === "GET") {
     const session = requireApiRole(request, response, "student");
     if (!session) return true;
-    const tasks = eligibleQuizTasks(session).map((task) => {
+    const profile = dbAdapter.findMysqlStudentProfileByFeishuId(session.feishuUserId);
+    const tasks = eligibleQuizTasks(session, profile).map((task) => {
       const latest = dbAdapter.readMysqlQuizAttempts(task.id).find((attempt) => attempt.studentFeishuUserId === session.feishuUserId);
       return { ...task, completion: latest ? { score: latest.score, completedAt: latest.completedAt, passed: latest.score >= task.passScore } : null };
     });
-    sendJson(response, 200, { task: tasks[0] || null, tasks });
+    response.setHeader("Cache-Control", "no-store");
+    sendJson(response, 200, { task: tasks[0] || null, tasks, needsProfile: !profile?.grade || !profile?.studyStage });
+    return true;
+  }
+
+  if (url.pathname === "/api/student/learning-profile" && request.method === "POST") {
+    const session = requireApiRole(request, response, "student");
+    if (!session) return true;
+    const { studyStage, grade } = await readRequestBody(request);
+    if (!["本科生", "研究生"].includes(studyStage) || typeof grade !== "string" || !/^20\d{2}$/.test(grade)) {
+      sendJson(response, 422, { error: "请选择学段，并填写四位入学年份。" });
+      return true;
+    }
+    const profile = dbAdapter.findMysqlStudentProfileByFeishuId(session.feishuUserId);
+    if (profile?.studyStage && profile?.grade) {
+      sendJson(response, 409, { error: "学习资料已填写。需要更正时，请联系工作人员。" });
+      return true;
+    }
+    dbAdapter.upsertMysqlStudentProfile({ feishuUserId: session.feishuUserId, name: session.name, studyStage: profile?.studyStage || studyStage, grade: profile?.grade || grade });
+    sendJson(response, 200, { ok: true });
     return true;
   }
 
@@ -1596,12 +1644,14 @@ async function handleApi(request, response, url) {
 
   if (url.pathname === "/api/auth/me" && request.method === "GET") {
     const session = readSession(request);
-    sendJson(response, session ? 200 : 401, session ? { user: session } : { error: "未登录" });
+    const signedIn = roleAllowed(session, "student") || roleAllowed(session, "any");
+    response.setHeader("Cache-Control", "no-store");
+    sendJson(response, signedIn ? 200 : 401, signedIn ? { user: session } : { error: "未登录" });
     return true;
   }
 
   if (url.pathname === "/api/auth/logout" && request.method === "POST") {
-    response.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Set-Cookie": "nsg_session=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax" });
+    response.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Set-Cookie": authCookie("nsg_session", "", 0) });
     response.end(JSON.stringify({ ok: true }));
     return true;
   }
@@ -1633,48 +1683,70 @@ async function handleApi(request, response, url) {
       sendJson(response, 403, { error: "当前账号没有访问该工作台的权限。" });
       return true;
     }
-    const cookie = "nsg_session=" + encodeURIComponent(makeSessionCookie(localUser)) + "; Path=/; HttpOnly; SameSite=Lax; Max-Age=43200";
-    response.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Set-Cookie": cookie });
+    const cookie = authCookie("nsg_session", makeSessionCookie(localUser), 43200);
+    response.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Set-Cookie": cookie, "Cache-Control": "no-store" });
     response.end(JSON.stringify({ ok: true, user: { name: localUser.name, role: localUser.role }, next: body.next || "/admin.html" }));
     return true;
   }
 
   if (url.pathname === "/api/auth/login" && request.method === "GET") {
     const role = url.searchParams.get("role") || "reviewer";
-    const next = url.searchParams.get("next") || (role === "editor" ? "/editor.html" : role === "student" ? "/knowledge.html" : role === "admin" ? "/admin.html" : "/reviewer.html");
-    const loginUrl = authLoginUrl(role, next);
-    if (!loginUrl) {
-      sendAuthError(response, 503, "飞书登录未配置", "请在 .env 中填写 FEISHU_APP_ID、FEISHU_APP_SECRET、PUBLIC_BASE_URL，并在飞书开放平台配置回调地址。需要配置的回调地址是：" + feishuAuthConfig().redirectUri);
+    if (!Object.hasOwn(loginDestinations, role)) {
+      sendAuthError(response, 400, "登录身份无效", "请从本站登录入口重新选择身份。");
       return true;
     }
-    redirect(response, loginUrl);
+    startFeishuLogin(response, role);
     return true;
   }
 
   if (url.pathname === "/api/auth/callback" && request.method === "GET") {
-    try {
-      if (url.searchParams.get("error")) throw new Error("飞书授权被取消");
-      const code = url.searchParams.get("code");
-      const state = url.searchParams.get("state");
-      const saved = state ? oauthStates.get(state) : null;
-      if (!code || !saved || Date.now() - saved.createdAt > 5 * 60 * 1000) throw new Error("登录状态已过期，请重新登录");
-      oauthStates.delete(state);
-      const feishuUser = await exchangeFeishuCode(code);
-      const localUser = await feishuUserToLocalUser(feishuUser, saved.role);
-      if (!localUser) {
-        const feishuId = feishuUser.open_id || feishuUser.union_id || feishuUser.user_id || "未知";
-        sendAuthError(response, 403, "无访问权限", "当前飞书账号未加入后台用户表，飞书用户 ID：" + feishuId + "。请管理员在 admin_users 表中配置该 ID 和角色。");
-        return true;
-      }
-      if (!roleAllowed(localUser, saved.role)) {
-        sendAuthError(response, 403, "角色权限不足", "当前账号角色为 " + localUser.role + "，不能访问该工作台。");
-        return true;
-      }
-      const cookie = "nsg_session=" + encodeURIComponent(makeSessionCookie(localUser)) + "; Path=/; HttpOnly; SameSite=Lax; Max-Age=43200";
-      redirect(response, saved.next || "/reviewer.html", [cookie]);
+    response.setHeader("Referrer-Policy", "no-referrer");
+    const state = url.searchParams.get("state");
+    const saved = state ? oauthStates.get(state) : null;
+    if (!saved || saved.expiresAt <= Date.now() || parseCookies(request).nsg_oauth !== state) {
+      sendAuthError(response, 400, "登录状态无效", "请在发起登录的浏览器中重新开始飞书登录。");
       return true;
-    } catch (error) {
-      sendAuthError(response, 500, "飞书登录失败", error.message);
+    }
+    oauthStates.delete(state);
+    const clearState = authCookie("nsg_oauth", "", 0, "/api/auth/callback");
+    response.setHeader("Set-Cookie", clearState);
+    const code = url.searchParams.get("code");
+    if (url.searchParams.has("error") || !code) {
+      sendAuthError(response, 400, "飞书授权未完成", "请返回登录入口重新授权。");
+      return true;
+    }
+    try {
+      const feishuUser = await exchangeFeishuCode(code, saved.verifier);
+      const { tenantKey } = feishuAuthConfig();
+      if (tenantKey && feishuUser.tenant_key !== tenantKey) {
+        sendAuthError(response, 403, "飞书组织验证失败", "请切换到南开大学组织账号后重新登录。");
+        return true;
+      }
+      if (typeof feishuUser.open_id !== "string" || !feishuUser.open_id) {
+        sendAuthError(response, 502, "飞书身份读取失败", "飞书未返回当前应用的用户标识，请联系管理员。");
+        return true;
+      }
+      let localUser;
+      if (saved.role === "student") {
+        if (!dbAdapter.mysqlEnabled()) {
+          sendAuthError(response, 503, "学生学习服务未配置", "请联系工作人员启用 MySQL 学习记录服务。");
+          return true;
+        }
+        const name = feishuUser.name || feishuUser.en_name || "飞书用户";
+        localUser = dbAdapter.upsertMysqlStudent(feishuUser.open_id, name);
+        dbAdapter.upsertMysqlStudentProfile({ feishuUserId: feishuUser.open_id, name });
+      } else {
+        localUser = feishuUserToLocalUser(feishuUser, saved.role);
+      }
+      if (!localUser) {
+        sendAuthError(response, 403, "无工作台权限", "请联系管理员为该应用的飞书用户 ID 配置对应角色。当前用户 ID 为 " + feishuUser.open_id + "。");
+        return true;
+      }
+      const cookie = authCookie("nsg_session", makeSessionCookie(localUser), 43200);
+      redirect(response, loginDestinations[saved.role], [clearState, cookie]);
+      return true;
+    } catch {
+      sendAuthError(response, 502, "飞书登录暂时失败", "请重试。如果问题持续，请联系管理员检查飞书应用配置和后端服务。");
       return true;
     }
   }
@@ -1755,9 +1827,14 @@ async function handleApi(request, response, url) {
     return true;
   }
   if (url.pathname === "/api/cases" && request.method === "GET") {
+    const status = url.searchParams.get("status");
+    if (status === "approved") {
+      const cases = readDatabase().cases.filter((item) => normalizeStatus(item.reviewStatus) === "approved");
+      sendJson(response, 200, { cases });
+      return true;
+    }
     if (!requireApiRole(request, response, "any")) return true;
     const database = readDatabase();
-    const status = url.searchParams.get("status");
     const cases = status ? database.cases.filter((item) => normalizeStatus(item.reviewStatus) === status) : database.cases;
     sendJson(response, 200, { ...database, cases });
     return true;
@@ -1963,62 +2040,22 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
-    const urlPath = decodeURIComponent(requestUrl.pathname);
-    const safePath = path.normalize(urlPath).replace(/\\/g, "/").replace(/^(\.\.[/\\])+/, "");
-    const requestedPath = safePath === "/" ? "/index.html" : safePath;
-    const requiredPageRole = protectedPages[requestedPath];
-    const requiresStaffLogin = ["admin", "editor", "reviewer"].includes(requiredPageRole);
-    if ((authRequired() || requiresStaffLogin) && requiredPageRole) {
-      const session = readSession(request, { disableDevSession: requiresStaffLogin });
-      if (!session) {
-        if (requiresStaffLogin) {
-          redirect(response, "/admin-login.html?role=" + encodeURIComponent(requiredPageRole) + "&next=" + encodeURIComponent(requestedPath));
-          return;
-        }
-        const loginUrl = authLoginUrl(requiredPageRole, requestedPath);
-        if (!loginUrl) {
-          sendAuthError(response, 503, "飞书登录未配置", "请在 .env 中填写 FEISHU_APP_ID、FEISHU_APP_SECRET、PUBLIC_BASE_URL，并在飞书开放平台配置回调地址：" + feishuAuthConfig().redirectUri);
-          return;
-        }
-        redirect(response, loginUrl);
+    let requestedPath = decodeURIComponent(requestUrl.pathname);
+    if (requestedPath === "/help/") requestedPath = "/help/index.html";
+    if (requestedPath === "/") requestedPath = "/index.html";
+    if (Object.hasOwn(protectedPages, requestedPath)) {
+      const role = protectedPages[requestedPath];
+      if (!roleAllowed(readSession(request), role)) {
+        const loginPath = role === "student" ? "/api/auth/login?role=student" : "/admin-login.html?role=" + role + "&next=" + encodeURIComponent(requestedPath);
+        redirect(response, loginPath);
         return;
       }
-      if (requiredPageRole === "student" && !roleAllowed(session, "student")) {
-        const loginUrl = authLoginUrl("student", requestedPath);
-        if (!loginUrl) {
-          sendAuthError(response, 503, "Feishu auth is not configured", "Please configure FEISHU_APP_ID, FEISHU_APP_SECRET and callback URL: " + feishuAuthConfig().redirectUri);
-          return;
-        }
-        redirect(response, loginUrl);
-        return;
-      }
-      if (requiredPageRole === "student" && roleAllowed(session, "student")) {
-        dbAdapter.upsertMysqlStudent(session.feishuUserId, session.name || "Feishu user");
-        dbAdapter.upsertMysqlStudentProfile({ feishuUserId: session.feishuUserId, name: session.name || "Feishu user" });
-      }
-      if (!roleAllowed(session, requiredPageRole)) {
-        if (requiresStaffLogin) {
-          redirect(response, "/admin-login.html?role=" + encodeURIComponent(requiredPageRole) + "&next=" + encodeURIComponent(requestedPath));
-          return;
-        }
-        const loginUrl = authLoginUrl(requiredPageRole, requestedPath);
-        if (loginUrl) {
-          redirect(response, loginUrl);
-          return;
-        }
-        sendAuthError(response, 403, "Role denied", "Current account cannot access this workspace.");
-        return;
-      }
-    }
-    const filePath = path.join(root, requestedPath);
-
-    if (!filePath.startsWith(root)) {
-      response.writeHead(403, { "Content-Type": "text/plain; charset=utf-8" });
-      response.end("禁止访问");
+    } else if (!publicFiles.has(requestedPath) && !/^\/assets\/(?:[\w-]+\/)*[\w-]+\.(?:png|jpe?g|svg|webp)$/.test(requestedPath)) {
+      response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+      response.end("文件不存在");
       return;
     }
-
-    sendFile(response, filePath);
+    sendFile(response, path.join(root, requestedPath));
   } catch (error) {
     sendJson(response, error.statusCode || 500, { error: error.statusCode ? error.message : "服务器处理失败" });
   }

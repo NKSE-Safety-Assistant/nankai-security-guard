@@ -101,11 +101,18 @@ async function loadQuizQuestions() {
 }
 
 async function loadActiveQuizTask() {
+  const profileForm = document.querySelector('#learningProfileForm');
+  if (profileForm) profileForm.hidden = true;
   try {
     const response = await fetch("/api/quiz-task/active", { cache: "no-store" });
+    if (response.status === 401) {
+      location.assign('/api/auth/login?role=student');
+      return;
+    }
     if (!response.ok) throw new Error("No active task");
     const payload = await response.json();
     availableLearningTasks = payload.tasks || (payload.task ? [payload.task] : []);
+    if (profileForm) profileForm.hidden = !payload.needsProfile;
     learningTasksError = '';
   } catch (error) {
     const staticShowcase = location.hostname.endsWith('.github.io') || location.protocol === 'file:';
@@ -134,6 +141,7 @@ function renderLearningTasks() {
   if (!container) return;
   container.replaceChildren();
   if (!availableLearningTasks.length) {
+    if (document.querySelector('#learningProfileForm')?.hidden === false) return;
     const empty = document.createElement('p');
     empty.className = 'knowledge-task-empty';
     empty.textContent = learningTasksError || '暂无与你的学段、年级匹配的学习任务，可进入日常学习。';
@@ -165,6 +173,34 @@ function renderLearningTasks() {
     card.append(status, title, scope, rule, themes, result, button); container.append(card);
   });
 }
+
+document.querySelector('#learningProfileForm')?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const button = form.querySelector('button');
+  const message = form.querySelector('#learningProfileMessage');
+  button.disabled = true;
+  message.textContent = '';
+  try {
+    const response = await fetch('/api/student/learning-profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.fromEntries(new FormData(form)))
+    });
+    if (response.status === 401) {
+      location.assign('/api/auth/login?role=student');
+      return;
+    }
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || '学习资料保存失败');
+    await loadActiveQuizTask();
+    renderLearningTasks();
+  } catch (error) {
+    message.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
 
 function setLearningEntry(entry) {
   learningEntry = entry;

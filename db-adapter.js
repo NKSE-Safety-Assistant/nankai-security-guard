@@ -562,7 +562,8 @@ function insertMysqlQuizAttempt(attempt, answers = []) {
 
 function readMysqlQuizAttempts(taskId = "") {
   initMysqlSchema();
-  const where = taskId ? " WHERE task_id = " + sqlString(taskId) : "";
+  const taskFilter = taskId ? " AND task_id = " + sqlString(taskId) : "";
+  const where = " WHERE student_feishu_user_id <> 'dev'" + taskFilter;
   const output = mysqlExec("SELECT id, COALESCE(task_id, ''), student_feishu_user_id, student_name, score, total_questions, correct_count, COALESCE(DATE_FORMAT(completed_at, '%Y-%m-%d %H:%i:%s'), '') FROM quiz_attempts" + where + " ORDER BY completed_at DESC;").trim();
   if (!output) return [];
   return output.split(/\r?\n/).filter(Boolean).map((line) => {
@@ -573,7 +574,8 @@ function readMysqlQuizAttempts(taskId = "") {
 
 function readMysqlQuizAttemptAnswers(taskId = "") {
   initMysqlSchema();
-  const join = taskId ? " INNER JOIN quiz_attempts qa ON qa.id = qaa.attempt_id WHERE qa.task_id = " + sqlString(taskId) : "";
+  const taskFilter = taskId ? " AND qa.task_id = " + sqlString(taskId) : "";
+  const join = " INNER JOIN quiz_attempts qa ON qa.id = qaa.attempt_id WHERE qa.student_feishu_user_id <> 'dev'" + taskFilter;
   const output = mysqlExec("SELECT qaa.attempt_id, qaa.question_id, qaa.category, COALESCE(qaa.selected_answers_json, CAST(qaa.selected_answer AS CHAR)), COALESCE(qaa.correct_answers_json, CAST(qaa.correct_answer AS CHAR)), qaa.is_correct FROM quiz_attempt_answers qaa" + join + ";").trim();
   if (!output) return [];
   return output.split(/\r?\n/).filter(Boolean).map((line) => {
