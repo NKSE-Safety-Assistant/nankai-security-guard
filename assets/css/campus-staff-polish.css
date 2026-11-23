@@ -1,0 +1,9 @@
+/* Staff site visual layer — intentionally does not change layout structure or business logic. */
+:root{--unified-purple:#6d427f;--unified-purple-deep:#321e42;--unified-ink:#2b2431;--unified-border:#e7e0e9;--unified-surface:#fff;--unified-soft:#f9f7fa}
+body{font-family:Inter,'PingFang SC','Microsoft YaHei',system-ui,sans-serif!important;-webkit-font-smoothing:antialiased}
+:where(.admin-v2-panel,.admin-v2-card,.staff-panel,.staff-card,.case-card,.dashboard-card,.login-card){border-radius:15px!important;box-shadow:0 12px 30px rgba(34,24,41,.07)!important}
+:where(.admin-v2-sidebar,.staff-sidebar){background:linear-gradient(165deg,#452e55,#291d34)!important}
+:where(.admin-v2-header,.staff-topbar){backdrop-filter:blur(12px);border-bottom-color:#eee6f0!important}
+:where(button,a,input,select,textarea):focus-visible{outline:2px solid #9a76b1!important;outline-offset:2px}
+:where(.admin-v2-nav button,.staff-sidebar-nav button,.admin-v2-btn,.staff-primary-btn){transition:background .2s ease,transform .2s ease,box-shadow .2s ease}
+:where(.admin-v2-btn,.staff-primary-btn):hover{transform:translateY(-1px)}

@@ -1,65 +1,65 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>南开安全卫士 - 审核员工作台</title>
-    <link rel="icon" type="image/png" href="assets/nankai-security-logo.png" />
-    <script src="static-auth-guard.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="deck-tokens.css?v=20261118-deck2" />
-    <link rel="stylesheet" href="deck-shell.css?v=20261118-deck2" />
-    <script src="staff-workspace.js?v=20261123-deploy" defer></script>
-    <script src="case-workspace.js?v=20261123-deploy" defer></script>
-    <link rel="stylesheet" href="deck-cases.css?v=20261118-deck2" />
-  </head>
-  <body class="staff-console-page" data-default-tab="admin">
-    <div class="staff-console-shell">
-      <aside class="staff-sidebar">
-        <div class="staff-sidebar-brand"><img src="assets/nankai-security-logo.png" alt="" aria-hidden="true" /><div><strong>审核员工作台</strong><small>案例审核发布</small></div></div>
-        <nav class="staff-sidebar-nav" aria-label="审核员功能导航">
-          <button type="button" id="caseReviewNavButton" aria-expanded="false"><span class="nav-label">案例审核</span></button>
-          <div class="staff-sidebar-subnav" id="caseReviewSubnav" aria-label="案例审核筛选" hidden>
-            <button class="active" type="button" data-reviewer-status="review"><span class="nav-label">待审核案例</span></button>
-            <button type="button" data-reviewer-status="approved"><span class="nav-label">已发布案例</span></button>
-          </div>
-          <button class="staff-sidebar-logout" type="button" id="sidebarLogoutButton"><span class="nav-label">退出登录</span></button>
-        </nav>
-        <p class="staff-sidebar-note">审核员负责核验案例内容，决定通过发布或退回修改。</p>
-      </aside>
-      <main class="admin-console staff-main">
-      <section class="admin-toolbar" aria-label="案例管理工具栏">
-        <div>
-          <h1>审核员工作台</h1>
-        </div>
-        <div class="admin-toolbar-actions">
-          <button class="secondary-button staff-hidden-action" type="button" id="logoutButton">退出登录</button>
-        </div>
-      </section>
-
-      <section class="admin-collection-strip" aria-label="采集状态">
-        <div class="admin-collection-grid" id="collectionStatusGrid">
-          <article><span>状态</span><strong>读取中</strong><p>正在连接后端。</p></article>
-        </div>
-      </section>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>南开安全卫士 - 审核员工作台</title>
+<link href="assets/nankai-security-logo.png" rel="icon" type="image/png"/>
+<script src="assets/js/static-auth-guard.js"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;family=Noto+Serif+SC:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="assets/css/deck-tokens.css?v=20261118-deck2" rel="stylesheet"/>
+<link href="assets/css/deck-shell.css?v=20261118-deck2" rel="stylesheet"/>
+<script defer="" src="assets/js/staff-workspace.js?v=20261123-deploy"></script>
+<script defer="" src="assets/js/case-workspace.js?v=20261123-deploy"></script>
+<link href="assets/css/deck-cases.css?v=20261118-deck2" rel="stylesheet"/>
+<link href="assets/css/unified-finish.css?v=20261123" rel="stylesheet"/>
+<link href="assets/css/campus-staff-polish.css?v=20261123b" rel="stylesheet"/></head>
+<body class="staff-console-page" data-default-tab="admin">
+<div class="staff-console-shell">
+<aside class="staff-sidebar">
+<div class="staff-sidebar-brand"><img alt="" aria-hidden="true" src="assets/nankai-security-logo.png"/><div><strong>审核员工作台</strong><small>案例审核发布</small></div></div>
+<nav aria-label="审核员功能导航" class="staff-sidebar-nav">
+<button aria-expanded="false" id="caseReviewNavButton" type="button"><span class="nav-label">案例审核</span></button>
+<div aria-label="案例审核筛选" class="staff-sidebar-subnav" hidden="" id="caseReviewSubnav">
+<button class="active" data-reviewer-status="review" type="button"><span class="nav-label">待审核案例</span></button>
+<button data-reviewer-status="approved" type="button"><span class="nav-label">已发布案例</span></button>
+</div>
+<button class="staff-sidebar-logout" id="sidebarLogoutButton" type="button"><span class="nav-label">退出登录</span></button>
+</nav>
+<p class="staff-sidebar-note">审核员负责核验案例内容，决定通过发布或退回修改。</p>
+</aside>
+<main class="admin-console staff-main">
+<section aria-label="案例管理工具栏" class="admin-toolbar">
+<div>
+<h1>审核员工作台</h1>
+</div>
+<div class="admin-toolbar-actions">
+<button class="secondary-button staff-hidden-action" id="logoutButton" type="button">退出登录</button>
+</div>
+</section>
+<section aria-label="采集状态" class="admin-collection-strip">
+<div class="admin-collection-grid" id="collectionStatusGrid">
+<article><span>状态</span><strong>读取中</strong><p>正在连接后端。</p></article>
+</div>
+</section>
 <section class="workspace admin-workspace admin-review-board">
-        <div class="workspace-head">
-          <div><h2>待办案例</h2></div>
-          <strong class="admin-save-state" id="adminSaveState">连接案例库中</strong>
-        </div>
-        <div class="admin-status-tabs" id="adminStatusTabs" role="tablist" aria-label="案例状态筛选"></div>
-        <div class="admin-review-layout">
-          <div class="admin-case-list" id="adminReviewList" aria-label="案例列表"></div>
-          <article class="admin-review-detail" id="adminReviewDetail" aria-live="polite"></article>
-        </div>
-      </section>
-    </main>
-    </div>
-
-    <footer class="site-footer"><span>南开安全卫士</span><span>前后端案例库</span></footer>
-    <script>
+<div class="workspace-head">
+<div><h2>待办案例</h2></div>
+<strong class="admin-save-state" id="adminSaveState">连接案例库中</strong>
+</div>
+<div aria-label="案例状态筛选" class="admin-status-tabs" id="adminStatusTabs" role="tablist"></div>
+<div class="admin-review-layout">
+<div aria-label="案例列表" class="admin-case-list" id="adminReviewList"></div>
+<article aria-live="polite" class="admin-review-detail" id="adminReviewDetail"></article>
+</div>
+</section>
+</main>
+</div>
+<footer class="site-footer"><span>南开安全卫士</span><span>前后端案例库</span></footer>
+<script>
       let libraryState = { sourcePool: [], cases: [] };
       let activeRole = 'reviewer';
       let activeStatus = 'review';
@@ -552,5 +552,5 @@
       });
       initAdminCases();
     </script>
-  </body>
+</body>
 </html>

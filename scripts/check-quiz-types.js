@@ -3,7 +3,7 @@ const vm = require('vm');
 const assert = require('assert');
 const path = require('path');
 const root = path.join(__dirname, '..');
-const source = fs.readFileSync(path.join(root, 'app.js'), 'utf8');
+const source = fs.readFileSync(path.join(root, 'assets/js/app.js'), 'utf8');
 const element = () => ({ textContent: '', className: '', append() {}, replaceChildren() {}, classList: { add() {}, toggle() {} }, setAttribute() {} });
 const buttons = Array.from({ length: 4 }, element);
 const context = { document: { createElement: element }, quizOptions: { querySelectorAll: () => buttons }, quizFeedback: element(), nextQuestion: element(), quizScore: element() };

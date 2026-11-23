@@ -32,15 +32,18 @@ const quizBankPath = path.join(dataDir, "quiz-questions.json");
 const quizUploadDir = path.join(dataDir, "quiz-uploads");
 const adminAccountsPath = path.join(dataDir, "admin-accounts.json");
 
-const loginDestinations = { editor: "/editor.html", reviewer: "/reviewer.html", admin: "/admin.html", student: "/knowledge.html" };
+const loginDestinations = { editor: "/editor.html", reviewer: "/reviewer.html", admin: "/admin.html", student: "/index.html" };
 const protectedPages = Object.fromEntries(Object.entries(loginDestinations).map(([role, page]) => [page, role]));
+for (const page of ["knowledge", "tasks", "quiz", "scenarios", "activity", "assistant", "exam", "map", "mistakes", "news", "notifications", "profile", "report-history", "reports", "topics"]) {
+  protectedPages[`/${page}.html`] = "student";
+}
 const publicFiles = new Set([
   "/index.html", "/admin-login.html", "/help.html", "/help_new.html", "/help/index.html",
   "/app.js", "/admin-tasks.js", "/case-workspace.js", "/staff-workspace.js", "/static-auth-guard.js",
   "/styles.css", "/preview-unify.css", "/help-center.css", "/staff-login.css", "/admin-tasks.css",
   "/case-workspace.css", "/deck-admin.css", "/deck-cases.css", "/deck-shell.css", "/deck-tokens.css",
   "/staff-readable.css", "/staff-workspace.css",
-  "/data/safety-cases.json", "/data/quiz-questions.json", "/data/demo-learning-tasks.json"
+  "/data/safety-cases.json", "/data/quiz-questions.json", "/data/demo-learning-tasks.json", "/data/student-topics.json"
 ]);
 const oauthLifetime = 300;
 const oauthStates = new Map();
@@ -148,7 +151,7 @@ function sendAuthError(response, status, title, message) {
   response.end(html);
 }
 
-function startFeishuLogin(response, role) {
+function startFeishuLogin(response, role, next) {
   const config = feishuAuthConfig();
   if (!config.appId || !config.appSecret) {
     sendAuthError(response, 503, "飞书登录未配置", "请配置 FEISHU_APP_ID、FEISHU_APP_SECRET，并在飞书开放平台登记回调地址 " + config.redirectUri);
@@ -165,7 +168,8 @@ function startFeishuLogin(response, role) {
   }
   const state = crypto.randomBytes(18).toString("hex");
   const verifier = crypto.randomBytes(32).toString("base64url");
-  oauthStates.set(state, { role, verifier, expiresAt: now + oauthLifetime * 1000 });
+  const destination = Object.hasOwn(protectedPages, next) && protectedPages[next] === role ? next : loginDestinations[role];
+  oauthStates.set(state, { role, destination, verifier, expiresAt: now + oauthLifetime * 1000 });
   const url = new URL("https://accounts.feishu.cn/open-apis/authen/v1/authorize");
   url.searchParams.set("client_id", config.appId);
   url.searchParams.set("response_type", "code");
@@ -1695,7 +1699,7 @@ async function handleApi(request, response, url) {
       sendAuthError(response, 400, "登录身份无效", "请从本站登录入口重新选择身份。");
       return true;
     }
-    startFeishuLogin(response, role);
+    startFeishuLogin(response, role, url.searchParams.get("next"));
     return true;
   }
 
@@ -1743,7 +1747,7 @@ async function handleApi(request, response, url) {
         return true;
       }
       const cookie = authCookie("nsg_session", makeSessionCookie(localUser), 43200);
-      redirect(response, loginDestinations[saved.role], [clearState, cookie]);
+      redirect(response, saved.destination, [clearState, cookie]);
       return true;
     } catch {
       sendAuthError(response, 502, "飞书登录暂时失败", "请重试。如果问题持续，请联系管理员检查飞书应用配置和后端服务。");
@@ -2046,11 +2050,11 @@ const server = http.createServer(async (request, response) => {
     if (Object.hasOwn(protectedPages, requestedPath)) {
       const role = protectedPages[requestedPath];
       if (!roleAllowed(readSession(request), role)) {
-        const loginPath = role === "student" ? "/api/auth/login?role=student" : "/admin-login.html?role=" + role + "&next=" + encodeURIComponent(requestedPath);
+        const loginPath = (role === "student" ? "/api/auth/login?role=student" : "/admin-login.html?role=" + role) + "&next=" + encodeURIComponent(requestedPath);
         redirect(response, loginPath);
         return;
       }
-    } else if (!publicFiles.has(requestedPath) && !/^\/assets\/(?:[\w-]+\/)*[\w-]+\.(?:png|jpe?g|svg|webp)$/.test(requestedPath)) {
+    } else if (!publicFiles.has(requestedPath) && !/^\/assets\/(?:css\/[\w-]+\.css|js\/[\w-]+\.js|(?:[\w-]+\/)*[\w-]+\.(?:png|jpe?g|svg|webp))$/.test(requestedPath)) {
       response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
       response.end("文件不存在");
       return;

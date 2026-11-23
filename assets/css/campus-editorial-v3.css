@@ -1,0 +1,83 @@
+/* 南开安全卫士 · editorial design system v3 — actual HTML, no page screenshot as background */
+:root{--e-plum:#4b2c5c;--e-deep:#2d2139;--e-wine:#684276;--e-mist:#f9f6f8;--e-line:#e9e0e9;--e-ink:#38283f;--e-muted:#786d7e}
+html{scroll-behavior:smooth}body.nk-editorial-page,body.nk-editorial-home{background:linear-gradient(180deg,#fffdfc 0,#faf7f8 55%,#f7f2f6 100%)!important;color:var(--e-ink);font-family:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.nk-skip-link{position:fixed;left:12px;top:-90px;z-index:9999;background:white;padding:12px;color:#3e2353}.nk-skip-link:focus{top:10px}
+/* Navigation shared across the home, learning and utility pages */
+body.nk-editorial-home .site-header,body.nk-editorial-page .site-header,body.nk-editorial-page .nk-header{position:sticky!important;top:0;z-index:500;background:linear-gradient(110deg,#603b69 0%,#4e305b 52%,#382440 100%)!important;border:0!important;box-shadow:0 8px 25px #2513261c!important}
+body.nk-editorial-page .student-topline,body.nk-editorial-page .nk-utility-strip,body.nk-editorial-home .student-topline{display:none!important}
+body.nk-editorial-page .header-inner,body.nk-editorial-page .nk-header-in,body.nk-editorial-home .header-inner{max-width:1370px!important;width:100%;min-height:70px;margin:0 auto!important;padding:9px 26px!important;gap:18px!important;display:flex;align-items:center;justify-content:space-between}
+body.nk-editorial-page .brand,body.nk-editorial-page .nk-brand,body.nk-editorial-home .brand{display:flex;gap:11px;align-items:center;min-width:205px;text-decoration:none!important;color:#fff!important}
+body.nk-editorial-page .brand-mark,body.nk-editorial-page .nk-brand img,body.nk-editorial-home .brand-mark{width:44px!important;height:44px!important;object-fit:contain!important;filter:grayscale(1) brightness(0) invert(1);opacity:.98}
+body.nk-editorial-page .brand strong,body.nk-editorial-page .nk-brand strong,body.nk-editorial-home .brand strong{font-size:20px!important;font-family:'Songti SC',SimSun,serif!important;color:white!important;font-weight:700!important;letter-spacing:.09em!important}
+body.nk-editorial-page .brand small,body.nk-editorial-page .nk-brand small,body.nk-editorial-home .brand small{display:block;color:#f0ddec!important;font-size:9px!important;letter-spacing:.16em}
+body.nk-editorial-page .nk-nav,body.nk-editorial-home .nk-nav{display:flex!important;flex-wrap:wrap!important;align-items:center!important;justify-content:center!important;gap:3px!important;flex:1!important}
+body.nk-editorial-page .nk-nav>a,body.nk-editorial-page .nk-nav .nk-dropdown>button,body.nk-editorial-home .nk-nav>a,body.nk-editorial-home .nk-nav .nk-dropdown>button{background:transparent!important;color:#f6eef6!important;border-radius:8px!important;border:0!important;font-weight:600!important;font-size:12px!important;padding:11px 10px!important;text-decoration:none!important;white-space:nowrap}
+body.nk-editorial-page .nk-nav>a:hover,body.nk-editorial-page .nk-nav .nk-dropdown>button:hover,body.nk-editorial-home .nk-nav>a:hover,body.nk-editorial-home .nk-nav .nk-dropdown>button:hover{background:#ffffff20!important;color:white!important}
+body.nk-editorial-page .nk-nav .nk-dropdown-menu,body.nk-editorial-home .nk-nav .nk-dropdown-menu{background:#fff!important;border-radius:14px!important;border:1px solid #e6dce8!important;box-shadow:0 22px 55px #26142e33!important;padding:8px!important}
+body.nk-editorial-page .nk-nav .nk-dropdown-menu a,body.nk-editorial-home .nk-nav .nk-dropdown-menu a{color:#4e355b!important;font-size:12px!important;padding:10px 12px!important}
+body.nk-editorial-page .nk-nav .nk-dropdown-menu a:hover,body.nk-editorial-home .nk-nav .nk-dropdown-menu a:hover{background:#f5eef7!important}
+body.nk-editorial-page .nk-head-action,body.nk-editorial-page .student-header-cta,body.nk-editorial-home .student-header-cta{background:rgba(255,255,255,.13)!important;color:white!important;border:1px solid #ffffff4a!important;border-radius:50px!important;white-space:nowrap;box-shadow:none!important;padding:10px 15px!important;font-size:12px!important}
+body.nk-editorial-page .nk-head-action:hover,body.nk-editorial-page .student-header-cta:hover,body.nk-editorial-home .student-header-cta:hover{background:#ffffff32!important}
+body.nk-editorial-page .nk-nav a[aria-current="page"]{border-bottom:2px solid #f7e5ff!important}
+/* Home — deliberately matches the reference's spacing, colors and bento hierarchy */
+body.nk-editorial-home .portal-main{max-width:1340px!important;padding:0 35px 55px!important;overflow:visible!important}
+body.nk-editorial-home .portal-hero{padding:35px 0 14px!important;gap:26px!important;min-height:360px!important;grid-template-columns:minmax(330px,.78fr) minmax(510px,1.22fr)!important;background:radial-gradient(circle at 26% 7%,#efdeec90,transparent 50%)!important}
+body.nk-editorial-home .portal-hero-content{padding:12px 0 8px 9px!important}
+body.nk-editorial-home .portal-hero h1{font-size:clamp(42px,4vw,60px)!important;margin:14px 0 3px!important;line-height:1.18!important}
+body.nk-editorial-home .portal-hero h2{font-size:clamp(19px,1.65vw,25px)!important;margin:3px 0 17px!important}
+body.nk-editorial-home .portal-hero-content p{font-size:12px!important;line-height:2.0!important;max-width:420px}
+body.nk-editorial-home .portal-hero-ambient{display:none!important}
+body.nk-editorial-home .portal-hero-gallery{grid-template-columns:1.16fr .85fr!important;gap:10px!important;align-items:center!important}
+body.nk-editorial-home .portal-gallery-card{height:325px!important;overflow:hidden!important;position:relative!important;border-radius:86px 18px 62px 18px!important;box-shadow:0 20px 40px #372a4429!important;transform:rotate(-2deg)}
+body.nk-editorial-home .portal-gallery-dorm{height:293px!important;border-radius:65px 85px 70px 18px!important;transform:rotate(2deg)}
+body.nk-editorial-home .portal-gallery-card img{height:100%!important;width:100%!important;object-fit:cover!important;object-position:center!important;transform:scale(1.04)}
+body.nk-editorial-home .portal-gallery-card:hover{transform:translateY(-4px) rotate(0deg)!important}
+body.nk-editorial-home .portal-image-caption{background:#2e2436bd!important;backdrop-filter:blur(12px);border-radius:12px;padding:9px!important;bottom:9px!important;left:9px!important;right:9px!important;display:flex!important;align-items:center!important;gap:8px!important}
+body.nk-editorial-home .portal-image-caption strong{font-size:11px!important;color:white!important}body.nk-editorial-home .portal-image-caption small{font-size:9px!important;color:#f1e7f0!important}
+body.nk-editorial-home .portal-ribbon{border-radius:12px!important;background:linear-gradient(100deg,#764a7b,#593567 60%,#442747)!important;padding:16px 22px!important;min-height:60px!important;margin-bottom:24px!important;box-shadow:0 12px 32px #67386824!important}
+body.nk-editorial-home .portal-ribbon strong{letter-spacing:.17em!important}
+body.nk-editorial-home .portal-access{padding:5px 0 10px!important}
+body.nk-editorial-home .portal-section-title{margin-bottom:20px!important;align-items:end!important}
+body.nk-editorial-home .portal-section-title h2{font-family:'Songti SC',SimSun,serif!important;font-size:clamp(29px,3.2vw,45px)!important;font-weight:700!important;line-height:1.35!important;margin:8px 0!important;letter-spacing:.04em!important}
+body.nk-editorial-home .portal-access-grid{gap:12px!important;grid-template-columns:repeat(6,minmax(0,1fr))!important}
+body.nk-editorial-home .portal-access-feature{grid-column:span 3!important;min-height:225px!important;border-radius:17px!important;overflow:hidden!important;box-shadow:0 17px 35px #36244014!important}
+body.nk-editorial-home .portal-feature-learning{background:linear-gradient(122deg,#634075 0,#3e2a50 73%)!important}
+body.nk-editorial-home .portal-feature-scenarios{background:linear-gradient(90deg,#192b3b 0%,#1c2f41aa 40%,transparent),url('../scenario-covers/night-following.png') center/cover!important}
+body.nk-editorial-home .portal-small-card{grid-column:span 2!important;min-height:198px!important;border-radius:17px!important;background:linear-gradient(120deg,#fffefd,#faf5f8)!important;box-shadow:0 11px 32px #412f4910!important;border:1px solid #eee7ef!important}
+body.nk-editorial-home .portal-small-card:hover,body.nk-editorial-home .portal-access-feature:hover{box-shadow:0 20px 40px #35213f24!important;transform:translateY(-3px)}
+body.nk-editorial-home .portal-small-body h3{font-size:23px!important}body.nk-editorial-home .portal-feature-copy h3{font-size:29px!important}
+body.nk-editorial-home .portal-small-body p{font-size:12px!important;line-height:1.75!important}
+body.nk-editorial-home .portal-small-cta{border:1px solid #c5a8d0!important;padding:6px 12px!important;border-radius:30px!important;background:white!important;color:#57326d!important}
+body.nk-editorial-home .portal-more{padding:30px 0 20px!important}
+body.nk-editorial-home .portal-more-grid>a{border-radius:16px!important;overflow:hidden!important;box-shadow:0 9px 22px #33213c12!important}
+/* Utility and learning pages: image-forward page headers & editorial card system */
+body.nk-editorial-page .nk-container{max-width:1320px!important;margin:0 auto!important;padding:30px 30px 70px!important}
+body.nk-editorial-page .premium-page-hero{position:relative;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(290px,.75fr)!important;gap:30px!important;align-items:center!important;padding:34px 45px!important;min-height:285px!important;background:linear-gradient(115deg,#f1e9f0 0,#faf7f7 65%,#f0e3ed)!important;border:1px solid #e9dfeb!important;border-radius:24px!important;box-shadow:0 18px 52px #4b2c5c12!important;overflow:hidden!important;margin:0 0 24px!important}
+body.nk-editorial-page .premium-page-hero::before{content:'✳';font-size:180px;color:#b7a1bf16;position:absolute;left:-18px;top:-55px;pointer-events:none}
+body.nk-editorial-page .premium-page-hero h1{font-family:'Songti SC',SimSun,serif!important;font-size:clamp(32px,3.3vw,46px)!important;color:#3b2549!important;line-height:1.38!important;letter-spacing:.04em!important;max-width:660px!important;margin:14px 0!important}
+body.nk-editorial-page .premium-page-hero p{color:#74677a!important;font-size:14px!important;max-width:570px!important;line-height:1.9!important}
+body.nk-editorial-page .premium-page-hero .nk-overline{color:#8c609c!important;font-weight:800!important;letter-spacing:.19em!important;font-size:10px!important}
+body.nk-editorial-page .premium-page-art{height:225px!important;width:100%!important;max-width:none!important;border:7px solid #fff!important;border-radius:95px 18px 70px 16px!important;box-shadow:0 15px 36px #412e4b26!important;background-image:linear-gradient(180deg,transparent 55%,#1c182f99),var(--page-photo)!important;background-size:cover!important;background-position:center!important;display:flex!important;align-items:end!important;justify-content:start!important;padding:15px 20px!important;font-size:10px!important;font-weight:800!important;color:#fff!important;letter-spacing:.17em!important;transform:rotate(1.5deg)}
+body.nk-editorial-page .nk-hero:not(.premium-page-hero){background:#f7eff6}
+body.nk-editorial-page .nk-panel,body.nk-editorial-page .nk-note{background:#fff!important;border:1px solid #e9e1e9!important;border-radius:19px!important;padding:25px!important;box-shadow:0 10px 35px #4a2c590e!important}
+body.nk-editorial-page .nk-panel h2{font-family:'Songti SC',SimSun,serif;font-size:26px!important;color:#3e284b!important}
+body.nk-editorial-page .nk-panel h3{color:#402c4b}
+body.nk-editorial-page .nk-panel:hover{box-shadow:0 15px 42px #4a2c5917!important}
+body.nk-editorial-page .nk-btn,body.nk-editorial-page .primary-button{background:#5a366f!important;color:white!important;border-radius:40px!important;padding:11px 19px!important;border:1px solid transparent!important;box-shadow:0 9px 19px #5a366f19!important;cursor:pointer}
+body.nk-editorial-page .nk-btn.alt,body.nk-editorial-page .nk-btn.outline{background:#f3eaf6!important;color:#553368!important;border:1px solid #e8dce9!important}
+body.nk-editorial-page .nk-input,body.nk-editorial-page input[type="text"],body.nk-editorial-page textarea,body.nk-editorial-page select{border-radius:11px;border:1px solid #e4dce5;background:#fff}
+body.nk-editorial-page .nk-grid{gap:18px!important}body.nk-editorial-page .nk-item{border-color:#eee7ef!important}
+body.nk-editorial-page .nk-footer{border-top:1px solid #ece3ed!important;background:#f5eff6!important;color:#847588!important;padding:25px max(28px,calc((100% - 1280px)/2))!important}
+/* Original learning task/quiz/scenario engine: preserve DOM IDs, add photograph-led masthead */
+body.nk-editorial-page .nk-section-masthead{max-width:1280px;margin:25px auto 22px;min-height:278px;padding:33px 42px;display:grid;grid-template-columns:1fr minmax(300px,.75fr);gap:35px;align-items:center;border:1px solid #e8dee9;border-radius:22px;background:linear-gradient(105deg,#f1e7f0,#fff9f8);box-shadow:0 15px 45px #3f204312;overflow:hidden}
+body.nk-editorial-page .nk-section-masthead h1{font:700 clamp(33px,3.3vw,47px)/1.35 'Songti SC',SimSun,serif;color:#382342;margin:15px 0}
+body.nk-editorial-page .nk-section-masthead p{font-size:14px;color:#756a79;line-height:1.9;max-width:530px}
+body.nk-editorial-page .nk-section-masthead .nk-overline{font-size:11px;letter-spacing:.15em;color:#8e639b;font-weight:800}
+body.nk-editorial-page .nk-masthead-picture{background:linear-gradient(180deg,transparent 65%,#1d1a2799),var(--page-photo) center/cover;height:215px;border:7px solid white;border-radius:80px 19px 80px 19px;box-shadow:0 14px 28px #39274721;transform:rotate(1deg)}
+body.nk-editorial-page .knowledge-workspace{max-width:1280px;margin:auto!important;padding-top:15px!important}
+body.nk-editorial-page .knowledge-workspace .module-intro,body.nk-editorial-page .knowledge-workspace .knowledge-tasks-panel,body.nk-editorial-page .knowledge-workspace .quiz-card,body.nk-editorial-page .knowledge-workspace .story-game-card{background:#fff;border-radius:18px!important;border:1px solid #e8dfe8!important;box-shadow:0 8px 30px #3924440d!important}
+body.nk-editorial-page .knowledge-workspace .learning-home-back{border-radius:25px}
+@media(max-width:1100px){body.nk-editorial-home .portal-hero{grid-template-columns:1fr 1fr!important}body.nk-editorial-page .nk-header-in,body.nk-editorial-page .header-inner,body.nk-editorial-home .header-inner{flex-wrap:wrap}body.nk-editorial-page .nk-nav,body.nk-editorial-home .nk-nav{order:3;width:100%;flex-wrap:nowrap!important;overflow-x:auto;justify-content:flex-start!important}body.nk-editorial-home .portal-main{padding:0 24px 40px!important}}
+@media(max-width:740px){body.nk-editorial-home .portal-hero{grid-template-columns:1fr!important;gap:15px!important}body.nk-editorial-home .portal-hero-gallery{max-width:650px}body.nk-editorial-home .portal-access-grid{grid-template-columns:repeat(2,1fr)!important}body.nk-editorial-home .portal-access-feature{grid-column:span 2!important}body.nk-editorial-home .portal-small-card{grid-column:span 1!important}body.nk-editorial-page .premium-page-hero,body.nk-editorial-page .nk-section-masthead{grid-template-columns:1fr!important;padding:25px!important}body.nk-editorial-page .premium-page-art,body.nk-editorial-page .nk-masthead-picture{height:185px!important}body.nk-editorial-page .nk-container{padding:20px 14px 45px!important}}
+@media(max-width:510px){body.nk-editorial-home .portal-main{padding:0 14px 35px!important}body.nk-editorial-home .portal-gallery-card{height:205px!important}body.nk-editorial-home .portal-gallery-dorm{height:188px!important}body.nk-editorial-home .portal-small-card{grid-column:span 2!important}body.nk-editorial-home .portal-ribbon-right{display:none!important}body.nk-editorial-home .portal-ribbon{flex-wrap:wrap!important}body.nk-editorial-page .premium-page-hero h1{font-size:32px!important}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}

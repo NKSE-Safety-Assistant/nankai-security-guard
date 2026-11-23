@@ -1,0 +1,29 @@
+/* Shared design finishing layer · 2026-11-23
+   Deliberately limited to visual polish. No navigation or functional changes. */
+:root {
+ --unified-purple:#78166c;--unified-purple-deep:#32102f;
+ --unified-ink:#261d29;--unified-border:#e7dfe9;
+ --unified-surface:#fff;--unified-soft:#f8f5f9;
+ --unified-ease:cubic-bezier(.22,1,.36,1);
+}
+html {font-synthesis:none;}
+body { -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+:where(button,a,input,select,textarea):focus-visible {outline:2px solid var(--unified-purple);outline-offset:3px;}
+:where(button,.student-global-nav a,.admin-v2-nav button,.staff-sidebar-nav button) {transition:background-color .2s var(--unified-ease),border-color .2s var(--unified-ease),box-shadow .2s var(--unified-ease),transform .2s var(--unified-ease);}
+/* Student site matches the existing Nankai-purple operations dashboard */
+:root {--nk-purple-950:#240622;--nk-purple-900:#32102f;--nk-purple-800:#4d1146;--nk-purple-700:#78166c;--nk-purple-100:#f3e9f2;--nk-purple-50:#faf5fa;--nk-ink:#261d29;--nk-muted:#746a76;--nk-line:#e7dfe9;--nk-bg:#f8f6f9;--nk-shadow:0 8px 28px rgba(45,12,47,.075);}
+.student-home-page,.student-help-page {background:var(--nk-bg);color:var(--nk-ink);}
+.student-global-header {border-bottom:1px solid var(--unified-border);box-shadow:0 3px 18px rgba(35,11,35,.035);background:rgba(255,255,255,.965);}
+.student-global-brand strong {letter-spacing:.015em;font-weight:700;}
+.student-global-nav [data-student-nav] {font-weight:600;}
+.student-global-nav [data-student-nav]::after {height:2px;}
+.student-global-brand img {filter:drop-shadow(0 3px 7px rgba(51,12,48,.11));}
+/* Shared form & surface details; no broad overrides that affect layout */
+.student-home-page :where(button,a),.student-help-page :where(button,a) { -webkit-tap-highlight-color:transparent; }
+.student-home-page :where(input,textarea,select),.student-help-page :where(input,textarea,select) {accent-color:var(--unified-purple);}
+/* Administrative modules: retained layout, softer elevations & deliberate borders */
+.admin-v2-page,.staff-console-page {--shadow-card:0 2px 4px rgba(36,6,34,.025),0 10px 28px rgba(36,6,34,.055);--shadow-hover:0 6px 16px rgba(36,6,34,.055),0 18px 38px rgba(36,6,34,.08);}
+.admin-v2-sidebar,.staff-sidebar {background:linear-gradient(165deg,#3e113b 0%,#290a2a 62%,#210820 100%);}
+.admin-v2-nav > button.active,.admin-v2-nav > button[aria-current=page],.staff-sidebar-nav > button.active {box-shadow:0 4px 14px rgba(0,0,0,.075);}
+.admin-v2-brand img,.staff-sidebar-brand img {box-shadow:0 3px 16px rgba(0,0,0,.13);}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;}}

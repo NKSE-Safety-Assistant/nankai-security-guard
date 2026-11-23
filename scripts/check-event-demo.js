@@ -25,7 +25,7 @@ function pass(label, detail) {
   pass('服务与数据库模式', 'MySQL');
 
   const learningPage = await fetch(baseUrl + '/knowledge.html', { redirect: 'manual' });
-  if (learningPage.status !== 302 || learningPage.headers.get('location') !== '/api/auth/login?role=student') {
+  if (learningPage.status !== 302 || learningPage.headers.get('location') !== '/api/auth/login?role=student&next=%2Fknowledge.html') {
     throw new Error('学生学习入口未跳转到飞书认证');
   }
   pass('学生学习入口要求飞书登录');

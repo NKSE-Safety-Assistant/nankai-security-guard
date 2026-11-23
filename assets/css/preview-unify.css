@@ -1,0 +1,2022 @@
+/* 预览统一样式：仅供 knowledge_preview/editor_preview/reviewer_preview 使用 */
+.knowledge-help-preview .student-site-label { color: #405e54; font-size: 17px; font-weight: 500; white-space: nowrap; }
+.knowledge-help-preview .staff-entry-link { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 0; color: #405e54; font-size: 16px; font-weight: 500; text-decoration: none; text-underline-offset: 4px; }
+.knowledge-help-preview .staff-entry-link:hover { text-decoration: underline; color: #185b4b; }
+.knowledge-help-preview .staff-entry-link:focus-visible { outline: 2px solid #185b4b; outline-offset: 4px; }
+@media(max-width:480px) { .knowledge-help-preview .student-site-label { display: none; } }
+
+:root {
+  --preview-blue: #1d5fbf;
+  --preview-blue-dark: #174a92;
+  --preview-green: #16805d;
+  --preview-ink: #162033;
+  --preview-muted: #667085;
+  --preview-line: #e5e7eb;
+  --preview-bg: #f5f7fb;
+  --preview-card: #ffffff;
+  --preview-sidebar: #102238;
+  --preview-shadow: 0 18px 45px rgba(20, 36, 64, 0.08);
+}
+
+/* knowledge_preview：对齐 help_new 的浅色圆角卡片风格 */
+
+body.knowledge-help-preview {
+  margin: 0;
+  color: var(--preview-ink);
+  background: #f2f6f5;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+.knowledge-help-preview .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid var(--preview-line);
+  backdrop-filter: blur(10px);
+}
+
+.knowledge-help-preview .header-inner {
+  max-width: 1120px;
+  min-height: 82px;
+  margin: 0 auto;
+  padding: 16px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.knowledge-help-preview .brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--preview-ink);
+  text-decoration: none;
+}
+
+.knowledge-help-preview .brand-mark {
+  width: 68px;
+  height: 68px;
+  flex: 0 0 68px;
+  object-fit: contain;
+  padding: 2px;
+}
+
+.knowledge-help-preview .brand strong { display: block; font-size: 26px; line-height: 1.35; font-weight: 700; }
+.knowledge-help-preview .brand small { display: block; margin-top: 4px; font-size: 14px; line-height: 1.5; }
+
+.knowledge-help-preview main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 30px 28px 56px;
+}
+
+.knowledge-help-preview .knowledge-workspace {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.knowledge-help-preview .workspace-head {
+  position: relative;
+  display: flex;
+  min-height: 250px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 28px;
+  margin: 0 0 22px;
+  padding: 38px 46px;
+  border: 1px solid #d7e4df;
+  border-radius: 20px;
+  overflow: hidden;
+  text-align: left;
+  background: linear-gradient(112deg, #fff 0%, #f5faf7 56%, #e5f1eb 100%);
+  box-shadow: 0 12px 34px rgba(28, 67, 54, .07);
+}
+.knowledge-help-preview .workspace-head::after { content: ""; position: absolute; width: 380px; height: 380px; right: 12%; top: -245px; border: 1px solid rgba(22,107,88,.13); border-radius: 50%; box-shadow: 0 0 0 34px rgba(22,107,88,.025), 0 0 0 68px rgba(22,107,88,.025), 0 0 0 102px rgba(22,107,88,.025); pointer-events: none; }
+
+.knowledge-help-preview .workspace-head > div {
+  width: auto;
+  text-align: left;
+}
+
+.knowledge-help-preview .workspace-head .eyebrow {
+  display: block;
+  margin-bottom: 12px;
+  color: #13745e;
+  font-size: 11px;
+  letter-spacing: .15em;
+}
+
+.knowledge-help-preview .workspace-head h2 {
+  margin: 0;
+  font-size: clamp(34px, 4vw, 50px);
+  line-height: 1.15;
+  letter-spacing: -.055em;
+}
+
+.knowledge-help-preview .workspace-head h2::after {
+  content: none;
+}
+.knowledge-help-preview .learning-home-copy { max-width: 510px; margin-top: 14px; color: #64756f; font-size: 16px; line-height: 1.8; }
+.knowledge-help-preview .learning-home-mark { position: relative; z-index: 1; display: grid; align-content: center; gap: 12px; width: 245px; min-height: 164px; flex: 0 0 245px; padding: 24px 27px; border-left: 1px solid #c7d9d1; color: #174f42; }
+.knowledge-help-preview .learning-home-mark span { color: #32826c; font-size: 11px; font-weight: 800; letter-spacing: .18em; }
+.knowledge-help-preview .learning-home-mark strong { font-size: 25px; line-height: 1.45; letter-spacing: -.04em; }
+.knowledge-help-preview .learning-home-mark i { position: absolute; right: 4px; top: 10px; width: 74px; height: 74px; border: 1px solid rgba(22,107,88,.24); border-radius: 50%; }
+.knowledge-help-preview .learning-home-mark i::before, .knowledge-help-preview .learning-home-mark i::after { content: ""; position: absolute; inset: 12px; border: 1px solid rgba(22,107,88,.2); border-radius: 50%; }
+.knowledge-help-preview .learning-home-mark i::after { inset: 24px; background: #176b58; border: 0; }
+
+.knowledge-help-preview .module-grid.learning-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.knowledge-help-preview .tab-panel {
+  max-width: 1040px;
+  margin: 0 auto;
+  border: 1px solid var(--preview-line);
+  border-radius: 24px;
+  background: var(--preview-card);
+  box-shadow: var(--preview-shadow);
+  padding: 24px;
+}
+
+.knowledge-help-preview .module-intro,
+.knowledge-help-preview .learning-mode-switch,
+.knowledge-help-preview .quiz-card,
+.knowledge-help-preview .story-game-card {
+  border: 1px solid var(--preview-line);
+  border-radius: 20px;
+  background: #fff;
+}
+
+.knowledge-help-preview .learning-section {
+  display: none;
+}
+
+.knowledge-help-preview .learning-section.active {
+  display: grid;
+}
+
+.knowledge-help-preview .module-intro {
+  display: none;
+  padding: 24px;
+}
+
+.knowledge-help-preview .learning-mode-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
+  max-width: none;
+  margin: 0 auto 22px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.knowledge-help-preview .learning-mode-button,
+.knowledge-help-preview .role-button {
+  border-radius: 16px;
+}
+
+.knowledge-help-preview .learning-mode-button span {
+  font-size: 21px;
+  font-weight: 900;
+}
+
+.knowledge-help-preview .learning-mode-button small {
+  margin-top: 7px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.knowledge-help-preview .learning-mode-button { position: relative; display: grid; align-content: center; justify-items: start; min-height: 116px; padding: 22px 56px 22px 24px; border: 1px solid #d8e4df; border-radius: 15px; background: #fff; color: #233832; text-align: left; box-shadow: 0 5px 18px rgba(28,67,54,.045); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+.knowledge-help-preview .learning-mode-button { overflow: hidden; }
+.knowledge-help-preview .learning-mode-button::after { content: ""; position: absolute; width: 178px; height: 178px; right: -42px; top: -50px; border: 1px solid rgba(23,107,88,.13); border-radius: 50%; box-shadow: 0 0 0 22px rgba(23,107,88,.035), 0 0 0 44px rgba(23,107,88,.025); pointer-events: none; }
+.knowledge-help-preview .learning-mode-button[data-learning-mode="story"]::after { border-color: rgba(29,95,191,.16); box-shadow: 0 0 0 22px rgba(29,95,191,.035), 0 0 0 44px rgba(29,95,191,.025); }
+.knowledge-help-preview .learning-mode-button:hover { transform: translateY(-2px); border-color: #92b8aa; box-shadow: 0 12px 24px rgba(28,67,54,.09); }
+.knowledge-help-preview .learning-mode-button.active { border-color: #176b58; background: #f0f7f3; color: #193a30; box-shadow: inset 0 0 0 1px #176b58, 0 8px 22px rgba(23,107,88,.09); }
+.knowledge-help-preview .learning-mode-button > b { position: absolute; right: 22px; top: 22px; color: #176b58; font-size: 22px; font-weight: 500; }
+.knowledge-help-preview .learning-mode-button::before { content: "QUICK PRACTICE"; color: #37826e; font-size: 10px; font-weight: 850; letter-spacing: .16em; }
+.knowledge-help-preview .learning-mode-button[data-learning-mode="story"]::before { content: "CAMPUS SCENARIO"; }
+.knowledge-help-preview .learning-mode-button span { font-size: 21px; letter-spacing: 0; }
+.knowledge-help-preview .learning-mode-button small { max-width: 360px; color: #677771; font-size: 14px; font-weight: 450; line-height: 1.45; }
+.knowledge-help-preview .learning-mode-footnote { display: flex; align-items: center; gap: 12px; margin: 0; padding: 17px 20px; border: 1px solid #dce7e2; border-radius: 11px; color: #687871; background: rgba(255,255,255,.7); font-size: 13px; line-height: 1.6; }
+.knowledge-help-preview .learning-mode-footnote span { flex: 0 0 auto; padding-right: 12px; border-right: 1px solid #cadbd4; color: #176b58; font-weight: 800; }
+.knowledge-help-preview .learning-mode-footnote[hidden] { display: none !important; }
+.knowledge-help-preview .learning-mode-button.active { background: #fff; color: #233832; }
+.knowledge-help-preview .learning-mode-button.active span { color: #193a30; }
+.knowledge-help-preview .learning-mode-button.active small { color: #677771; }
+.knowledge-help-preview .learning-mode-switch[hidden], .knowledge-help-preview .learning-daily-back[hidden] { display: none !important; }
+.knowledge-help-preview .learning-section[hidden] { display: none !important; }
+.knowledge-help-preview .learning-mode-switch { gap: 14px; margin-bottom: 22px; }
+
+.knowledge-help-preview .quiz-card.learning-section.active {
+  width: 100%;
+  max-width: 900px;
+  margin: 0;
+  padding: 28px 32px;
+  border-color: #dbe5e2;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #fff 0%, #fbfdfc 100%);
+  box-shadow: 0 8px 26px rgba(28,67,54,.055);
+}
+
+.knowledge-help-preview .story-game-card.learning-section.active {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 26px;
+  border-color: #dbe5e2;
+  border-radius: 16px;
+  box-shadow: 0 8px 26px rgba(28,67,54,.055);
+}
+
+.knowledge-help-preview.knowledge-help-preview .knowledge-workspace .quiz-card.learning-section.active,
+.knowledge-help-preview.knowledge-help-preview .knowledge-workspace .quiz-card.learning-section.active {
+  width: min(100%, 900px);
+  max-width: 900px;
+  margin-left: 0;
+  margin-right: auto;
+  border-radius: 16px;
+}
+
+.knowledge-help-preview.knowledge-help-preview .knowledge-workspace .story-game-card.learning-section.active {
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: auto;
+  border-radius: 16px;
+}
+
+.knowledge-help-preview.knowledge-help-preview .knowledge-workspace .learning-section:not(.active) {
+  display: none;
+}
+
+.knowledge-help-preview.knowledge-help-preview .knowledge-workspace .learning-mode-switch {
+  width: 100%;
+  max-width: none;
+  margin: 0 0 18px;
+  border-radius: 0;
+}
+
+.knowledge-help-preview .quiz-card {
+  display: grid;
+  gap: 16px;
+}
+
+.knowledge-help-preview .quiz-options {
+  display: grid;
+  gap: 10px;
+}
+
+.knowledge-help-preview .quiz-options button,
+.knowledge-help-preview .quiz-options label,
+.knowledge-help-preview .quiz-options .quiz-option {
+  min-height: 56px;
+  border-radius: 11px;
+}
+
+.knowledge-help-preview .primary-button,
+.knowledge-help-preview .story-start {
+  border-radius: 10px;
+  background: #176b58;
+  box-shadow: 0 6px 16px rgba(23,107,88,.15);
+}
+
+/* knowledge 正式页：三角色剧情学习改为大屏长方形布局 */
+
+.knowledge-help-preview .story-game-head {
+  align-items: center;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--preview-line);
+}
+
+.knowledge-help-preview .story-game-card.scenario-selected .story-game-head {
+  display: none;
+}
+
+.knowledge-help-preview .scenario-selection-back {
+  width: max-content;
+  margin: 0 0 4px;
+}
+
+.knowledge-help-preview .scenario-selection-back[hidden] {
+  display: none !important;
+}
+
+.knowledge-help-preview .story-kicker {
+  font-size: 16px;
+}
+
+.knowledge-help-preview .story-game-head h3 {
+  margin: 6px 0 0;
+  font-size: 30px;
+  line-height: 1.25;
+}
+
+.knowledge-help-preview .story-game-head p {
+  max-width: 760px;
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.knowledge-help-preview .story-game-head > strong {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 17px;
+}
+
+.knowledge-help-preview .scene-gallery {
+  grid-template-columns: 54px minmax(0, 1fr) 54px;
+  gap: 16px;
+}
+
+.knowledge-help-preview .scene-viewport {
+  border-radius: 22px;
+}
+
+.knowledge-help-preview .scene-track .scene-card {
+  min-height: 410px;
+  isolation: isolate;
+  border: 1px solid rgba(255,255,255,.28);
+  background: #142b32;
+  box-shadow: 0 18px 42px rgba(17,43,48,.16);
+}
+
+.knowledge-help-preview .scene-card {
+  border-radius: 16px;
+}
+.knowledge-help-preview .scene-card::after { background: linear-gradient(90deg,rgba(9,29,34,.62) 0%,rgba(9,29,34,.3) 45%,rgba(9,29,34,0) 100%), linear-gradient(0deg,rgba(9,29,34,.42),transparent 72%); }
+.knowledge-help-preview .scene-card .scene-illustration::before { background-size: cover; filter: saturate(1.08) contrast(1.02); transform: scale(1.04); }
+.knowledge-help-preview .scene-card .scene-illustration::after { display: block; position: absolute; inset: 0; content: ""; background: linear-gradient(135deg,rgba(14,66,59,.1),transparent 45%), radial-gradient(circle at 76% 34%,rgba(255,255,255,.16),transparent 22%); mix-blend-mode: screen; }
+
+.knowledge-help-preview .scene-content {
+  z-index: 2;
+  width: min(62%, 680px);
+  gap: 12px;
+  padding: 38px 42px;
+}
+
+.knowledge-help-preview .scene-badge {
+  padding: 7px 11px;
+  border: 1px solid rgba(255,255,255,.35);
+  border-radius: 6px;
+  background: rgba(17,51,48,.58);
+  color: #e8f5ee;
+  font-size: 11px;
+  letter-spacing: .08em;
+}
+
+.knowledge-help-preview .scene-label {
+  color: #c6e6d7;
+  font-size: 14px;
+}
+
+.knowledge-help-preview .scene-card strong {
+  max-width: 620px;
+  font-size: clamp(34px, 4vw, 48px);
+  line-height: 1.12;
+  letter-spacing: -.045em;
+}
+
+.knowledge-help-preview .scene-card small {
+  max-width: 620px;
+  color: rgba(244,249,246,.83);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.knowledge-help-preview .scene-card em {
+  margin-top: 8px;
+  padding: 11px 15px;
+  border-radius: 7px;
+  background: #e5f2eb;
+  color: #155a49;
+  font-size: 13px;
+}
+
+.knowledge-help-preview .scene-nav {
+  width: 54px;
+  height: 86px;
+  border-radius: 18px;
+  font-size: 38px;
+}
+
+.knowledge-help-preview .role-stage {
+  grid-template-columns: minmax(300px, 0.9fr) minmax(360px, 1.1fr);
+  gap: 22px;
+  align-items: stretch;
+}
+
+.knowledge-help-preview .selected-scene {
+  min-height: 330px;
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.knowledge-help-preview .selected-scene strong {
+  max-width: 420px;
+  font-size: 42px;
+}
+
+.knowledge-help-preview .selected-scene span {
+  font-size: 18px;
+}
+
+.knowledge-help-preview .role-stage-copy {
+  align-self: center;
+}
+
+.knowledge-help-preview .role-stage-copy h3 {
+  margin: 8px 0 0;
+  font-size: 32px;
+}
+
+.knowledge-help-preview .role-stage-copy p {
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+.knowledge-help-preview .role-picker {
+  grid-column: 1 / -1;
+  gap: 14px;
+}
+
+.knowledge-help-preview .role-button {
+  min-height: 118px;
+  padding: 20px;
+  border-radius: 18px;
+}
+
+.knowledge-help-preview .role-button span {
+  font-size: 22px;
+}
+
+.knowledge-help-preview .role-button small {
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.knowledge-help-preview .story-start {
+  grid-column: 1 / -1;
+  min-height: 52px;
+  padding: 0 28px;
+  font-size: 18px;
+}
+
+.knowledge-help-preview .story-stage {
+  grid-template-columns: minmax(280px, .78fr) minmax(390px, 1.22fr);
+  grid-template-areas:
+    "top top"
+    "visual board"
+    "thought thought";
+  gap: 16px;
+}
+
+.knowledge-help-preview .story-topbar {
+  grid-area: top;
+  min-height: 54px;
+  padding: 12px 18px;
+  border: 1px solid #dbe5e2;
+  border-radius: 10px;
+  font-size: 17px;
+  background: #17382f;
+}
+
+.knowledge-help-preview .story-visual {
+  grid-area: visual;
+  min-height: 380px;
+  border: 1px solid #dbe5e2;
+  border-radius: 14px;
+  box-shadow: inset 0 -100px 120px rgba(13,42,38,.22);
+}
+
+.knowledge-help-preview .story-board {
+  grid-area: board;
+  align-content: start;
+  gap: 12px;
+  padding: 56px 20px 20px;
+  border: 1px solid #dce7e3;
+  border-radius: 14px;
+  background: #edf3f0;
+  box-shadow: none;
+}
+.knowledge-help-preview .story-game-card.story-mode .story-board::before { height: 42px; padding: 0 18px; background: #17382f; color: #f3faf6; font-size: 14px; letter-spacing: .02em; }
+.knowledge-help-preview .story-game-card.story-mode .story-board::after { color: #c8e8d9; }
+.knowledge-help-preview .story-game-card.story-mode { min-height: min(700px, calc(100vh - 110px)); max-height: calc(100vh - 100px); padding: 16px; border-radius: 16px; background: #f7faf8; }
+.knowledge-help-preview .story-game-card.story-mode .story-stage { grid-template-columns: minmax(330px, 1.05fr) minmax(250px, .95fr); grid-template-rows: 42px minmax(220px, 1fr) auto; grid-template-areas: "top top" "chat visual" "chat thought"; gap: 12px; min-height: 0; }
+.knowledge-help-preview .story-game-card.story-mode .story-topbar { grid-area: top; min-height: 42px; padding: 8px 14px; border-radius: 9px; }
+.knowledge-help-preview .story-game-card.story-mode .story-board { grid-area: chat; max-height: none; overflow-y: auto; align-content: start; padding: 54px 16px 16px; border-radius: 12px; }
+.knowledge-help-preview .story-game-card.story-mode .story-stage { grid-template-rows: 42px minmax(220px, 1fr) auto !important; }
+.knowledge-help-preview .story-game-card.story-mode .story-board { min-width: 0; width: 100%; }
+.knowledge-help-preview .story-game-card.story-mode .thought-panel { min-width: 0; width: 100%; box-sizing: border-box; }
+.knowledge-help-preview .story-game-card.story-mode .thought-choice { width: 100%; box-sizing: border-box; }
+.knowledge-help-preview .story-game-card.story-mode .story-board::before { height: 42px; padding: 0 16px; }
+.knowledge-help-preview .story-game-card.story-mode .story-line { width: min(88%, 460px); padding: 11px 13px; border-radius: 11px 11px 11px 3px; }
+.knowledge-help-preview .story-game-card.story-mode .story-line.user-chat { justify-self: end; border-radius: 11px 11px 3px 11px; }
+.knowledge-help-preview .story-game-card.story-mode .story-line p { font-size: 14px; line-height: 1.6; }
+.knowledge-help-preview .story-game-card.story-mode .story-visual { grid-area: visual; min-height: 0; height: 100%; border-radius: 12px; }
+.knowledge-help-preview .story-game-card.story-mode .thought-panel { grid-area: thought; align-self: stretch; gap: 9px; padding: 16px; border-radius: 12px; }
+.knowledge-help-preview .story-game-card.story-mode .thought-panel::before, .knowledge-help-preview .story-game-card.story-mode .thought-panel::after { display: none; }
+.knowledge-help-preview .story-game-card.story-mode .thought-panel > span { font-size: 13px; }
+.knowledge-help-preview .story-game-card.story-mode .thought-panel p { font-size: 16px; line-height: 1.55; }
+.knowledge-help-preview .story-game-card.story-mode .thought-choices { gap: 8px; }
+.knowledge-help-preview .story-game-card.story-mode .thought-choice { min-height: 48px; padding: 11px 12px 11px 37px; border-radius: 9px; font-size: 13px; }
+.knowledge-help-preview .story-game-card.story-mode .thought-choice::before { left: 13px; top: 17px; }
+@media (max-width: 860px) {
+  .knowledge-help-preview .story-game-card.story-mode { min-height: 0; max-height: none; padding: 14px; }
+  .knowledge-help-preview .story-game-card.story-mode .story-stage { grid-template-columns: 1fr; grid-template-rows: auto; grid-template-areas: "top" "chat" "visual" "thought"; }
+  .knowledge-help-preview .story-game-card.story-mode .story-stage { grid-template-rows: auto !important; }
+  .knowledge-help-preview .story-game-card.story-mode .story-board { max-height: 310px; overflow-y: auto; }
+  .knowledge-help-preview .story-game-card.story-mode .story-visual { min-height: 210px; }
+}
+@media (max-width: 640px) {
+  .knowledge-help-preview .story-game-card.story-mode { min-height: 0; max-height: none; padding: 12px !important; }
+  .knowledge-help-preview .story-game-card.story-mode .story-stage { grid-template-columns: 1fr !important; grid-template-rows: auto; grid-template-areas: "top" "chat" "thought"; gap: 10px; }
+  .knowledge-help-preview .story-game-card.story-mode .story-visual { display: none; }
+  .knowledge-help-preview .story-game-card.story-mode .story-board { min-height: 180px; max-height: 38vh; padding: 48px 12px 12px; }
+  .knowledge-help-preview .story-game-card.story-mode .thought-panel { padding: 14px; }
+}
+
+.knowledge-help-preview .story-line {
+  max-width: min(88%, 520px);
+  gap: 5px;
+  padding: 12px 15px;
+  border: 1px solid #e1eae6;
+  border-radius: 12px 12px 12px 3px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(24,58,48,.045);
+}
+.knowledge-help-preview .story-line.user-chat { justify-self: end; border-color: #c8e3d7; border-radius: 12px 12px 3px 12px; background: #dff0e7; }
+.knowledge-help-preview .story-line:nth-child(1) { border-left: 3px solid #92a8a0; }
+.knowledge-help-preview .story-line span { color: #176b58; font-size: 12px; }
+
+.knowledge-help-preview .story-line span {
+  font-size: 15px;
+}
+
+.knowledge-help-preview .story-line p {
+  color: #263a34;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.knowledge-help-preview .thought-panel {
+  grid-area: thought;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid #dfd9c4;
+  border-left: 4px solid #b28b3d;
+  border-radius: 12px;
+  background: #fffdf7;
+  box-shadow: 0 5px 18px rgba(81,65,31,.055);
+}
+
+.knowledge-help-preview .thought-panel > span {
+  font-size: 17px;
+}
+
+.knowledge-help-preview .thought-panel p {
+  font-size: 20px;
+  line-height: 1.7;
+}
+
+.knowledge-help-preview .thought-choices {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.knowledge-help-preview .thought-choice {
+  min-height: 72px;
+  padding: 18px 18px 18px 52px;
+  border-radius: 16px;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.knowledge-help-preview .thought-choice::before {
+  left: 20px;
+  top: 26px;
+}
+
+.knowledge-help-preview .ending-stage {
+  padding: 30px;
+  border-radius: 22px;
+}
+
+.knowledge-help-preview .ending-stage h3 {
+  font-size: 34px;
+}
+
+.knowledge-help-preview .ending-stage p,
+.knowledge-help-preview .ending-report span {
+  font-size: 18px;
+}
+
+@media (max-width: 860px) {
+  .knowledge-help-preview .story-game-card.learning-section.active,
+  .knowledge-help-preview.knowledge-help-preview .knowledge-workspace .story-game-card.learning-section.active {
+    padding: 20px;
+  }
+
+  .knowledge-help-preview .scene-track .scene-card {
+    min-height: 360px;
+  }
+
+  .knowledge-help-preview .scene-card strong {
+    font-size: 30px;
+  }
+
+  .knowledge-help-preview .scene-card small {
+    font-size: 16px;
+  }
+
+  .knowledge-help-preview .role-stage,
+  .knowledge-help-preview .story-stage {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "top"
+      "visual"
+      "board"
+      "thought";
+  }
+
+  .knowledge-help-preview .thought-choices {
+    grid-template-columns: 1fr;
+  }
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-chat-panel {
+  grid-area: chat;
+  display: grid;
+  grid-template-rows: 46px minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid #d5e1dc;
+  border-radius: 12px;
+  background: #f3f7f5;
+  box-shadow: 0 8px 22px rgba(28,58,49,.07);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-chat-head {
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 0 18px;
+  background: #143f35;
+  color: #f4faf7;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-chat-head strong {
+  font-size: 14px;
+  letter-spacing: .03em;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-chat-head span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #cfe8dd;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-chat-head span::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #75d0a9;
+  content: "";
+  box-shadow: 0 0 0 4px rgba(117,208,169,.12);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-chat-panel .story-board {
+  grid-area: auto;
+  width: 100%;
+  height: 100%;
+  padding-top: 20px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-chat-panel .story-board::before,
+.knowledge-help-preview .story-game-card.story-mode .story-chat-panel .story-board::after {
+  display: none;
+}
+
+/* Polished campus-safety conversation surface. */
+.knowledge-help-preview .story-game-card.story-mode .story-board {
+  gap: 16px;
+  padding: 60px 22px 22px;
+  border: 1px solid #d5e1dc;
+  background-color: #f3f7f5;
+  background-image: radial-gradient(circle at 1px 1px, rgba(23,107,88,.055) 1px, transparent 0);
+  background-size: 22px 22px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-board::before {
+  height: 46px;
+  padding: 0 20px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  background: #143f35;
+  color: #f4faf7;
+  font-size: 14px;
+  letter-spacing: .03em;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-board::after {
+  top: 13px;
+  right: 20px;
+  padding-left: 16px;
+  color: #cfe8dd;
+  font-size: 11px;
+  letter-spacing: .06em;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-board::-webkit-scrollbar {
+  width: 8px;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-board::-webkit-scrollbar-track {
+  background: rgba(20,63,53,.05);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-board::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(20,63,53,.3);
+  background-clip: padding-box;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-line {
+  width: min(74%, 460px);
+  max-width: min(74%, 460px);
+  padding: 13px 16px 14px;
+  box-shadow: 0 8px 22px rgba(28,58,49,.08);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-line::after {
+  top: 7px;
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(255,255,255,.86);
+  font-size: 12px;
+  box-shadow: 0 0 0 1px #d9e5e0, 0 5px 12px rgba(30,65,54,.1);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-line span {
+  margin-bottom: 5px;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .02em;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-line p {
+  font-size: 14px;
+  line-height: 1.62;
+  letter-spacing: .005em;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-other {
+  margin-left: 42px;
+  border: 1px solid #dbe6e1;
+  border-radius: 16px 16px 16px 5px;
+  background: rgba(255,255,255,.98);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-other::before {
+  bottom: 8px;
+  left: -5px;
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-bottom: 1px solid #dbe6e1;
+  border-left: 1px solid #dbe6e1;
+  border-radius: 1px;
+  background: #fff;
+  transform: rotate(45deg);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-other::after {
+  left: -43px;
+  background: #e4eee9;
+  color: #31584c;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-other span {
+  color: #41685c;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-self {
+  margin-right: 42px;
+  border: 1px solid #176b58;
+  border-radius: 16px 16px 5px 16px;
+  background: #176b58;
+  box-shadow: 0 10px 24px rgba(23,107,88,.17);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-self::before {
+  right: -5px;
+  bottom: 8px;
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-top: 1px solid #176b58;
+  border-right: 1px solid #176b58;
+  border-radius: 1px;
+  background: #176b58;
+  transform: rotate(45deg);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-self::after {
+  right: -43px;
+  background: #d4ebe1;
+  color: #115142;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-self span {
+  color: #d6eee4;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-self p {
+  color: #fff;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-system {
+  justify-self: center;
+  width: min(88%, 540px);
+  max-width: min(88%, 540px);
+  padding: 9px 14px 9px 32px;
+  border: 1px solid #cddbd5;
+  border-radius: 9px;
+  background: rgba(231,239,236,.94);
+  box-shadow: none;
+  text-align: left;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-system::before {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  width: 7px;
+  height: 7px;
+  border: 0;
+  border-radius: 50%;
+  background: #6e9185;
+  content: "";
+  transform: translateY(-50%);
+  box-shadow: 0 0 0 4px rgba(110,145,133,.12);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-system span {
+  color: #55766b;
+  font-size: 10px;
+  letter-spacing: .1em;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-system p {
+  color: #405b52;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  .knowledge-help-preview .story-game-card.story-mode .story-board {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .knowledge-help-preview .story-game-card.story-mode .story-line {
+    width: min(80%, 420px);
+    max-width: min(80%, 420px);
+  }
+}
+
+/* Three-party dialogue language: other / self / system. */
+.knowledge-help-preview .story-game-card.story-mode .story-board {
+  gap: 14px;
+  padding-right: 20px;
+  padding-left: 20px;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-line {
+  position: relative;
+  width: min(76%, 470px);
+  max-width: min(76%, 470px);
+  padding: 12px 15px;
+  border: 1px solid transparent;
+  box-shadow: 0 7px 18px rgba(25, 54, 46, .08);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-line::after {
+  position: absolute;
+  top: 5px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  content: attr(data-avatar);
+  font-size: 12px;
+  font-weight: 850;
+  box-shadow: 0 0 0 3px #edf3f0;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-line span {
+  display: block;
+  margin-bottom: 3px;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-line p {
+  font-size: 14px;
+  line-height: 1.58;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-other {
+  justify-self: start;
+  margin-left: 38px;
+  border-color: #dce6e2;
+  border-radius: 15px 15px 15px 4px;
+  background: #fff;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-other::before {
+  position: absolute;
+  bottom: -1px;
+  left: -8px;
+  width: 16px;
+  height: 16px;
+  border-bottom: 1px solid #dce6e2;
+  border-left: 1px solid #dce6e2;
+  border-radius: 0 0 0 4px;
+  background: #fff;
+  content: "";
+  transform: skewX(-28deg);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-other::after {
+  left: -39px;
+  background: #e5ece9;
+  color: #35564c;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-other span {
+  color: #527067;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-self {
+  justify-self: end;
+  margin-right: 38px;
+  border-color: #176b58;
+  border-radius: 15px 15px 4px 15px;
+  background: #176b58;
+  color: #fff;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-self::before {
+  position: absolute;
+  right: -8px;
+  bottom: -1px;
+  width: 16px;
+  height: 16px;
+  border-right: 1px solid #176b58;
+  border-bottom: 1px solid #176b58;
+  border-radius: 0 0 4px;
+  background: #176b58;
+  content: "";
+  transform: skewX(28deg);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-self::after {
+  right: -39px;
+  background: #c9e5d9;
+  color: #114e41;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-self span {
+  color: #cbe8dc;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-self p {
+  color: #fff;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-system {
+  justify-self: center;
+  width: min(92%, 560px);
+  max-width: min(92%, 560px);
+  padding: 9px 14px;
+  border: 1px dashed #bdcdc7;
+  border-radius: 10px;
+  background: #e8efec;
+  box-shadow: none;
+  text-align: center;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-system::after {
+  display: none;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-system span {
+  color: #55736a;
+  font-size: 10px;
+  letter-spacing: .12em;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-system p {
+  color: #455d56;
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .knowledge-help-preview .story-game-card.story-mode .story-line {
+    width: min(82%, 420px);
+    max-width: min(82%, 420px);
+  }
+}
+
+.knowledge-help-preview .secondary-action {
+  border-radius: 14px;
+}
+
+.knowledge-help-preview .site-footer {
+  max-width: 1120px;
+  margin: 0 auto 24px;
+  color: #52675f;
+  font-size: 16px;
+  line-height: 1.7;
+  align-items: center;
+}
+
+@media (max-width: 860px) {
+  .knowledge-help-preview .module-grid.learning-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  html,
+  body.knowledge-help-preview {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .knowledge-help-preview .site-header {
+    position: sticky;
+  }
+
+  .knowledge-help-preview .header-inner {
+    min-height: 72px;
+    padding: 10px 14px;
+    justify-content: flex-start;
+    box-sizing: border-box;
+  }
+
+  .knowledge-help-preview .brand {
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .knowledge-help-preview .brand-mark {
+    width: 50px;
+    height: 50px;
+    flex: 0 0 50px;
+    padding: 2px;
+  }
+
+  .knowledge-help-preview .brand strong {
+    display: block;
+    font-size: 22px;
+    line-height: 1.25;
+  }
+
+  .knowledge-help-preview .brand small {
+    display: block;
+    font-size: 13px;
+    line-height: 1.2;
+  }
+
+  .knowledge-help-preview .student-site-label { margin-left: auto; font-size: 14px; }
+  .knowledge-help-preview .site-footer { align-items: flex-start; font-size: 15px; gap: 8px; }
+  .knowledge-help-preview .staff-entry-link { font-size: 15px; }
+
+  .knowledge-help-preview main {
+    width: 100%;
+    max-width: none;
+    padding: 14px 12px 42px;
+    box-sizing: border-box;
+  }
+
+  .knowledge-help-preview .workspace-head { min-height: 0; margin-bottom: 14px; padding: 24px 20px; border-radius: 15px; }
+  .knowledge-help-preview .learning-home-mark { display: none; }
+
+  .knowledge-help-preview .workspace-head h2 {
+    font-size: 31px;
+    letter-spacing: -.045em;
+  }
+
+  .knowledge-help-preview .workspace-head h2::after {
+    display: none;
+  }
+  .knowledge-help-preview .learning-home-copy { margin-top: 10px; font-size: 14px; line-height: 1.7; }
+  .knowledge-help-preview .learning-home-entries { grid-template-columns: 1fr; gap: 10px; margin-bottom: 18px; }
+  .knowledge-help-preview .learning-home-entries button { min-height: 158px; gap: 8px; padding: 18px; border-radius: 13px; }
+  .knowledge-help-preview .learning-home-entries strong { font-size: 23px; }
+  .knowledge-help-preview .learning-home-entries small { font-size: 13px; }
+
+  .knowledge-help-preview .module-grid.learning-grid {
+    width: 100%;
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+
+  .knowledge-help-preview .learning-mode-switch {
+    position: static !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 0 14px;
+    padding: 0;
+    gap: 8px;
+    border-radius: 0;
+    box-sizing: border-box;
+  }
+
+  .knowledge-help-preview .learning-mode-button {
+    min-height: 176px;
+    padding: 17px;
+    border-radius: 12px;
+    align-content: center;
+  }
+
+  .knowledge-help-preview .learning-mode-button span {
+    font-size: 16px;
+    line-height: 1.25;
+  }
+
+  .knowledge-help-preview .learning-mode-button small {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+  }
+  .knowledge-help-preview .learning-mode-button em { font-size: 11px; }
+  .knowledge-help-preview .learning-mode-button > b { right: 16px; bottom: 16px; font-size: 18px; }
+
+  .knowledge-help-preview .quiz-card.learning-section.active,
+  .knowledge-help-preview .story-game-card.learning-section.active,
+  .knowledge-help-preview.knowledge-help-preview .knowledge-workspace .quiz-card.learning-section.active,
+  .knowledge-help-preview.knowledge-help-preview .knowledge-workspace .story-game-card.learning-section.active {
+    grid-column: 1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 18px 14px !important;
+    border-radius: 20px !important;
+    box-sizing: border-box;
+  }
+
+  .knowledge-help-preview .quiz-card h3 {
+    font-size: 21px;
+    line-height: 1.35;
+  }
+
+  .knowledge-help-preview .quiz-options button,
+  .knowledge-help-preview .quiz-options label,
+  .knowledge-help-preview .quiz-options .quiz-option {
+    min-height: 50px;
+    padding: 12px;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .knowledge-help-preview .story-game-head {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+    align-items: start;
+    padding-bottom: 14px;
+  }
+
+  .knowledge-help-preview .story-game-head > strong {
+    justify-self: start;
+    min-height: 32px;
+    padding: 0 12px;
+    font-size: 14px;
+    order: -1;
+  }
+
+  .knowledge-help-preview .story-game-head h3 {
+    margin-top: 4px;
+    font-size: 22px;
+    line-height: 1.3;
+  }
+
+  .knowledge-help-preview .story-game-head p {
+    max-width: none;
+    margin: 8px 0 0;
+    font-size: 15px;
+    line-height: 1.65;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
+  .knowledge-help-preview .scene-gallery {
+    grid-template-columns: minmax(0, 1fr) 46px 46px minmax(0, 1fr) !important;
+    grid-template-areas:
+      "viewport viewport viewport viewport"
+      ". prev next ."
+      "dots dots dots dots" !important;
+    gap: 10px;
+    width: 100%;
+    justify-items: center;
+    align-items: center;
+  }
+
+  .knowledge-help-preview .scene-viewport {
+    justify-self: center;
+    width: min(100%, 560px);
+    min-width: 0;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .knowledge-help-preview .scene-track {
+    width: 100%;
+  }
+
+  .knowledge-help-preview .scene-track .scene-card {
+    min-width: 100%;
+    min-height: 260px;
+    aspect-ratio: 16 / 10;
+    border-radius: 13px;
+  }
+
+  .knowledge-help-preview .scene-content {
+    width: 78%;
+    padding: 18px;
+    gap: 8px;
+  }
+
+  .knowledge-help-preview .scene-badge,
+  .knowledge-help-preview .scene-label {
+    font-size: 13px;
+  }
+
+  .knowledge-help-preview .scene-card strong {
+    max-width: 100%;
+    font-size: 25px;
+    line-height: 1.18;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
+  .knowledge-help-preview .scene-card small {
+    max-width: 100%;
+    font-size: 14px;
+    line-height: 1.55;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+
+  .knowledge-help-preview .scene-card em {
+    margin-top: 6px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+
+  .knowledge-help-preview .scene-nav {
+    width: 46px;
+    height: 54px;
+    border-radius: 14px;
+    font-size: 26px;
+  }
+
+  .knowledge-help-preview .scene-prev {
+    justify-self: end;
+  }
+
+  .knowledge-help-preview .scene-next {
+    justify-self: start;
+  }
+
+  .knowledge-help-preview .scene-dots {
+    width: 100%;
+    justify-content: center;
+    margin-top: 2px;
+  }
+
+  .knowledge-help-preview .role-stage,
+  .knowledge-help-preview .story-stage {
+    grid-template-columns: 1fr !important;
+  }
+
+  .knowledge-help-preview .role-stage {
+    gap: 14px;
+  }
+
+  .knowledge-help-preview .selected-scene {
+    min-height: 190px;
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .knowledge-help-preview .selected-scene strong {
+    max-width: 100%;
+    font-size: 26px;
+    line-height: 1.15;
+  }
+
+  .knowledge-help-preview .selected-scene span {
+    font-size: 14px;
+  }
+
+  .knowledge-help-preview .role-picker {
+    grid-template-columns: 1fr !important;
+    gap: 10px;
+  }
+
+  .knowledge-help-preview .role-button {
+    min-height: 0;
+    padding: 13px;
+  }
+
+  .knowledge-help-preview .story-stage {
+    grid-template-areas:
+      "top"
+      "visual"
+      "board"
+      "thought" !important;
+    gap: 12px;
+  }
+
+  .knowledge-help-preview .story-topbar {
+    min-height: 48px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .knowledge-help-preview .story-visual {
+    min-height: 190px;
+    border-radius: 18px;
+  }
+
+  .knowledge-help-preview .story-board,
+  .knowledge-help-preview .thought-panel {
+    padding: 48px 13px 13px;
+    border-radius: 12px;
+  }
+
+  .knowledge-help-preview .story-line {
+    max-width: 94%;
+    padding: 11px 12px;
+  }
+
+  .knowledge-help-preview .story-line p,
+  .knowledge-help-preview .thought-panel p {
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  .knowledge-help-preview .thought-choices {
+    grid-template-columns: 1fr !important;
+  }
+
+  .knowledge-help-preview .thought-choice {
+    min-height: 0;
+    padding: 13px 13px 13px 42px;
+    font-size: 15px;
+  }
+
+  .knowledge-help-preview .thought-choice::before {
+    left: 16px;
+    top: 19px;
+  }
+  .knowledge-help-preview .story-game-card.story-mode { min-height: 0; max-height: none; padding: 12px !important; }
+  .knowledge-help-preview .story-game-card.story-mode .story-stage { grid-template-columns: 1fr !important; grid-template-rows: auto; grid-template-areas: "top" "chat" "thought"; gap: 10px; }
+  .knowledge-help-preview .story-game-card.story-mode .story-visual { display: none; }
+  .knowledge-help-preview .story-game-card.story-mode .story-board { min-height: 180px; max-height: 38vh; padding: 48px 12px 12px; }
+  .knowledge-help-preview .story-game-card.story-mode .thought-panel { padding: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .knowledge-help-preview *, .knowledge-help-preview *::before, .knowledge-help-preview *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+.knowledge-help-preview .knowledge-entry-tabs { display: flex; box-sizing: border-box; }
+.knowledge-help-preview .learning-home-entries { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; width: 100%; margin: 0 0 26px; padding: 0; border: 0; background: transparent; }
+.knowledge-help-preview .learning-home-entries button { position: relative; display: grid; align-content: space-between; justify-items: start; gap: 12px; min-height: 216px; padding: 24px 27px; border: 1px solid #d8e3df; border-radius: 16px; color: #1d302a; background: #fff; text-align: left; cursor: pointer; box-shadow: 0 7px 22px rgba(28,67,54,.045); transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+.knowledge-help-preview .learning-home-entries button:hover { transform: translateY(-3px); border-color: #8db5a6; box-shadow: 0 15px 30px rgba(28,67,54,.1); }
+.knowledge-help-preview .learning-home-entries button[aria-selected="true"] { border-color: #176b58; box-shadow: inset 0 0 0 1px #176b58, 0 10px 28px rgba(23,107,88,.08); }
+.knowledge-help-preview .learning-home-entries .entry-index { color: #37826e; font-size: 10px; font-weight: 850; letter-spacing: .16em; }
+.knowledge-help-preview .learning-home-entries strong { font-size: 27px; letter-spacing: -.04em; }
+.knowledge-help-preview .learning-home-entries small { max-width: 380px; color: #677771; font-size: 14px; font-weight: 450; line-height: 1.65; }
+.knowledge-help-preview .learning-home-entries em { display: flex; width: 100%; justify-content: space-between; align-items: center; padding-top: 13px; border-top: 1px solid #e6eeea; color: #176b58; font-size: 13px; font-style: normal; font-weight: 800; }
+.knowledge-help-preview .learning-home-entries em b { font-size: 18px; font-weight: 500; }
+.knowledge-help-preview .learning-home-back { display: inline-flex; align-items: center; gap: 9px; min-height: 42px; margin: -4px 0 18px; padding: 0 14px; border: 1px solid #d6e2dd; border-radius: 9px; color: #285b4d; background: #fff; font: inherit; font-size: 14px; font-weight: 750; cursor: pointer; transition: background-color .16s ease, border-color .16s ease; }
+.knowledge-help-preview .learning-home-back:hover { border-color: #8eb6a7; background: #f1f7f4; }
+.knowledge-help-preview .learning-home-back span { font-size: 19px; line-height: 1; }
+.knowledge-help-preview .learning-home-back[hidden] { display: none !important; }
+.knowledge-help-preview .knowledge-entry-tabs:not(.learning-home-entries) { display: none; }
+.knowledge-help-preview .learning-home-entries[hidden] { display: none !important; }
+.knowledge-help-preview .workspace-head[hidden] { display: none !important; }
+.knowledge-help-preview button:focus-visible, .knowledge-help-preview a:focus-visible { outline: 3px solid #4ba98c; outline-offset: 3px; }
+.knowledge-help-preview #quiz[hidden], .knowledge-help-preview #learningTasksPanel[hidden], .knowledge-help-preview #taskQuizRunner[hidden], .knowledge-help-preview #learningTaskCards[hidden] { display: none !important; }
+.knowledge-tasks-panel { max-width: none; margin: 0; }
+#learningTaskCards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.knowledge-task-card { position: relative; display: grid; align-content: start; min-height: 220px; padding: 22px; border: 1px solid #d9e4e1; border-radius: 14px; background: #fff; box-shadow: 0 4px 16px #14244006; transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease; }
+.knowledge-task-card:hover { transform: translateY(-2px); border-color: #94bdb1; box-shadow: 0 10px 24px #1424400d; }
+.knowledge-task-status { display: inline-flex; justify-self: start; padding: 5px 10px; border-radius: 7px; background: #e8f4ef; color: #176b58; font-size: 12px; font-weight: 750; }
+.knowledge-task-card h3 { margin: 14px 0 8px; font-size: 21px; line-height: 1.35; color: #162b33; }
+.knowledge-task-card p { margin: 5px 0; color: #657772; font-size: 14px; line-height: 1.65; }
+.knowledge-task-card .knowledge-task-result { color: #1d5fbf; }
+.knowledge-task-card .primary-button { justify-self: start; margin-top: 12px; min-height: 40px; padding: 0 16px; border-radius: 9px; background: #176b58; }
+.knowledge-task-empty { padding: 26px 24px; border: 1px dashed #b9ccc6; border-radius: 14px; background: #f8fbfa; color: #657772; line-height: 1.7; }
+.knowledge-help-preview .knowledge-task-empty { grid-column: 1 / -1; min-height: 164px; display: flex; align-items: center; padding: 26px 30px; border-style: solid; background: linear-gradient(110deg,#fff,#f7fbf9); font-size: 15px; }
+.knowledge-help-preview .tab-panel { max-width: none; padding: 20px; border-color: #dbe5e2; border-radius: 16px; box-shadow: 0 6px 22px #14244008; }
+.knowledge-help-preview .learning-mode-switch { margin-bottom: 16px; border-radius: 12px; }
+.knowledge-help-preview .learning-mode-button { border-radius: 9px; }
+.knowledge-help-preview .quiz-card.learning-section.active, .knowledge-help-preview .story-game-card.learning-section.active { border-radius: 14px; }
+.knowledge-help-preview .scene-track .scene-card { border-radius: 14px; }
+.knowledge-help-preview .story-topbar, .knowledge-help-preview .thought-panel, .knowledge-help-preview .story-board { border-radius: 12px; }
+.task-runner-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 18px; }
+.task-runner-head strong { font-size: 20px; line-height: 1.4; }
+.task-runner-head button { flex-shrink: 0; padding: 10px 14px; border: 1px solid #dce5ef; border-radius: 12px; background: #fff; color: #1d5fbf; font: inherit; cursor: pointer; }
+@media (max-width: 640px) {
+  #learningTaskCards { grid-template-columns: 1fr; }
+  .knowledge-task-card { min-height: auto; padding: 20px 16px; border-radius: 12px; }
+  .knowledge-task-card h3 { font-size: 20px; }
+  .knowledge-entry-tabs button { font-size: 16px; }
+  .task-runner-head { align-items: start; flex-direction: column; }
+}
+
+/* editor_preview / reviewer_preview：对齐 admin.html 的深色侧边栏后台风格 */
+
+body.role-admin-preview {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--preview-ink);
+  background: var(--preview-bg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+.role-admin-preview .site-header {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 280px;
+  background: var(--preview-sidebar);
+  color: #fff;
+  z-index: 30;
+}
+
+.role-admin-preview .header-inner {
+  height: 100%;
+  padding: 28px 22px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.role-admin-preview .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.role-admin-preview .brand-mark {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  object-fit: contain;
+  padding: 4px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+.role-admin-preview .brand small {
+  display: block;
+  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.role-admin-preview .admin-console {
+  max-width: none;
+  margin: 0 0 0 280px;
+  padding: 28px;
+}
+
+.role-admin-preview .admin-toolbar {
+  margin: 0 0 18px;
+  padding: 24px 26px;
+  border: 1px solid var(--preview-line);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: var(--preview-shadow);
+}
+
+.role-admin-preview .admin-toolbar .eyebrow {
+  margin: 0 0 4px;
+  color: var(--preview-blue);
+  font-weight: 800;
+}
+
+.role-admin-preview .admin-toolbar h1 {
+  margin: 0;
+  font-size: 30px;
+  letter-spacing: -0.03em;
+}
+
+.role-admin-preview .primary-link-button,
+.role-admin-preview .primary-button,
+.role-admin-preview button[type="submit"] {
+  border-radius: 14px;
+  background: var(--preview-blue);
+  box-shadow: 0 12px 22px rgba(29, 95, 191, 0.18);
+}
+
+.role-admin-preview .admin-collection-strip {
+  margin: 0 0 18px;
+}
+
+.role-admin-preview .admin-collection-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.role-admin-preview .admin-collection-grid article,
+.role-admin-preview .workspace.admin-workspace {
+  border: 1px solid var(--preview-line);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: var(--preview-shadow);
+}
+
+.role-admin-preview .admin-collection-grid article {
+  padding: 18px;
+}
+
+.role-admin-preview .workspace.admin-workspace {
+  padding: 22px;
+}
+
+.role-admin-preview .workspace-head {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--preview-line);
+}
+
+.role-admin-preview .workspace-head .eyebrow {
+  margin: 0 0 4px;
+  color: var(--preview-blue);
+  font-weight: 800;
+}
+
+.role-admin-preview .workspace-head h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.role-admin-preview .admin-status-tabs button,
+.role-admin-preview .admin-save-state {
+  border-radius: 999px;
+}
+
+.role-admin-preview .admin-review-layout {
+  gap: 18px;
+}
+
+.role-admin-preview .admin-case-list,
+.role-admin-preview .admin-review-detail {
+  border: 1px solid var(--preview-line);
+  border-radius: 22px;
+  background: #fbfcff;
+}
+
+.role-admin-preview .site-footer {
+  margin-left: 280px;
+  color: var(--preview-muted);
+}
+
+@media (max-width: 980px) {
+  .role-admin-preview .site-header {
+    position: static;
+    width: auto;
+  }
+
+  .role-admin-preview .admin-console,
+  .role-admin-preview .site-footer {
+    margin-left: 0;
+  }
+
+  .role-admin-preview .admin-collection-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .role-admin-preview .admin-collection-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Scenario-specific generated covers. The safety-type illustrations above remain
+   as a resilient fallback for newly collected cases without a dedicated cover. */
+.cover-dorm-electric::before { background-image: url("../scenario-covers/dorm-electric-overload.png"); }
+.cover-lab-outlet-smoke::before { background-image: url("../scenario-covers/lab-outlet-smoke.png"); }
+.cover-blocked-evacuation::before { background-image: url("../scenario-covers/blocked-evacuation.png"); }
+.cover-canteen-oil-fire::before { background-image: url("../scenario-covers/canteen-oil-fire.png"); }
+.cover-ebike-battery-smoke::before { background-image: url("../scenario-covers/ebike-battery-smoke.png"); }
+.cover-part-time-rebate::before { background-image: url("../scenario-covers/part-time-rebate-fraud.png"); }
+.cover-improper-ebike-charging::before { background-image: url("../scenario-covers/improper-ebike-charging.png"); }
+.cover-night-following::before { background-image: url("../scenario-covers/night-following.png"); }
+.cover-chemical-waste::before { background-image: url("../scenario-covers/chemical-waste-mixing.png"); }
+.cover-phishing-login::before { background-image: url("../scenario-covers/phishing-login.png"); }
+.cover-campus-fire-event::before { background-image: url("../scenario-covers/campus-fire-awareness-event.png"); }
+
+/* Keep every story control reachable inside the fixed desktop stage. */
+.knowledge-help-preview .story-game-card.story-mode {
+  display: grid;
+  left: 50% !important;
+  right: auto !important;
+  width: min(1180px, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+  transform: translateX(-50%);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .scenario-selection-back {
+  flex: none;
+  align-self: start;
+  margin: 0;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-stage {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-board {
+  box-sizing: border-box;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-visual,
+.knowledge-help-preview .story-game-card.story-mode .thought-panel {
+  min-height: 0;
+}
+
+@media (max-width: 860px) {
+  .knowledge-help-preview .story-game-card.story-mode {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  .knowledge-help-preview .story-game-card.story-mode .story-stage {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    padding-right: 4px;
+  }
+}
+
+/* Final conversation refinement layer; intentionally follows the base role rules. */
+.knowledge-help-preview .story-game-card.story-mode .story-board {
+  gap: 16px;
+  padding-right: 22px;
+  padding-left: 22px;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-line {
+  width: min(74%, 460px);
+  max-width: min(74%, 460px);
+  padding: 13px 16px 14px;
+  box-shadow: 0 8px 22px rgba(28,58,49,.08);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-line::after {
+  top: 7px;
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(255,255,255,.86);
+  box-shadow: 0 0 0 1px #d9e5e0, 0 5px 12px rgba(30,65,54,.1);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-line span {
+  margin-bottom: 5px;
+  letter-spacing: .02em;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .story-line p {
+  line-height: 1.62;
+  letter-spacing: .005em;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-other {
+  margin-left: 42px;
+  border-color: #dbe6e1;
+  border-radius: 16px 16px 16px 5px;
+  background: rgba(255,255,255,.98);
+  box-shadow: 0 8px 22px rgba(28,58,49,.08);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-other::before {
+  bottom: 8px;
+  left: -5px;
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-bottom: 1px solid #dbe6e1;
+  border-left: 1px solid #dbe6e1;
+  border-radius: 1px;
+  background: #fff;
+  transform: rotate(45deg);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-other::after {
+  left: -43px;
+  background: #e4eee9;
+  color: #31584c;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-self {
+  margin-right: 42px;
+  border-color: #176b58;
+  border-radius: 16px 16px 5px 16px;
+  background: #176b58;
+  box-shadow: 0 10px 24px rgba(23,107,88,.17);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-self::before {
+  right: -5px;
+  bottom: 8px;
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-top: 1px solid #176b58;
+  border-right: 1px solid #176b58;
+  border-radius: 1px;
+  background: #176b58;
+  transform: rotate(45deg);
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-self::after {
+  right: -43px;
+  background: #d4ebe1;
+  color: #115142;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-system {
+  width: min(88%, 540px);
+  max-width: min(88%, 540px);
+  padding: 9px 14px 9px 32px;
+  border: 1px solid #cddbd5;
+  border-radius: 9px;
+  background: rgba(231,239,236,.94);
+  text-align: left;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-system span {
+  color: #55766b;
+  letter-spacing: .1em;
+}
+
+.knowledge-help-preview .story-game-card.story-mode .dialogue-system p {
+  color: #405b52;
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  .knowledge-help-preview .story-game-card.story-mode .story-board {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .knowledge-help-preview .story-game-card.story-mode .story-line {
+    width: min(80%, 420px);
+    max-width: min(80%, 420px);
+  }
+}
+
+/* Refined inner-thought choices; CSS-only so story behavior stays unchanged. */
+.knowledge-help-preview .story-game-card.story-mode .thought-panel {
+  position: relative;
+  isolation: isolate;
+  gap: 10px;
+  overflow: hidden;
+  padding: 15px 16px 16px;
+  border: 1px solid #dfd7c4;
+  border-left: 1px solid #dfd7c4;
+  border-radius: 14px;
+  background: #fffdf8;
+  box-shadow: none;
+}
+.knowledge-help-preview .story-game-card.story-mode .thought-panel::before {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg,#b98d3f 0%,#d9bf83 45%,rgba(217,191,131,0) 100%);
+  content: "";
+}
+.knowledge-help-preview .story-game-card.story-mode .thought-panel::after {
+  position: absolute;
+  top: -28px;
+  right: -24px;
+  z-index: -1;
+  display: none;
+  width: 88px;
+  height: 88px;
+  border: 1px solid rgba(185,141,63,.12);
+  border-radius: 50%;
+  content: "";
+}
+.knowledge-help-preview .story-game-card.story-mode .thought-panel > span {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  min-height: 25px;
+  padding: 0 10px 0 28px;
+  border: 1px solid rgba(185,141,63,.2);
+  border-radius: 999px;
+  color: #795a23;
+  background: rgba(255,250,236,.82);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: .08em;
+}
+.knowledge-help-preview .story-game-card.story-mode .thought-panel > span::before {
+  position: absolute;
+  left: 10px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid #b98d3f;
+  border-radius: 50%;
+  content: "";
+  box-shadow: none;
+}
+.knowledge-help-preview .story-game-card.story-mode .thought-panel p {
+  margin: 0;
+  color: #35433e;
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.55;
+}
+.knowledge-help-preview .story-game-card.story-mode .thought-choices {
+  grid-template-columns: 1fr;
+  gap: 8px;
+  counter-reset: thought-option;
+}
+.knowledge-help-preview .story-game-card.story-mode .thought-choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 42px 10px 44px;
+  border: 1px solid #e1dccf;
+  border-radius: 11px;
+  color: #293934;
+  background: rgba(255,255,255,.9);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 720;
+  line-height: 1.48;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: none;
+  counter-increment: thought-option;
+  transition: border-color .1s ease-out, background-color .1s ease-out;
+}
+.knowledge-help-preview .story-game-card.story-mode .thought-choice::before {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  display: grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  border: 1px solid #d7c28f;
+  border-radius: 7px;
+  color: #8a682b;
+  background: #fff9e9;
+  content: counter(thought-option, decimal-leading-zero);
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: none;
+  transform: translateY(-50%);
+}
+.knowledge-help-preview .story-game-card.story-mode .thought-choice::after {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  color: #9b8554;
+  content: "\2192";
+  font-size: 17px;
+  line-height: 1;
+  transform: translateY(-50%);
+  transition: color .18s ease-out, transform .18s cubic-bezier(.2,.8,.2,1);
+}
+.knowledge-help-preview .story-game-card.story-mode .thought-choice:hover {
+  border-color: #bfa363;
+  background: #fff;
+  box-shadow: none;
+  transform: none;
+}
+.knowledge-help-preview .story-game-card.story-mode .thought-choice:hover::after {
+  color: #176b58;
+  transform: translateY(-50%);
+}
+.knowledge-help-preview .story-game-card.story-mode .thought-choice:active {
+  box-shadow: none;
+  transform: none;
+}
+.knowledge-help-preview .story-game-card.story-mode .thought-choice:focus-visible {
+  border-color: #176b58;
+  outline: 3px solid rgba(75,169,140,.28);
+  outline-offset: 2px;
+}
+@media (max-width: 640px) {
+  .knowledge-help-preview .story-game-card.story-mode .thought-panel { gap: 9px; padding: 14px; border-radius: 13px; }
+  .knowledge-help-preview .story-game-card.story-mode .thought-panel p { font-size: 14px; }
+  .knowledge-help-preview .story-game-card.story-mode .thought-choice { min-height: 50px; padding: 10px 39px 10px 43px; font-size: 13px; }
+}
+
+/* Story ending reference layout: scenario-specific hero plus learning recap. */
+.knowledge-help-preview .ending-stage{position:relative;width:min(100%,1080px);margin:4px auto;padding:0;border:0;background:transparent;box-sizing:border-box;box-shadow:none}
+.knowledge-help-preview .ending-stage[hidden]{display:none}
+.knowledge-help-preview .ending-stage::before,.knowledge-help-preview .ending-stage::after{display:none}
+.knowledge-help-preview .ending-hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr);min-height:286px;overflow:hidden;border:1px solid #cfddd8;border-radius:18px;background:#fff}
+.knowledge-help-preview .ending-copy{display:grid;align-content:center;padding:34px 38px 36px}
+.knowledge-help-preview .ending-badge{justify-self:start;margin:0 0 22px;padding:7px 12px;border:1px solid #ecd9ad;border-radius:999px;color:#a66d12;background:#fff7e5;font-size:12px;font-weight:800;letter-spacing:.02em}
+.knowledge-help-preview .ending-badge::before{display:inline-grid;width:17px;height:17px;margin-right:6px;place-items:center;border:1px solid currentColor;border-radius:50%;content:"✓";font-size:10px;line-height:1;vertical-align:-1px}
+.knowledge-help-preview .ending-title-row{display:grid;grid-template-columns:64px minmax(0,1fr);align-items:center;gap:17px}
+.knowledge-help-preview .ending-symbol{display:grid;width:58px;height:58px;place-items:center;border:3px solid #176b58;border-radius:16px;color:#176b58;background:#eff6f3;font-size:31px;font-weight:900;line-height:1}
+.knowledge-help-preview .ending-symbol::before{content:"✓"}
+.knowledge-help-preview .ending-stage[data-outcome="warning"] .ending-symbol,.knowledge-help-preview .ending-stage[data-outcome="danger"] .ending-symbol{border-color:#bd7b16;color:#bd7b16;background:#fff7e8}
+.knowledge-help-preview .ending-stage[data-outcome="warning"] .ending-symbol::before,.knowledge-help-preview .ending-stage[data-outcome="danger"] .ending-symbol::before{content:"!"}
+.knowledge-help-preview .ending-stage[data-outcome="danger"] .ending-symbol{border-color:#b95b3f;color:#b95b3f;background:#fff3ef}
+.knowledge-help-preview .ending-stage h3{margin:0;color:#174c3e;font-size:clamp(32px,3.3vw,43px);font-weight:880;line-height:1.13;letter-spacing:-.045em}
+.knowledge-help-preview .ending-text{margin:24px 0 0;padding:0 0 0 18px;border-left:3px solid #c79a3e;color:#43564f;background:transparent;font-size:16px;font-weight:550;line-height:1.75}
+.knowledge-help-preview .ending-visual{position:relative;min-width:0;min-height:286px;overflow:hidden;border-left:1px solid #d7e2de;background:#edf4f0}
+.knowledge-help-preview .ending-visual::before{position:absolute;inset:0;display:block;background-position:center;background-size:cover;background-repeat:no-repeat;content:""}
+.knowledge-help-preview .ending-visual::after{position:absolute;right:18px;bottom:16px;padding:6px 10px;border:1px solid rgba(255,255,255,.78);border-radius:7px;color:#fff;background:rgba(18,57,47,.72);content:attr(data-label);font-size:11px;font-weight:800;letter-spacing:.04em}
+.knowledge-help-preview .ending-report-head{display:grid;gap:5px;margin:28px 0 14px;padding-left:18px;border-left:5px solid #176b58}
+.knowledge-help-preview .ending-report-head strong{color:#173d33;font-size:24px;line-height:1.25}
+.knowledge-help-preview .ending-report-head span{color:#667b74;font-size:13px;line-height:1.5}
+.knowledge-help-preview .ending-report{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0;padding:0;border:0;counter-reset:ending-point}
+.knowledge-help-preview .ending-report::before{display:none}
+.knowledge-help-preview .ending-report span{position:relative;display:grid;align-content:center;min-height:104px;padding:20px 50px 20px 80px;border:1px solid #cdded8;border-radius:13px;color:#30473f;background:#fff;font-size:17px;font-weight:720;line-height:1.58;counter-increment:ending-point;box-shadow:none}
+.knowledge-help-preview .ending-report span:last-child:nth-of-type(odd){grid-column:1/-1}
+.knowledge-help-preview .ending-report span::before{position:absolute;top:50%;left:19px;display:grid;width:42px;height:42px;place-items:center;border-radius:10px;color:#176b58;background:#eaf4f0;content:counter(ending-point,decimal-leading-zero);font-size:13px;font-weight:900;transform:translateY(-50%)}
+.knowledge-help-preview .ending-report span::after{position:absolute;top:50%;right:20px;width:9px;height:9px;border-top:1px solid #6e9a8d;border-right:1px solid #6e9a8d;content:"";transform:translateY(-50%) rotate(45deg)}
+.knowledge-help-preview .ending-stage[data-outcome="warning"] .ending-badge,.knowledge-help-preview .ending-stage[data-outcome="danger"] .ending-badge{color:#9a6616;background:#fff6e2}
+.knowledge-help-preview .ending-stage[data-outcome="danger"] .ending-badge{color:#a55139;border-color:#e5c1b6;background:#fff2ee}
+@media(max-width:760px){
+.knowledge-help-preview .ending-hero{grid-template-columns:1fr}
+.knowledge-help-preview .ending-copy{padding:26px 22px 28px}
+.knowledge-help-preview .ending-badge{margin-bottom:17px}
+.knowledge-help-preview .ending-title-row{grid-template-columns:49px minmax(0,1fr);gap:12px}
+.knowledge-help-preview .ending-symbol{width:45px;height:45px;border-width:2px;border-radius:12px;font-size:24px}
+.knowledge-help-preview .ending-stage h3{font-size:28px}
+.knowledge-help-preview .ending-text{margin-top:19px;font-size:14px}
+.knowledge-help-preview .ending-visual{min-height:210px;border-top:1px solid #d7e2de;border-left:0}
+.knowledge-help-preview .ending-report-head{margin-top:24px}
+.knowledge-help-preview .ending-report-head strong{font-size:21px}
+.knowledge-help-preview .ending-report{grid-template-columns:1fr}
+.knowledge-help-preview .ending-report span,.knowledge-help-preview .ending-report span:last-child:nth-of-type(odd){grid-column:auto;min-height:90px;padding:17px 40px 17px 72px;font-size:15px}
+.knowledge-help-preview .ending-report span::before{left:15px;width:38px;height:38px}
+.knowledge-help-preview .ending-report span::after{right:17px}
+}
+
+#learningProfileForm[hidden] { display: none; }
+#learningProfileForm { gap: 8px; margin-bottom: 16px; }
+#learningProfileForm label { display: grid; gap: 4px; max-width: 260px; }

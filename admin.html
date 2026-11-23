@@ -1,97 +1,99 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>安全教育管理 | 南开校园安全卫士</title>
-    <link rel="icon" type="image/png" href="assets/nankai-security-logo.png" />
-    <script src="static-auth-guard.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+SC:wght@600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="deck-tokens.css?v=20261118-deck2" />
-    <link rel="stylesheet" href="deck-shell.css?v=20261118-deck2" />
-    <script src="staff-workspace.js?v=20261123-deploy" defer></script>
-    <script src="admin-tasks.js?v=20261123-deploy" defer></script>
-    <link rel="stylesheet" href="deck-admin.css?v=20261118-deck2" />
-  </head>
-  <body class="admin-v2-page">
-    <div class="admin-v2-shell">
-      <aside class="admin-v2-sidebar">
-        <div class="admin-v2-brand"><img class="admin-v2-mark" src="assets/nankai-security-logo.png" alt="" aria-hidden="true" /><div><strong>南开校园安全卫士</strong><small>安全教育管理</small></div></div>
-        <nav class="admin-v2-nav" aria-label="管理导航"><button class="active" type="button" data-view="tasks"><span class="nav-label">学习任务</span></button><button type="button" data-view="analytics"><span class="nav-label">学习统计</span></button><button type="button" data-view="question-bank"><span class="nav-label">题库管理</span></button><button type="button" data-view="roles"><span class="nav-label">角色管理</span></button><button class="admin-v2-logout" id="adminLogoutButton" type="button"><span class="nav-label">退出登录</span></button></nav>
-        <div class="admin-v2-side-note"><strong>数据说明</strong><p>学习统计仅汇总已完成答题的飞书登录用户。</p></div>
-      </aside>
-      <main class="admin-v2-main">
-        <header class="admin-v2-header"><div><p id="viewKicker">安全教育</p><h1 id="viewTitle">学习任务管理</h1></div><div class="admin-v2-header-actions"><span id="adminUser">正在验证身份</span><button class="admin-v2-primary" type="button" id="openTaskModal">新建学习任务</button></div></header>
-        <section class="admin-v2-overview"><div><span>当前任务</span><strong id="overviewTaskTitle">尚未选择任务</strong><small id="overviewTaskScope">请从左侧选择或新建任务</small></div><div><span>完成进度</span><strong id="overviewCompletion">--</strong><small id="overviewCompletionDetail">暂无统计</small></div><div><span>平均得分</span><strong id="overviewScore">--</strong><small id="overviewScoreDetail">暂无统计</small></div><div class="admin-v2-status-block"><span>任务状态</span><strong id="overviewStatus">--</strong><small id="overviewDeadline">--</small></div></section>
-        <section class="admin-v2-content" data-panel="tasks">
-          <section class="admin-v2-task-panel"><div class="admin-v2-section-head"><div><h2>学习任务</h2><p>创建、选择和调整已发布的安全教育任务</p></div></div><div id="taskList" class="admin-v2-task-list"></div></section>
-          <section class="admin-v2-detail-panel"><div id="emptyState" class="admin-v2-empty"><strong>暂未创建学习任务</strong><p>新建任务后，学生端会按任务主题抽取题目并自动汇总学习数据。</p><button class="admin-v2-primary" type="button" data-open-modal>新建学习任务</button></div><div id="taskDetail" hidden><div class="admin-v2-detail-head"><div><span id="taskTypeLabel">安全教育任务</span><h2 id="taskTitle">--</h2><p id="taskScope">--</p></div><div id="taskActions" class="admin-v2-actions"></div></div><dl class="admin-v2-task-facts"><div><dt>学习主题</dt><dd id="taskCategories">--</dd></div><div><dt>题目与合格线</dt><dd id="taskRule">--</dd></div><div><dt>开始时间</dt><dd id="taskStart">--</dd></div><div><dt>截止时间</dt><dd id="taskEnd">--</dd></div></dl><div class="admin-v2-records"><div class="admin-v2-subhead"><h3>最近完成记录</h3><span id="attemptTotal">0 次完成</span></div><div class="admin-v2-table-wrap"><table><thead><tr><th>学生</th><th>得分</th><th>完成时间</th></tr></thead><tbody id="recentAttempts"></tbody></table></div></div></div></section>
-        </section>
-        <section class="admin-v2-content" data-panel="analytics" hidden>
-          <section class="admin-v2-task-panel">
-            <div class="admin-v2-section-head"><div><h2>学习任务</h2><p>选择任务，查看对应的学习效果统计</p></div></div>
-            <div id="analyticsTaskList" class="admin-v2-task-list"></div>
-          </section>
-          <div class="admin-v2-analytics-detail">
-            <section class="admin-v2-analytics-head"><div><h2>学习效果统计</h2><p id="analyticsDescription">选择左侧任务，查看各主题的掌握情况和高频错题。</p></div><select id="taskSelect" hidden aria-label="统计任务"></select></section>
-            <div id="analyticsEmpty" class="admin-v2-empty" hidden><strong>暂无可统计的数据</strong><p>学生完成答题后，系统会在这里生成学习效果汇总。</p></div>
-            <div id="analyticsContent" class="admin-v2-analytics-grid">
-              <section class="admin-v2-report"><div class="admin-v2-subhead"><h3>主题正确率</h3><span>按答题明细计算</span></div><div id="categoryStats" class="admin-v2-stat-list"></div></section>
-              <section class="admin-v2-report"><div class="admin-v2-subhead"><h3>高频错题</h3><span>用于后续重点复习</span></div><div id="wrongQuestions" class="admin-v2-wrong-list"></div></section>
-            </div>
-          </div>
-        </section>
-        <section class="admin-v2-content" data-panel="question-bank" hidden>
-          <section class="admin-v2-bank-panel">
-            <div class="admin-v2-bank-stats"><div><span>当前版本</span><strong id="bankVersion">--</strong></div><div><span>题目总数</span><strong id="bankCount">--</strong></div><div><span>题目类型数</span><strong id="bankCategoryCount">--</strong></div><div><span>更新时间</span><strong id="bankUpdatedAt">--</strong></div></div>
-            <div class="admin-v2-bank-categories"><div class="admin-v2-bank-category-head"><div><span>题目类型分布</span><strong>按当前题库统计各主题题量</strong></div><small id="bankCategoryTotal">正在读取…</small></div><div id="bankCategorySummary">正在读取题库类型…</div></div>
-            <form id="quizBankForm" class="admin-v2-bank-form">
-              <label class="admin-v2-upload-zone" id="quizBankDropZone" for="quizBankFile"><strong>选择题库文件或拖入此处</strong><span>支持 Word .docx 和 Markdown .md；支持单选、判断和多选题；每题须包含题干、选项、正确答案和解释。</span><div class="admin-v2-upload-action"><b>选择文件</b></div><p class="admin-v2-upload-tip">选择或拖入文件后，点击“上传题库”开始解析并更新题库。</p><div class="admin-v2-upload-format"><strong>文档格式</strong><p>每题以“1. 题干”或“问题：题干”开头，随后写题目分类、选项、答案和解析。单选题填写一个答案（如A）；判断题使用两个选项；多选题填写全部答案（如ABC）。系统会自动生成题目编号并写入数据库；上传成功后会补充到现有题库，按题干跳过重复题，并保留备份。</p></div><input id="quizBankFile" type="file" accept=".docx,.md,.markdown,.txt,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain" required /></label>
-              <div id="bankPreview" class="admin-v2-bank-preview" hidden></div>
-              <div class="admin-v2-form-footer"><span id="bankMessage" role="status">请选择题库文件后点击上传。</span><button class="admin-v2-primary" id="uploadQuizBankButton" type="button">上传题库</button></div>
-            </form>
-            <section class="admin-v2-bank-history">
-              <div class="admin-v2-subhead"><div><h3>题库版本记录</h3><span>查看现有题库，并保留每次上传的时间、人员和原始文件</span></div><button class="admin-v2-secondary" id="toggleVersionHistory" type="button">查看版本记录</button></div>
-              <div id="versionHistory" hidden></div>
-            </section>
-          </section>
-        </section>
-        <section class="admin-v2-content" data-panel="roles" hidden>
-          <section class="admin-v2-role-panel">
-            <div class="admin-v2-section-head"><div><h2>角色授权管理</h2><p>为后台工作人员配置管理员、审核员、编辑员权限；支持账号密码和飞书身份两种登录方式。</p></div></div>
-            <form id="roleForm" class="admin-v2-role-form" autocomplete="off">
-              <input type="hidden" name="id" />
-              <label>显示名称<input name="name" autocomplete="off" required /></label>
-              <label>角色<select name="role" required><option value="" selected disabled></option><option value="admin">管理员</option><option value="reviewer">审核员</option><option value="editor">编辑员</option></select></label>
-              <label>状态<select name="status" required><option value="" selected disabled></option><option value="active">启用</option><option value="paused">停用</option></select></label>
-              <label>飞书用户 ID<input name="feishuUserId" autocomplete="off" /></label>
-              <label>账号<input name="username" autocomplete="off" readonly data-lpignore="true" data-1p-ignore /></label>
-              <label>密码<input name="password" type="password" autocomplete="new-password" readonly data-lpignore="true" data-1p-ignore /></label>
-              <div class="admin-v2-form-footer"><span id="roleMessage" role="status"></span><button class="admin-v2-secondary" id="clearRoleForm" type="button">清空</button><button class="admin-v2-primary" type="submit">保存授权</button></div>
-            </form>
-            <div class="admin-v2-role-table-wrap"><table class="admin-v2-role-table"><thead><tr><th>名称</th><th>角色</th><th>状态</th><th>账号</th><th>飞书用户 ID</th><th>最近登录</th><th>操作</th></tr></thead><tbody id="roleTableBody"></tbody></table></div>
-          </section>
-        </section>
-      </main>
-    </div>
-    <div class="admin-v2-modal" id="taskModal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="admin-v2-modal-card"><div class="admin-v2-modal-head"><div><p>任务配置</p><h2 id="modalTitle">新建学习任务</h2></div><button class="admin-v2-close" type="button" id="closeTaskModal" aria-label="关闭">关闭</button></div><form id="taskForm"><div class="admin-v2-form-grid"><label>任务名称<input name="title" required placeholder="例如：2026 级新生入学安全教育" /></label><label>应完成人数<input name="expectedCount" type="number" min="0" value="0" placeholder="用于计算完成率" /></label><label>题目数量<input name="questionCount" type="number" min="5" max="30" step="1" value="10" required /><small>5 至 30 题</small></label><label>合格分数<input name="passScore" type="number" min="0" max="100" value="80" /></label><label>开始时间<input name="startsAt" type="datetime-local" /></label><label>截止时间<input name="endsAt" type="datetime-local" /></label></div><fieldset class="admin-v2-fieldset"><legend>适用范围</legend><div class="admin-v2-scope-groups"><div><strong>本科生</strong><p><label><input type="checkbox" name="targetScopes" value="本科生 2026 级" />2026 级</label><label><input type="checkbox" name="targetScopes" value="本科生 2025 级" />2025 级</label><label><input type="checkbox" name="targetScopes" value="本科生 2024 级" />2024 级</label><label><input type="checkbox" name="targetScopes" value="本科生 2023 级" />2023 级</label></p></div><div><strong>研究生</strong><p><label><input type="checkbox" name="targetScopes" value="研究生 2026 级" />2026 级</label><label><input type="checkbox" name="targetScopes" value="研究生 2025 级" />2025 级</label><label><input type="checkbox" name="targetScopes" value="研究生 2024 级" />2024 级</label><label><input type="checkbox" name="targetScopes" value="研究生 2023 级" />2023 级</label></p></div></div></fieldset><fieldset class="admin-v2-fieldset"><legend>学习主题</legend><div id="categoryChoices" class="admin-v2-check-list"></div></fieldset><div class="admin-v2-form-footer"><span id="formMessage" role="status"></span><button class="admin-v2-primary" type="submit">校验并发布任务</button></div></form></div></div>
-    <div class="admin-v2-toast" id="adminToast" hidden></div>
-    <div class="admin-v2-modal" id="passwordModal" hidden role="dialog" aria-modal="true" aria-labelledby="passwordModalTitle">
-      <div class="admin-v2-modal-card" style="max-width:480px">
-        <div class="admin-v2-modal-head"><h2 id="passwordModalTitle">修改密码</h2><button class="admin-v2-close" type="button" id="closePasswordModal">关闭</button></div>
-        <form id="passwordForm" autocomplete="off">
-          <input name="userId" type="hidden" />
-          <p id="passwordAccount"></p>
-          <div class="admin-v2-form-grid" style="grid-template-columns:1fr">
-            <label>新密码<input name="newPassword" type="text" autocomplete="off" minlength="8" maxlength="128" placeholder="请输入8至128位新密码" required /><small>管理员可直接查看本次输入的新密码。</small></label>
-          </div>
-          <div class="admin-v2-form-footer"><span id="passwordMessage" role="status"></span><button class="admin-v2-primary" type="submit" style="white-space:nowrap;flex-shrink:0">保存密码</button></div>
-        </form>
-      </div>
-    </div>
-    <script>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>安全教育管理 | 南开校园安全卫士</title>
+<link href="assets/nankai-security-logo.png" rel="icon" type="image/png"/>
+<script src="assets/js/static-auth-guard.js"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;family=Noto+Serif+SC:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="assets/css/deck-tokens.css?v=20261118-deck2" rel="stylesheet"/>
+<link href="assets/css/deck-shell.css?v=20261118-deck2" rel="stylesheet"/>
+<script defer="" src="assets/js/staff-workspace.js?v=20261123-deploy"></script>
+<script defer="" src="assets/js/admin-tasks.js?v=20261123-deploy"></script>
+<link href="assets/css/deck-admin.css?v=20261118-deck2" rel="stylesheet"/>
+<link href="assets/css/unified-finish.css?v=20261123" rel="stylesheet"/>
+<link href="assets/css/campus-staff-polish.css?v=20261123b" rel="stylesheet"/></head>
+<body class="admin-v2-page">
+<div class="admin-v2-shell">
+<aside class="admin-v2-sidebar">
+<div class="admin-v2-brand"><img alt="" aria-hidden="true" class="admin-v2-mark" src="assets/nankai-security-logo.png"/><div><strong>南开校园安全卫士</strong><small>安全教育管理</small></div></div>
+<nav aria-label="管理导航" class="admin-v2-nav"><button class="active" data-view="tasks" type="button"><span class="nav-label">学习任务</span></button><button data-view="analytics" type="button"><span class="nav-label">学习统计</span></button><button data-view="question-bank" type="button"><span class="nav-label">题库管理</span></button><button data-view="roles" type="button"><span class="nav-label">角色管理</span></button><button class="admin-v2-logout" id="adminLogoutButton" type="button"><span class="nav-label">退出登录</span></button></nav>
+<div class="admin-v2-side-note"><strong>数据说明</strong><p>学习统计仅汇总已完成答题的飞书登录用户。</p></div>
+</aside>
+<main class="admin-v2-main">
+<header class="admin-v2-header"><div><p id="viewKicker">安全教育</p><h1 id="viewTitle">学习任务管理</h1></div><div class="admin-v2-header-actions"><span id="adminUser">正在验证身份</span><button class="admin-v2-primary" id="openTaskModal" type="button">新建学习任务</button></div></header>
+<section class="admin-v2-overview"><div><span>当前任务</span><strong id="overviewTaskTitle">尚未选择任务</strong><small id="overviewTaskScope">请从左侧选择或新建任务</small></div><div><span>完成进度</span><strong id="overviewCompletion">--</strong><small id="overviewCompletionDetail">暂无统计</small></div><div><span>平均得分</span><strong id="overviewScore">--</strong><small id="overviewScoreDetail">暂无统计</small></div><div class="admin-v2-status-block"><span>任务状态</span><strong id="overviewStatus">--</strong><small id="overviewDeadline">--</small></div></section>
+<section class="admin-v2-content" data-panel="tasks">
+<section class="admin-v2-task-panel"><div class="admin-v2-section-head"><div><h2>学习任务</h2><p>创建、选择和调整已发布的安全教育任务</p></div></div><div class="admin-v2-task-list" id="taskList"></div></section>
+<section class="admin-v2-detail-panel"><div class="admin-v2-empty" id="emptyState"><strong>暂未创建学习任务</strong><p>新建任务后，学生端会按任务主题抽取题目并自动汇总学习数据。</p><button class="admin-v2-primary" data-open-modal="" type="button">新建学习任务</button></div><div hidden="" id="taskDetail"><div class="admin-v2-detail-head"><div><span id="taskTypeLabel">安全教育任务</span><h2 id="taskTitle">--</h2><p id="taskScope">--</p></div><div class="admin-v2-actions" id="taskActions"></div></div><dl class="admin-v2-task-facts"><div><dt>学习主题</dt><dd id="taskCategories">--</dd></div><div><dt>题目与合格线</dt><dd id="taskRule">--</dd></div><div><dt>开始时间</dt><dd id="taskStart">--</dd></div><div><dt>截止时间</dt><dd id="taskEnd">--</dd></div></dl><div class="admin-v2-records"><div class="admin-v2-subhead"><h3>最近完成记录</h3><span id="attemptTotal">0 次完成</span></div><div class="admin-v2-table-wrap"><table><thead><tr><th>学生</th><th>得分</th><th>完成时间</th></tr></thead><tbody id="recentAttempts"></tbody></table></div></div></div></section>
+</section>
+<section class="admin-v2-content" data-panel="analytics" hidden="">
+<section class="admin-v2-task-panel">
+<div class="admin-v2-section-head"><div><h2>学习任务</h2><p>选择任务，查看对应的学习效果统计</p></div></div>
+<div class="admin-v2-task-list" id="analyticsTaskList"></div>
+</section>
+<div class="admin-v2-analytics-detail">
+<section class="admin-v2-analytics-head"><div><h2>学习效果统计</h2><p id="analyticsDescription">选择左侧任务，查看各主题的掌握情况和高频错题。</p></div><select aria-label="统计任务" hidden="" id="taskSelect"></select></section>
+<div class="admin-v2-empty" hidden="" id="analyticsEmpty"><strong>暂无可统计的数据</strong><p>学生完成答题后，系统会在这里生成学习效果汇总。</p></div>
+<div class="admin-v2-analytics-grid" id="analyticsContent">
+<section class="admin-v2-report"><div class="admin-v2-subhead"><h3>主题正确率</h3><span>按答题明细计算</span></div><div class="admin-v2-stat-list" id="categoryStats"></div></section>
+<section class="admin-v2-report"><div class="admin-v2-subhead"><h3>高频错题</h3><span>用于后续重点复习</span></div><div class="admin-v2-wrong-list" id="wrongQuestions"></div></section>
+</div>
+</div>
+</section>
+<section class="admin-v2-content" data-panel="question-bank" hidden="">
+<section class="admin-v2-bank-panel">
+<div class="admin-v2-bank-stats"><div><span>当前版本</span><strong id="bankVersion">--</strong></div><div><span>题目总数</span><strong id="bankCount">--</strong></div><div><span>题目类型数</span><strong id="bankCategoryCount">--</strong></div><div><span>更新时间</span><strong id="bankUpdatedAt">--</strong></div></div>
+<div class="admin-v2-bank-categories"><div class="admin-v2-bank-category-head"><div><span>题目类型分布</span><strong>按当前题库统计各主题题量</strong></div><small id="bankCategoryTotal">正在读取…</small></div><div id="bankCategorySummary">正在读取题库类型…</div></div>
+<form class="admin-v2-bank-form" id="quizBankForm">
+<label class="admin-v2-upload-zone" for="quizBankFile" id="quizBankDropZone"><strong>选择题库文件或拖入此处</strong><span>支持 Word .docx 和 Markdown .md；支持单选、判断和多选题；每题须包含题干、选项、正确答案和解释。</span><div class="admin-v2-upload-action"><b>选择文件</b></div><p class="admin-v2-upload-tip">选择或拖入文件后，点击“上传题库”开始解析并更新题库。</p><div class="admin-v2-upload-format"><strong>文档格式</strong><p>每题以“1. 题干”或“问题：题干”开头，随后写题目分类、选项、答案和解析。单选题填写一个答案（如A）；判断题使用两个选项；多选题填写全部答案（如ABC）。系统会自动生成题目编号并写入数据库；上传成功后会补充到现有题库，按题干跳过重复题，并保留备份。</p></div><input accept=".docx,.md,.markdown,.txt,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain" id="quizBankFile" required="" type="file"/></label>
+<div class="admin-v2-bank-preview" hidden="" id="bankPreview"></div>
+<div class="admin-v2-form-footer"><span id="bankMessage" role="status">请选择题库文件后点击上传。</span><button class="admin-v2-primary" id="uploadQuizBankButton" type="button">上传题库</button></div>
+</form>
+<section class="admin-v2-bank-history">
+<div class="admin-v2-subhead"><div><h3>题库版本记录</h3><span>查看现有题库，并保留每次上传的时间、人员和原始文件</span></div><button class="admin-v2-secondary" id="toggleVersionHistory" type="button">查看版本记录</button></div>
+<div hidden="" id="versionHistory"></div>
+</section>
+</section>
+</section>
+<section class="admin-v2-content" data-panel="roles" hidden="">
+<section class="admin-v2-role-panel">
+<div class="admin-v2-section-head"><div><h2>角色授权管理</h2><p>为后台工作人员配置管理员、审核员、编辑员权限；支持账号密码和飞书身份两种登录方式。</p></div></div>
+<form autocomplete="off" class="admin-v2-role-form" id="roleForm">
+<input name="id" type="hidden"/>
+<label>显示名称<input autocomplete="off" name="name" required=""/></label>
+<label>角色<select name="role" required=""><option disabled="" selected="" value=""></option><option value="admin">管理员</option><option value="reviewer">审核员</option><option value="editor">编辑员</option></select></label>
+<label>状态<select name="status" required=""><option disabled="" selected="" value=""></option><option value="active">启用</option><option value="paused">停用</option></select></label>
+<label>飞书用户 ID<input autocomplete="off" name="feishuUserId"/></label>
+<label>账号<input autocomplete="off" data-1p-ignore="" data-lpignore="true" name="username" readonly=""/></label>
+<label>密码<input autocomplete="new-password" data-1p-ignore="" data-lpignore="true" name="password" readonly="" type="password"/></label>
+<div class="admin-v2-form-footer"><span id="roleMessage" role="status"></span><button class="admin-v2-secondary" id="clearRoleForm" type="button">清空</button><button class="admin-v2-primary" type="submit">保存授权</button></div>
+</form>
+<div class="admin-v2-role-table-wrap"><table class="admin-v2-role-table"><thead><tr><th>名称</th><th>角色</th><th>状态</th><th>账号</th><th>飞书用户 ID</th><th>最近登录</th><th>操作</th></tr></thead><tbody id="roleTableBody"></tbody></table></div>
+</section>
+</section>
+</main>
+</div>
+<div aria-labelledby="modalTitle" aria-modal="true" class="admin-v2-modal" hidden="" id="taskModal" role="dialog"><div class="admin-v2-modal-card"><div class="admin-v2-modal-head"><div><p>任务配置</p><h2 id="modalTitle">新建学习任务</h2></div><button aria-label="关闭" class="admin-v2-close" id="closeTaskModal" type="button">关闭</button></div><form id="taskForm"><div class="admin-v2-form-grid"><label>任务名称<input name="title" placeholder="例如：2026 级新生入学安全教育" required=""/></label><label>应完成人数<input min="0" name="expectedCount" placeholder="用于计算完成率" type="number" value="0"/></label><label>题目数量<input max="30" min="5" name="questionCount" required="" step="1" type="number" value="10"/><small>5 至 30 题</small></label><label>合格分数<input max="100" min="0" name="passScore" type="number" value="80"/></label><label>开始时间<input name="startsAt" type="datetime-local"/></label><label>截止时间<input name="endsAt" type="datetime-local"/></label></div><fieldset class="admin-v2-fieldset"><legend>适用范围</legend><div class="admin-v2-scope-groups"><div><strong>本科生</strong><p><label><input name="targetScopes" type="checkbox" value="本科生 2026 级"/>2026 级</label><label><input name="targetScopes" type="checkbox" value="本科生 2025 级"/>2025 级</label><label><input name="targetScopes" type="checkbox" value="本科生 2024 级"/>2024 级</label><label><input name="targetScopes" type="checkbox" value="本科生 2023 级"/>2023 级</label></p></div><div><strong>研究生</strong><p><label><input name="targetScopes" type="checkbox" value="研究生 2026 级"/>2026 级</label><label><input name="targetScopes" type="checkbox" value="研究生 2025 级"/>2025 级</label><label><input name="targetScopes" type="checkbox" value="研究生 2024 级"/>2024 级</label><label><input name="targetScopes" type="checkbox" value="研究生 2023 级"/>2023 级</label></p></div></div></fieldset><fieldset class="admin-v2-fieldset"><legend>学习主题</legend><div class="admin-v2-check-list" id="categoryChoices"></div></fieldset><div class="admin-v2-form-footer"><span id="formMessage" role="status"></span><button class="admin-v2-primary" type="submit">校验并发布任务</button></div></form></div></div>
+<div class="admin-v2-toast" hidden="" id="adminToast"></div>
+<div aria-labelledby="passwordModalTitle" aria-modal="true" class="admin-v2-modal" hidden="" id="passwordModal" role="dialog">
+<div class="admin-v2-modal-card" style="max-width:480px">
+<div class="admin-v2-modal-head"><h2 id="passwordModalTitle">修改密码</h2><button class="admin-v2-close" id="closePasswordModal" type="button">关闭</button></div>
+<form autocomplete="off" id="passwordForm">
+<input name="userId" type="hidden"/>
+<p id="passwordAccount"></p>
+<div class="admin-v2-form-grid" style="grid-template-columns:1fr">
+<label>新密码<input autocomplete="off" maxlength="128" minlength="8" name="newPassword" placeholder="请输入8至128位新密码" required="" type="text"/><small>管理员可直接查看本次输入的新密码。</small></label>
+</div>
+<div class="admin-v2-form-footer"><span id="passwordMessage" role="status"></span><button class="admin-v2-primary" style="white-space:nowrap;flex-shrink:0" type="submit">保存密码</button></div>
+</form>
+</div>
+</div>
+<script>
       const state = { tasks: [], task: null, report: null, categories: [], view: "tasks", quizBankUpload: null, versions: [], users: [] };
       const $ = (selector) => document.querySelector(selector);
       const statusText = { active: "进行中", paused: "已暂停", closed: "已结束" };
@@ -234,5 +236,5 @@
       });
       loadUser(); loadOverview();
     </script>
-  </body>
+</body>
 </html>

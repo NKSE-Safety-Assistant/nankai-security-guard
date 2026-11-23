@@ -1,16 +1,8 @@
 # 部署说明
 
-当前网页端只保留真正需要网页承载的页面：
+机器人菜单可以链接到 `/index.html` 学生首页，也可以链接到 `/tasks.html`、`/quiz.html` 或 `/scenarios.html`。原有 `/knowledge.html` 入口会转到新版首页。Node.js 服务会先验证学生身份，授权后返回对应页面。应急求助入口为 `/help.html`，工作人员入口为 `/admin-login.html`。
 
-- index.html：跳转到 `knowledge.html`。Node.js 服务上的学习页会先验证学生的飞书身份。
-- knowledge.html：安全答题与三角色学习模式。
-- help.html：一键求助页面。
-- editor.html：编辑员工作台。
-- reviewer.html：审核员工作台。
-
-政策问答由飞书机器人直接承载，隐患上报由飞书表单直接承载，网页端不再保留首页或对应中转页面。
-
-GitHub Pages 用于静态演示，只发布前端资源以及演示用的 `data/safety-cases.json`、`data/quiz-questions.json` 和 `data/demo-learning-tasks.json`。飞书回调、工作台和 MySQL 学习记录由 Node.js 服务提供。
+前端样式和脚本分别位于 `assets/css` 和 `assets/js`。GitHub Pages 用于静态演示，学生专题使用 `data/student-topics.json`。飞书登录回调和学习记录由 Node.js 与 MySQL 提供。
 
 ## 工作人员飞书网页登录
 

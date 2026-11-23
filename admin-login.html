@@ -1,37 +1,39 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>后台登录 | 南开校园安全卫士</title>
-    <link rel="icon" type="image/png" href="assets/nankai-security-logo.png" />
-    <link rel="stylesheet" href="staff-login.css?v=20261117-single-column-large" />
-  </head>
-  <body class="admin-login-page staff-login-page">
-    <main class="admin-login-shell">
-      <header class="admin-login-brand"><img src="assets/nankai-security-logo.png" alt="" aria-hidden="true" /><div><strong>南开校园安全卫士</strong><small>Nankai Safety Assistant</small></div></header>
-      <section class="admin-login-card" aria-labelledby="loginTitle">
-        <section class="admin-login-panel">
-          <div class="admin-login-heading"><h1 id="loginTitle">工作人员登录</h1><p>请选择工作身份，使用已授权的账号登录。</p></div>
-          <nav class="login-role-switch" aria-label="选择工作人员登录身份">
-            <a href="/admin-login.html?role=admin&amp;next=%2Fadmin.html" data-login-role="admin">管理员</a>
-            <a href="/admin-login.html?role=editor&amp;next=%2Feditor.html" data-login-role="editor">编辑员</a>
-            <a href="/admin-login.html?role=reviewer&amp;next=%2Freviewer.html" data-login-role="reviewer">审核员</a>
-          </nav>
-          <p id="rolePurpose" class="login-role-purpose"></p>
-          <form id="adminLoginForm" class="admin-login-form" autocomplete="off">
-            <label><span id="usernameLabel">账号</span><input id="loginUsername" name="loginUsername" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore placeholder="后台账号" readonly required /></label>
-            <label><span id="passwordLabel">密码</span><input id="loginPassword" name="loginPassword" type="password" autocomplete="new-password" data-lpignore="true" data-1p-ignore placeholder="登录密码" readonly required /></label>
-            <button class="admin-login-submit" type="submit">登录后台</button>
-            <p id="loginMessage" role="status"></p>
-          </form>
-          <div class="admin-login-divider"><span>其他登录方式</span></div>
-          <a id="feishuLoginLink" class="admin-login-feishu" href="/api/auth/login?role=admin">飞书授权登录</a>
-        </section>
-      </section>
-      <footer class="login-footer"><p class="admin-login-tip">仅限已授权的工作人员使用</p><a class="admin-login-back" href="knowledge.html">返回学生学习平台</a></footer>
-    </main>
-    <script>
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>后台登录 | 南开校园安全卫士</title>
+<link href="assets/nankai-security-logo.png" rel="icon" type="image/png"/>
+<link href="assets/css/staff-login.css?v=20261117-single-column-large" rel="stylesheet"/>
+<link href="assets/css/unified-finish.css?v=20261123" rel="stylesheet"/>
+<link href="assets/css/campus-staff-polish.css?v=20261123b" rel="stylesheet"/></head>
+<body class="admin-login-page staff-login-page">
+<main class="admin-login-shell">
+<header class="admin-login-brand"><img alt="" aria-hidden="true" src="assets/nankai-security-logo.png"/><div><strong>南开校园安全卫士</strong><small>Nankai Safety Assistant</small></div></header>
+<section aria-labelledby="loginTitle" class="admin-login-card">
+<section class="admin-login-panel">
+<div class="admin-login-heading"><h1 id="loginTitle">工作人员登录</h1><p>请选择工作身份，使用已授权的账号登录。</p></div>
+<nav aria-label="选择工作人员登录身份" class="login-role-switch">
+<a data-login-role="admin" href="/admin-login.html?role=admin&amp;next=%2Fadmin.html">管理员</a>
+<a data-login-role="editor" href="/admin-login.html?role=editor&amp;next=%2Feditor.html">编辑员</a>
+<a data-login-role="reviewer" href="/admin-login.html?role=reviewer&amp;next=%2Freviewer.html">审核员</a>
+</nav>
+<p class="login-role-purpose" id="rolePurpose"></p>
+<form autocomplete="off" class="admin-login-form" id="adminLoginForm">
+<label><span id="usernameLabel">账号</span><input autocapitalize="off" autocomplete="off" data-1p-ignore="" data-lpignore="true" id="loginUsername" name="loginUsername" placeholder="后台账号" readonly="" required="" spellcheck="false"/></label>
+<label><span id="passwordLabel">密码</span><input autocomplete="new-password" data-1p-ignore="" data-lpignore="true" id="loginPassword" name="loginPassword" placeholder="登录密码" readonly="" required="" type="password"/></label>
+<button class="admin-login-submit" type="submit">登录后台</button>
+<p id="loginMessage" role="status"></p>
+</form>
+<div class="admin-login-divider"><span>其他登录方式</span></div>
+<a class="admin-login-feishu" href="/api/auth/login?role=admin&amp;next=%2Fadmin.html" id="feishuLoginLink">飞书授权登录</a>
+</section>
+</section>
+<footer class="login-footer"><p class="admin-login-tip">仅限已授权的工作人员使用</p><a class="admin-login-back" href="knowledge.html">返回学生学习平台</a></footer>
+</main>
+<script>
       const params = new URLSearchParams(location.search);
       const workspaces = { admin: "/admin.html", editor: "/editor.html", reviewer: "/reviewer.html" };
       const requestedRole = params.get("role") || Object.keys(workspaces).find((key) => workspaces[key] === params.get("next"));
@@ -52,7 +54,7 @@
       document.querySelector("#usernameLabel").textContent = accountText[role] || "后台账号";
       document.querySelector("#passwordLabel").textContent = (accountText[role] || "后台账号") + "密码";
       document.querySelector("#loginUsername").placeholder = accountText[role] || "后台账号";
-      document.querySelector("#feishuLoginLink").href = "/api/auth/login?role=" + encodeURIComponent(role);
+      document.querySelector("#feishuLoginLink").href = "/api/auth/login?role=" + encodeURIComponent(role) + "&next=" + encodeURIComponent(next);
       document.querySelector(`[data-login-role="${role}"]`)?.setAttribute("aria-current", "page");
       function clearLoginFields() {
         document.querySelector("#loginUsername").value = "";
@@ -103,5 +105,5 @@
         }
       });
     </script>
-  </body>
+</body>
 </html>

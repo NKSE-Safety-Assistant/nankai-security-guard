@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>我的学习任务 | 南开安全卫士</title>
+<link href="assets/nankai-security-logo.png" rel="icon" type="image/png"/>
+<link href="assets/css/styles.css?v=20261104-nankai-logo-large" rel="stylesheet"/>
+<link href="assets/css/preview-unify.css?v=20261117-fire-event-cover" rel="stylesheet"/>
+<link href="assets/css/student-redesign.css?v=20261118-v1" rel="stylesheet"/>
+<link href="assets/css/student-experience.css?v=3" rel="stylesheet"/><link href="assets/css/campus-premium.css?v=20261123b" rel="stylesheet"/><link href="assets/css/campus-editorial-v3.css?v=1" rel="stylesheet"/></head>
+<body class="knowledge-help-preview nk-editorial-page" data-default-tab="quiz" data-page="tasks"><a class="nk-skip-link" href="#main-content">跳转到主要内容</a>
+<div class="student-topline"><span><span class="topline-dot"></span> NANKAI UNIVERSITY · CAMPUS SAFETY</span><span>安全同行 · 守护每一天</span></div>
+<header class="site-header">
+<div class="header-inner">
+<a aria-label="南开安全卫士知识学习" class="brand" href="index.html">
+<img alt="" aria-hidden="true" class="brand-mark" src="assets/nankai-security-logo.png"/>
+<span>
+<strong>南开安全卫士</strong>
+<small>Nankai Safety Assistant</small>
+</span>
+</a>
+<nav aria-label="学生端导航" class="student-main-nav nk-nav"><a data-nav-group="首页" href="index.html">首页</a><div class="nk-dropdown"><button aria-expanded="false" type="button">安全学习 <span>⌄</span></button><div class="nk-dropdown-menu"><a href="tasks.html">学习任务</a><a href="quiz.html">安全答题</a><a href="scenarios.html">情景训练</a><a href="exam.html">模拟考试</a><a href="mistakes.html">错题本</a></div></div><div class="nk-dropdown"><button aria-expanded="false" type="button">安全服务 <span>⌄</span></button><div class="nk-dropdown-menu"><a href="reports.html">隐患上报</a><a href="help.html">应急求助</a></div></div><a data-nav-group="校园地图" href="map.html">校园地图</a><div class="nk-dropdown"><button aria-expanded="false" type="button">安全资讯 <span>⌄</span></button><div class="nk-dropdown-menu"><a href="news.html">安全资讯</a><a href="activity.html">安全活动</a><a href="topics.html">安全知识库</a></div></div><a data-nav-group="AI 助手" href="assistant.html">AI 助手</a><div class="nk-dropdown"><button aria-expanded="false" type="button">个人中心 <span>⌄</span></button><div class="nk-dropdown-menu"><a href="profile.html">个人中心</a><a href="notifications.html">消息中心</a></div></div></nav>
+<a class="student-header-cta" href="help.html">紧急求助 <span aria-hidden="true">↗</span></a>
+</div>
+</header>
+<main id="main-content">
+<section class="hero knowledge-hero" hidden="" style="display: none">
+<div class="hero-copy">
+<p class="eyebrow">校园安全知识学习</p>
+<h1>通过答题和情景模拟学习校园安全知识</h1>
+<p>安全知识页面仅保留学习功能，学生可通过安全答题巩固基础知识，也可进入三角色学习模式，在真实校园情景中练习识别风险、协助他人和复盘判断。</p>
+</div>
+<aside aria-label="学习提醒" class="safety-summary">
+<span>学习提醒</span>
+<strong>先识别风险，再选择行动</strong>
+<p>遇到陌生链接、异常转账、消防隐患、实验室风险或紧急情况时，请先核实来源，保留证据，并通过学校官方渠道求助。</p>
+</aside>
+</section>
+<section class="nk-section-masthead" style='--page-photo:url("assets/scenario-covers/campus-fire-awareness-event.png")'><div class="nk-masthead-copy"><span class="nk-overline">NANKAI SAFETY  /  LEARNING TASKS</span><h1>我的学习任务</h1><p>查看学校布置的学习任务，按要求完成答题并查看学习结果。</p></div><div aria-hidden="true" class="nk-masthead-picture"></div></section><section class="workspace knowledge-workspace"><div aria-hidden="true" style="display:none"><button id="taskEntryButton" type="button">taskEntryButton</button><button id="dailyEntryButton" type="button">dailyEntryButton</button></div><div class="student-page-intro" style="display:none!important"><span class="section-eyebrow">NANKAI · STUDENT SAFETY PORTAL</span><h1>我的学习任务</h1><p>查看学校布置的学习任务，按要求完成答题并查看学习结果。</p></div>
+<button class="learning-home-back" hidden="" id="learningHomeBack" style="display:none !important" type="button"><span aria-hidden="true">←</span> <span id="learningBackLabel">返回学习首页</span></button>
+<section aria-label="学习任务" class="knowledge-tasks-panel" hidden="" id="learningTasksPanel">
+<form id="learningProfileForm" class="knowledge-task-card" hidden>
+            <h3>填写学段和入学年份</h3>
+            <p>本站按这两项显示适用的学习任务。保存后如需更正，请联系工作人员。</p>
+            <label>学段 <select name="studyStage" required><option value="">请选择</option><option>本科生</option><option>研究生</option></select></label>
+            <label>入学年份 <input name="grade" inputmode="numeric" maxlength="4" pattern="20[0-9]{2}" placeholder="例如 2026" required /></label>
+            <button class="primary-button" type="submit">保存并查看任务</button>
+            <p id="learningProfileMessage" role="status"></p>
+          </form>
+<div id="learningTaskCards">正在读取学习任务…</div>
+<div hidden="" id="taskQuizRunner"><div class="task-runner-head"><strong id="taskRunnerTitle"></strong><button id="backToTaskList" type="button">返回任务列表</button></div></div>
+</section>
+<section aria-label="日常学习" class="tab-panel active" hidden="" id="quiz">
+<div class="module-grid learning-grid">
+<div class="module-intro">
+<h3>选择学习方式</h3>
+<p>通过消防专题答题巩固应急知识，再进入官方案例改编的消防安全情景，选择体验者、帮助者或观察者身份做判断。</p>
+<ul class="plain-list"><li>消防答题：10 道专题题目即时反馈</li><li>三角色学习：体验、帮助、观察风险</li><li>场景复盘：提炼下一次可执行的安全动作</li></ul>
+</div>
+<button class="learning-home-back learning-daily-back" hidden="" id="dailyModeBack" style="display:none !important" type="button"><span aria-hidden="true">←</span> 返回日常学习</button>
+<div class="quiz-card learning-section" data-learning-section="quiz" hidden="">
+<div class="quiz-meta"><span id="quizProgress">第 1 题</span><strong id="quizScore">得分 0</strong></div>
+<h3 id="quizQuestion"></h3>
+<div class="quiz-options" id="quizOptions"></div>
+<p class="quiz-feedback" id="quizFeedback"></p>
+<button class="primary-button" id="nextQuestion" type="button">下一题</button>
+</div>
+<div class="story-game-card learning-section" data-learning-section="story" hidden="">
+<button class="learning-home-back scenario-selection-back" hidden="" id="startOverStory" type="button"><span aria-hidden="true">←</span> 返回场景选择</button>
+<div class="story-game-head">
+<div>
+<span class="story-kicker">三角色情景</span>
+<h3>选择一个案例，进入校园安全剧情</h3>
+<p>案例来自审核通过的校园安全案例库，已完成信息脱敏。选择身份后进入剧情，中途不能退出，需要走到结局后再返回。</p>
+</div>
+<strong id="gameStatus">选择场景</strong>
+</div>
+<div aria-label="选择校园安全情景" class="scene-gallery" id="scenarioGallery"></div>
+<div class="role-stage" hidden="" id="roleStage">
+<div class="selected-scene" id="selectedScenePreview"></div>
+<div class="role-stage-copy">
+<span class="story-kicker">选择身份</span>
+<h3 id="gameTitle">刷单返利诈骗</h3>
+<p id="gameBrief"></p>
+</div>
+<div aria-label="选择学习角色" class="role-picker" id="rolePicker">
+<button class="role-button active" data-role="experiencer" type="button"><span>体验者</span><small>成为当事人，在现场压力下做安全判断</small></button>
+<button class="role-button" data-role="helper" type="button"><span>帮助者</span><small>协助同学识别风险并完成规范处置</small></button>
+<button class="role-button" data-role="observer" type="button"><span>观察者</span><small>回看事件全过程，标记风险与处置节点</small></button>
+</div>
+<button class="primary-button story-start" id="startStory" type="button">进入剧情</button>
+</div>
+<div class="story-stage" hidden="" id="storyStage">
+<div class="story-topbar">
+<span id="roleScenarioTag">剧情进行中</span>
+<strong id="gameRoleName">体验者</strong>
+</div>
+<div aria-hidden="true" class="story-visual" id="storyVisual"></div>
+<div class="story-chat-panel">
+<div class="story-chat-head"><strong>聊天记录</strong><span>在线</span></div>
+<div aria-label="剧情文本" class="story-board" id="storyBoard"></div>
+</div>
+<div class="thought-panel">
+<span>脑中想法</span>
+<p id="thoughtPrompt"></p>
+<div class="thought-choices" id="thoughtChoices"></div>
+</div>
+<p class="story-note" id="storyNote"></p>
+</div>
+<div class="ending-stage" hidden="" id="endingStage">
+<div class="ending-hero">
+<div class="ending-copy">
+<div class="ending-badge" id="endingBadge">学习已完成</div>
+<div class="ending-title-row">
+<span aria-hidden="true" class="ending-symbol"></span>
+<h3 id="endingTitle">完成学习</h3>
+</div>
+<p class="ending-text" id="endingText"></p>
+</div>
+<div aria-hidden="true" class="ending-visual" id="endingVisual"></div>
+</div>
+<div class="ending-report-head">
+<strong>本次学习要点</strong>
+<span>回顾关键风险，让下一次选择更安全。</span>
+</div>
+<div class="ending-report" id="endingReport"></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</main>
+<footer class="site-footer"><span>© 南开安全卫士 · 校园安全学习与服务</span><span>认真学习 · 安心生活</span></footer>
+<div aria-live="polite" class="toast" id="toast" role="status"></div>
+<script src="assets/js/app.js?v=20261117-fire-event-cover"></script>
+<script src="assets/js/student-redesign.js?v=20261118-v1"></script>
+<script src="assets/js/student-pages.js"></script><script defer="" src="assets/js/student-experience.js?v=3"></script></body>
+</html>
